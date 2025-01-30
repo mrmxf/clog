@@ -1,0 +1,66 @@
+{
+  "cSpell.customDictionaries": {
+    "cspell-this-project": {
+      "name": "cspell-this-project",
+      "path": "${workspaceRoot}/.vscode/cspell-this-project.txt",
+      "description": "Words used in this project",
+      "addWords": true
+    },
+    "custom": true, // Enable the `custom` dictionary
+    "internal-terms": false // Disable the `internal-terms` dictionary
+  },
+  "cSpell.dictionaries": [
+    "cspell-this-project"
+  ],
+  "workbench.colorTheme": "Default Light Modern",
+  "workbench.colorCustomizations": {
+    "[Default Light Modern]": {
+      "activityBar.background": "#C2A649",
+      "activityBarBadge.foreground": "#ffffff",
+      "statusBar.background": "#90b6457c",
+      "statusBar.foreground": "#b6066f"
+    }
+  },
+  // Default number of spaces a tab is equal to.
+  "editor.tabSize": 2,
+  // Insert spaces when pressing Tab.
+  "editor.insertSpaces": true,
+  // Guess the settings, then use overrides below else defaults
+  "editor.detectIndentation": true,
+  // Default rulers
+  "editor.rulers": [ 79, 80, 120 ],
+  "[html]": {
+    "editor.tabSize": 2,
+    "editor.rulers": [
+      120
+    ]
+  },
+  "[javascript]": {
+    "editor.rulers": [
+      120
+    ],
+    "editor.tabSize": 2
+  },
+  "[typescript]": {
+    "editor.rulers": [
+      120
+    ],
+    "editor.tabSize": 2
+  },
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.rulers": [
+      79,
+      80,
+      120
+    ]
+  },
+  "[markdown]": {
+    "editor.tabSize": 4,
+    "editor.rulers": [
+      79,
+      80,
+      120
+    ]
+  },
+}

@@ -219,8 +219,11 @@ func toBashStr(bashVars []string, outputs []string) string {
 	return bashStr
 }
 
-func GetBashString() string {
+func GetBashString(darkMode bool) string {
 	c := Color()
+	if darkMode {
+		c = Color()
+	}
 	x := "XXX"
 	bashVars := []string{"cC", "cE", "cI", "cF", "cH", "cS", "cT", "cU", "cW", "cX", "cAmd", "cArm", "cLnx", "cMac", "cWin"}
 	outputs := []string{c.C(x), c.E(x), c.I(x), c.F(x), c.H(x), c.S(x), c.T(x), c.U(x), c.W(x), c.X(x), c.Amd(x), c.Arm(x), c.Lnx(x), c.Mac(x), c.Win(x)}

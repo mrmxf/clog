@@ -6,8 +6,7 @@
 # simple test for some ZSH alternate paths
 cIsZSH=$(echo $0 | grep "zsh")
 
-# get clog colors to make the output pretty
-source <(clog Core Crayon)
+# lightmode / darkmode colors sent before this file
 
 # ------------------------------------------------------------------------------
 #define a function to echo a message - color initialised as text
