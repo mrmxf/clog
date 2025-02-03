@@ -1,22 +1,22 @@
-//  Copyright ©2019-2025  Mr MXF   info@mrmxf.com
+//  Copyright ©2018-2025  Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
 //
 // command:   $ clog Inc
 
-package cmd
+package inc
 
 import (
 	"embed"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"runtime"
 
 	"github.com/mrmxf/clog/crayon"
-	"github.com/mrmxf/clog/slogger"
 	"github.com/spf13/cobra"
 )
-
+var CommandString="Inc"
 // IncFs is the file system for the embedded shell file - override at runtime to use your own
 //go:embed inc.sh
 var IncFs embed.FS
@@ -24,8 +24,8 @@ var IncFs embed.FS
 var DarkMode bool = false
 var JustCrayon bool = false
 
-var CmdInc = &cobra.Command{
-	Use:   "Inc",
+var Command = &cobra.Command{
+	Use:   CommandString,
 	Short: "send embedded helper script to stdout",
 	Long:  `returns error status 126 if embedded file not found.`,
 
@@ -52,7 +52,7 @@ var CmdInc = &cobra.Command{
 
 func init() {
 	_, file, _, _ := runtime.Caller(0)
-	slogger.GetLogger().Debug("init " + file)
-	CmdInc.PersistentFlags().BoolVarP(&DarkMode, "darkmode", "d", false, "all colors for darkmode")
-	CmdInc.PersistentFlags().BoolVarP(&JustCrayon, "justcrayon", "j", false, "return color helpers, not script helpers")
+	slog.Debug("init " + file)
+	Command.PersistentFlags().BoolVarP(&DarkMode, "darkmode", "d", false, "all colors for darkmode")
+	Command.PersistentFlags().BoolVarP(&JustCrayon, "justcrayon", "j", false, "return color helpers, not script helpers")
 }

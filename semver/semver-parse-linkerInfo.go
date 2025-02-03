@@ -34,8 +34,8 @@ func cleanLinkerData() error {
 
 	defaultInfo := strings.Split(LinkerSemverDefault, "|")
 	linkerInfo := strings.Split(SemVerInfo, "|")
-	// log.Debug(" linkerInfo is ", "array", linkerInfo)
-	// log.Debug("defaultInfo is ", "array", defaultInfo)
+	//slog.Debug(" linkerInfo is ", "array", linkerInfo)
+	//slog.Debug("defaultInfo is ", "array", defaultInfo)
 
 	if len(linkerInfo) != len(defaultInfo) {
 		msg := fmt.Sprintf("ldflags SemVerInfo string should have %v fragments,, %v found", len(defaultInfo), len(linkerInfo))
@@ -112,6 +112,6 @@ func cleanLinkerData() error {
 		Info.SuffixShort = ""
 		Info.SuffixLong = "+" + Info.CommitId[:4]
 	}
-	// log.Debug("semver.Info is ", "struct", Info)
+	//slog.Debug("semver.Info is ", "struct", Info)
 	return nil
 }

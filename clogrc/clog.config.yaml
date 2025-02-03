@@ -1,0 +1,12 @@
+# sample clog configuration file
+#
+# Values in this file will override the embedded clog.core.config.yaml
+#
+# To get a copy of that file (and safely initialise a project) use:
+#    clog Core Init
+#                      ⇓⇓⇓⇓⇓⇓⇓⇓⇓
+# ALL KEYS ARE    ⇒⇒  lowercase    ⇐⇐  only. THIS IS A VIPER SETTING.
+#                      ⇑⇑⇑⇑⇑⇑⇑⇑⇑
+clog:
+  # path to the yaml file defining release history - see semver package
+  history_file: "releases.yaml"

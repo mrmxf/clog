@@ -1,4 +1,4 @@
-// Copyright ©2022-2024 Mr MXF   info@mrmxf.com
+// Copyright ©2018-2025 Mr MXF   info@mrmxf.com
 // BSD-3-Clause License   https://opensource.org/license/bsd-3-clause/
 
 package slogger
@@ -14,51 +14,34 @@ import (
 	"github.com/phsym/console-slog"
 )
 
-var Logger *slog.Logger
-
-func UsePrettyDebugLogger() {
+func UsePrettyLogger(level slog.Level) {
 	Logger = slog.New(
 		console.NewHandler(os.Stderr,
-			&console.HandlerOptions{Level: slog.LevelDebug}))
+			&console.HandlerOptions{Level: level}))
 	slog.SetDefault(Logger)
 }
 
-func UsePrettyInfoLogger() {
-	Logger = slog.New(
-		console.NewHandler(os.Stderr,
-			&console.HandlerOptions{Level: slog.LevelInfo}))
-	slog.SetDefault(Logger)
-}
-
-// JobLogger is a no-color version of the PrettyInfoLogger that is created
-// to append to the job log folder
-func JobLogger(path string) (*slog.Logger, *os.File) {
-	fileHandle, _ := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+// JobLogger is a no-color version of the PrettyLogger that is created
+// to append to a job log folder. If the file cannot be opened for appending
+// an error is returned
+func UseJobLogger(path string, level slog.Level) (*slog.Logger, *os.File, error) {
+	fileHandle, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	writer := bufio.NewWriter(fileHandle)
 
 	newLogger := slog.New(
 		console.NewHandler(writer,
-			&console.HandlerOptions{Level: slog.LevelInfo, NoColor: true}))
+			&console.HandlerOptions{Level: level, NoColor: true}))
 
-	return newLogger, fileHandle
+	return newLogger, fileHandle, err
 }
 
-func UseJSONInfoLogger() {
+func UseJSONLogger(level slog.Level) {
 	Logger = slog.New(slog.NewJSONHandler(os.Stderr,
-		&slog.HandlerOptions{Level: slog.LevelInfo}))
-	slog.SetDefault(Logger)
-}
-
-func UseProductionJSONErrorLogger() {
-	Logger = slog.New(slog.NewJSONHandler(os.Stderr,
-		&slog.HandlerOptions{Level: slog.LevelError}))
+		&slog.HandlerOptions{Level: level}))
 	slog.SetDefault(Logger)
 }
 
 func init() {
-	// uncomment this line to see init order
-	// UsePrettyInfoLogger()
-
 	// trace init order for sanity
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)

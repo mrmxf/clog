@@ -2,10 +2,9 @@ package shell
 
 import (
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
-
-	"github.com/mrmxf/clog/slogger"
 )
 
 // ExecControl is a simple structure to  control the output of the [ExecAsync]
@@ -68,7 +67,6 @@ func Exec(command string, args []string, env map[string]string, ctlIo *ExecContr
 //
 // The returned [exec.Cmd] can be used to wait for the command to finish.
 func ExecAsync(command string, args []string, env map[string]string, ctl *ExecControl) *exec.Cmd {
-	log := slogger.GetLogger()
 	exe := exec.Command(command, args...)
 	if ctl == nil {
 		ctl = &ExecControl{StdOutWriter: os.Stdout, StdErrWriter: os.Stderr}
@@ -91,7 +89,7 @@ func ExecAsync(command string, args []string, env map[string]string, ctl *ExecCo
 
 	err := exe.Start()
 	if err != nil {
-		log.Error("cmd.Start() failed to start", "command", command, "args", args)
+		slog.Error("cmd.Start() failed to start", "command", command, "args", args)
 		return exe
 	}
 
@@ -113,10 +111,10 @@ func ExecAsync(command string, args []string, env map[string]string, ctl *ExecCo
 	}()
 
 	if errStdout != nil {
-		log.Warn("rewriting StdOut during Exec", "command", command, "args", args)
+		slog.Warn("rewriting StdOut during Exec", "command", command, "args", args)
 	}
 	if errStderr != nil {
-		log.Warn("rewriting Stderr during Exec", "command", command, "args", args)
+		slog.Warn("rewriting Stderr during Exec", "command", command, "args", args)
 	}
 	return exe
 }

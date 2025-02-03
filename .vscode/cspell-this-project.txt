@@ -67,6 +67,7 @@ overriden
 pdate
 piersdeseilligny
 rangav
+regexstr
 restream
 rpts
 semver
@@ -78,6 +79,7 @@ somearray
 somevalue
 stdcopy
 stkb
+subfolders
 synthesised
 taghead
 taglatest

@@ -1,0 +1,418 @@
+---
+# yamllint disable rule:colons
+#        _                                                                  __   _
+#   __  | |  ___   __ _       __   ___   _ _   ___       __   ___   _ _    / _| (_)  __ _
+#  / _| | | / _ \ / _` |  _  / _| / _ \ | '_| / -_)  _  / _| / _ \ | ' \  |  _| | | / _` |
+#  \__| |_| \___/ \__, | (_) \__| \___/ |_|   \___| (_) \__| \___/ |_||_| |_|   |_| \__, |
+#                 |___/                                                             |___/
+### when clog starts it uses these config values. 
+###    1. clog searches for `clog.config.yaml` in each `clog.clogrc.search_order` folder
+###    2. for every match, the config is overlaid on previous configs
+###    3. recommended order: machine config, user config, project config
+
+#                      ⇓⇓⇓⇓⇓⇓⇓⇓⇓
+# ALL KEYS ARE    ⇒⇒  lowercase    ⇐⇐  only. THIS IS A VIPER SETTING.
+#                      ⇑⇑⇑⇑⇑⇑⇑⇑⇑
+
+# #############################################################################
+#  CLOG Configuration
+# =============================================================================
+clog:
+  clogrc:
+    config:
+      base: clog.config
+      format: yaml
+    # search order for config files. ENV variables substituted at run time
+    search_order:
+      - /var/clogrc/
+      - $HOME/.config/clogrc/
+      - ./clogrc/
+  # these are the ENV variables that are searched for by various tools
+  # override these to change the actual ENV variables used
+  env:
+    db_token: DB_ROACH
+    aws:
+      access: AWS_ACCESS_KEY_ID
+      secret: AWS_SECRET_ACCESS_KEY
+    gitlab:
+      access_token: GLAT
+      user: GLUSR
+    github:
+      access_token: GHAT
+      gist_token: GHGIST
+      user: GHUSR
+  # path to the yaml file defining release history - see semver package
+  history_file: "releases.yaml"
+  # detect home folder and make it available to clog
+  home_folder: set at runtime
+  # clog Jumbo --help to see the full font list
+  jumbo:
+    font: small
+    sample: www.mrmxf.com
+  version:
+    # set at runtime from clog.history_file
+    short: "0.0.0"
+    long: 0.0.0-type-hash
+# #############################################################################
+#      CHECK
+# =============================================================================
+check:
+  # checkLogLevel: debug | info | warn | error - all go to stdErr
+  checkLogLevel: Info
+  # logHandler: default | plain - default pretty handler for humans
+  logHandler: default
+
+  # the 2nd level keys define the CLI thing to check. If blank use default
+  # clog Check - use the default check list
+  # clog Check banana - check the list from check.banana: in the config file
+  #
+  # Syntax
+  # 2nd level key = checkName
+  #  e.g. check.banana
+  #
+  # 3rd level key - checkType
+  #    .report                      - report the value of a snippet
+  #    .report.warn-if
+  #    .report.warn-group-NAME
+  #    .report.error-if
+  #    .report.error-group-NAME
+  #    .dependencies                - report the status of dependencies
+
+  default-core:
+    report:
+      - tag-ref: clog git vcode
+      - tag-HEAD: clog git tag head
+      - tag-latest: clog git tag latest
+      - tag-origin: clog git tag origin
+        # warn-group-NAME will perform simple conditions on parsed values
+      - warn-group-tags:
+          - tag-HEAD != tag-ref
+          - tag-latest != tag-ref
+          - tag-origin != tag-ref
+      - branch: clog git branch
+      - hash-HEAD: clog git hash head
+      - hash-origin: clog git hash origin
+      # warn-group-NAME checks previous results and ONLY warns if condition true
+      - warn-group-hash:
+          - hash-HEAD != hash-origin
+      - msg-latest: clog git message latest
+      - msg-ref: clog git message ref
+      # warn-group-NAME checks previous results and ONLY warns if condition true
+      - warn-group-msg:
+          - msg-latest != msg-ref
+        # warn-if will run snippets and return warning if $? >0
+      - warn-if:
+          - tree-clean: clog    git tree clean
+          - tree-ahead: clog    git tree ahead
+          - tree-behind: clog   git tree behind
+          - tree-unstaged: clog git unstaged
+  # --- clog Check gitlab-env -------------------------------------------------
+  gitlab-core-env:
+    # report on the gitlab environment (empty snippet results in an echo)
+    report:
+      - PATH:
+      - CI_COMMIT_BRANCH:
+      - CI_COMMIT_REF_SLUG:
+      - CI_PIPELINE_SOURCE:
+      - CI_MERGE_REQUEST_APPROVED:
+      - CI_MERGE_REQUEST_ID:
+      - CI_MERGE_REQUEST_LABELS:
+      - CI_MERGE_REQUEST_REF_PATH:
+      - CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:
+      - CI_BUILDS_DIR:
+      - CI_COMMIT_DESCRIPTION:
+      - CI_COMMIT_TAG:
+      - CI_JOB_STAGE:
+      - CI_JOB_TOKEN:
+      - CI_PIPELINE_NAME:
+      - CI_PROJECT_DIR:
+      - CI_PROJECT_PATH:
+      - CI_RUNNER_VERSION:
+      - CI_SERVER:
+      - GITLAB_USER_EMAIL:
+      - GITLAB_USER_ID:
+      - GITLAB_USER_LOGIN:
+      - GITLAB_USER_NAME:
+      - KUBECONFIG:
+  tools:
+    # check you have the tools you need for your projects
+    report:
+      - warn-if:
+        - jq: clog install check-for jq
+        - curl:  clog install check-for curl
+        - docker: clog install check-for docker
+# #############################################################################
+#      DOCKER
+# =============================================================================
+docker:
+  # optional path to a url or file path or `clog`
+  configPath: clog
+# #############################################################################
+#     SNIPPETS
+# =============================================================================
+# --- command snippets clog <snippet> --------------------------------------------
+# --- IMPORTANT: command snippets stream their output {for terminals}
+# --- IMPORTANT:   shell snippets buffer their output (batch mode)
+#
+#    These will take priority over any scripts you load, so a snippet in this
+#    section will make a script of the same command name invisible.
+#    e.g.
+#      commandsnippets:
+#        watch: devtool server --port=1234 --mode=DEBUG 2>logs/dbg
+#
+#      can be run with the command
+#          clog watch
+#    con
+snippets:
+  # --- clog commands ---------------------------------------------------------
+  upgrade: curl https://mrmxf.com/get/clog | bash
+  upgradedev: curl https://mrmxf.com/get/clogdev | bash
+  # --- dev commands ----------------------------------------------------------
+  # dev commands
+  dev:
+    godoc: godoc     -http=localhost:6060 &&     open http://localhost:6060/pkg/
+    godoc-mac: godoc -http=localhost:6060 && xdg-open http://localhost:6060/pkg/
+  # --- git snippets clog git <snippet> ----------------------------------------
+  git:
+    # IMPORTANT ZSH gets confused with "--" so use always use quotes to prevent null output
+    # IMPORTANT YAML may parse logical expressions into arrays of strings e.g. [ -z "foo" ]
+    # IMPORTANT use quotes carefully '[ -z "foo" ]' is a shell expression [ -z "foo" ] is an array of strings
+    branch: git branch --show-current
+    # --- git hash snippets:  clog git tag <snippet> -----------------------------
+    hash:
+      head: git rev-list -1 HEAD
+      origin: git ls-remote --tags origin | tail -1 | head -c 40
+    # --- git message snippets:  clog git tag <snippet> -----------------------------
+    message:
+      latest: git log HEAD | head -5 | tail -1 | xargs
+      ref: echo 'set "clog.config.yaml/shellsnippets.git-message-ref" to a release message in your project'
+    origin: git config --get remote.origin.url
+    # --- git tag snippets:  clog git tag <snippet> -----------------------------
+    tag:
+      head: git tag --points-at HEAD
+      latest: git tag --sort=committerdate | tail -1
+      origin: git ls-remote --tags origin | tail -1 | sed -r 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+      tidy: |
+        eval "$(clog Inc)"  # define display functions etc.
+        if [ -f clogrc/_cfg.sh ];then source clogrc/_cfg.sh;else echo "no clogrc/_cfg.sh" && exit 1;fi
+        #
+        fInfo "Retag to   $cH $vCODE$cX$cT $vCodeType ($cW $bMSG $cT)"
+        # silently delete existing tag if it exists
+        fInfo "${cC}git tag$cS -d$cH \"$vCODE\""
+                    git tag    -d      $vCODE       >/dev/null 2>&1
+        # set the tag to the HEAD
+        fInfo "${cC}git tag$cS -a$cH \"$vCODE\"$cX$cS HEAD -m$cW \"$bMSG\""
+                    git tag    -a      "$vCODE"    HEAD -m     "$bMSG"
+        fInfo "${cC}git push$cS --delete$cE origin$cS \"$cH$vCODE\""
+                    git push    --delete    origin "$vCODE"      >/dev/null 2>&1
+        fInfo "${cC}git push$cE          origin$cS \"$cH$vCODE\""
+                    git push    origin     "$vCODE"
+    # --- git tree snippets:  clog git tree <snippet> ---------------------------
+    tree:
+      ahead: if [ "$(git status|grep -oE '(branch is ahead)')" ];then echo "Branch ahead - do push ";exit 1;else echo "ok";fi
+      behind: if [ "$(git status|grep -oE '(merge the remote)')" ];then echo "Branch behind - do pull";exit 1;else echo "ok";fi
+      clean: if [ "$(git status|grep -oE '(working tree clean)')" ];then echo "ok";else echo "Working tree not clean";exit 1;fi
+    unstaged: if [ "$(git status|grep -oE '(Changes not staged)')" ];then echo "Commit unstaged changes";exit 1; else echo "ok";fi
+    vcode:
+      echo 'set "clog.config.yaml/snippets.git.vcode" to the project's reference semver'
+      # this is a command snippet because it takes a while to complete
+    walk-parent-repos: |
+      eval "$(clog Inc)" # set color strings
+      root=..
+      [ -n "$GIT_WALK_REPOS_ROOT" ] && root="$GIT_WALK_REPOS_ROOT"
+      for i in $root/* ; do
+        status="  $cS clean✅$cT "
+        if [ ! -d "$i/.git" ]; then
+          status="   $cI skip🧱 non-git folder$cT "
+        else
+          cd $i
+          [ -n "$(git status | grep "hange")" ] && status="$cE unclean❌$cT "
+        fi
+        printf "$status$i$cX\n"
+      done
+
+    # -------------------------------------------------------------------------
+    # --- install snippets ----------------------------------------------------
+    #   clog install clog  # tool install thyself
+  gitpod:
+    before: echo "script clogrc/clogconfig/snippets.gitpod.before not present"
+    command: echo "script clogrc/clogconfig/snippets.gitpod.command not present"
+    init: echo "script clogrc/clogconfig/snippets.gitpod.init not present"
+  install:
+    # --- snippets to check install
+    # clog install check golang && echo "Yay, found it" || clog install golang
+    check-for:
+      aws: "aws --version       >/dev/null 2>&1"
+      clog: "clog version       >/dev/null 2>&1"
+      curl: "curl --version     >/dev/null 2>&1"
+      docker: "docker --version >/dev/null 2>&1"
+      golang: "go version       >/dev/null 2>&1"
+      godoc: "which godoc       >/dev/null 2>&1"
+      golangci-lint: "golangci-lint --version >/dev/null 2>&1"
+      glab: "glab version       >/dev/null 2>&1"
+      gh: "gdh --version        >/dev/null 2>&1"
+      hugo: "hugo version       >/dev/null 2>&1"
+      jq: "jq --version         >/dev/null 2>&1"
+      ko: "ko version           >/dev/null 2>&1"
+      nvm: "nvm --version       >/dev/null 2>&1"
+      slsa-verifier: "slsa-verifier version >dev/null 2>&1"
+      yarn: "yarn --version     >/dev/null 2>&1"
+    # install snippets --------------------------------------------------------
+    aws: |
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+      cd /tmp
+      unzip ./awscliv2.zip
+      sudo ./aws/install
+    clog: "curl https://mrmxf.com/get/clog | bash"
+    clogdev: "curl https://mrmxf.com/get/clogdev | bash"
+    clogrc: "curl https://mrmxf.com/get/clogrc | bash"
+    golang: 'echo download go1.23.0.linux-amd64.tar.gz and run: "rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz"'
+    golang-mac: brew install go
+    godoc: "go install golang.org/x/tools/cmd/godoc@latest"
+    golangci-lint: "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.1"
+    glab: |
+      V="$(glab release list --repo gitlab-org/cli 2>/dev/null|grep ago|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'|head -1)"
+      [ -z "V" ] && V="1.48.0"
+      url="https://gitlab.com/gitlab-org/cli/-/releases/v${V}/downloads/glab_${V}_linux_amd64.deb"
+      echo "installing version \"$V\" from $url"
+      curl -L $url -o /tmp/glab.deb && sudo apt-get install /tmp/glab.deb
+    glab-mac: "brew install glab"
+    gh: |
+      (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+      && sudo mkdir -p -m 755 /etc/apt/keyrings \
+      && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+      && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+      && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+      && sudo apt update \
+      && sudo apt install gh -y
+    gh-mac: brew install gh
+    hugo: |
+      eval "$(clog Inc)"
+      j="$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest)"
+      pkg=".deb"
+      arch="arm" ; [[ "$(uname -m)" == "x86_64" ]] && arch="amd64"
+      v="$(   echo $j | jq -r '.name   | ltrimstr("v")')"
+      urls="$(echo $j | jq -r '.assets | .[] | [.name, .browser_download_url] | .[1]')"
+      # get the first release with "extended" this should ignore the withdeploy options
+      url="$(echo "$urls" | grep "$v" | grep "$pkg" | grep "$arch" | grep "extended" | head -1)"
+      # echo "$urls"
+      fInfo "filter $(echo "$urls"|wc -l) installers for ($v)($pkg)($arch)(extended)[0]"
+      fInfo "installing $cF $url"
+      curl -L "$url" > /tmp/hugo.deb
+      sudo apt-get install -y /tmp/hugo.deb
+    ko: |
+      VERSION=0.17.1
+      curl -sSfL "https://github.com/ko-build/ko/releases/download/v${VERSION}/ko_${VERSION}_${OS}_${ARCH}.tar.gz" > /tmp/ko.tar.gz
+      #curl -sSfL https://github.com/ko-build/ko/releases/download/v${VERSION}/multiple.intoto.jsonl > /tmp/multiple.intoto.jsonl
+      slsa-verifier verify-artifact --provenance-path /tmp/multiple.intoto.jsonl --source-uri github.com/ko-build/ko --source-tag "v${VERSION}" /tmp/ko.tar.gz
+      sudo tar -xzf /tmp/ko.tar.gz --directory /usr/local/bin/ &&  sudo chmod +x /usr/local/bin/ko
+    kubectl: |
+      sudo apt-get update
+      # apt-transport-https may be a dummy package; if so, you can skip that package
+      sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
+      # If the folder `/etc/apt/keyrings` does not exist, it should be created before the curl command, read the note below.
+      # sudo mkdir -p -m 755 /etc/apt/keyrings
+      curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg # allow unprivileged APT programs to read this keyring
+      # This overwrites any existing configuration in /etc/apt/sources.list.d/kubernetes.list
+      echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+      sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list   # helps tools such as command-not-found to work correctly
+      sudo apt-get update
+      sudo apt-get install -y kubectl
+    minikube: |
+      curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
+      && sudo install minikube-linux-amd64 /usr/local/bin/minikube
+    nginx: |
+      sudo apt-get update;  sudo apt-get upgrade -y -q
+      sudo apt-get install -y -q nginx
+      if [ -n "$(which ufw)" ]; then
+        sudo ufw allow "Nginx Full" > /dev/null   # Allow HTTP, HTTPS
+        sudo ufw reload
+      fi
+      sudo chown -R $USER:$USER /var/www
+      # give some status & check config
+      systemctl status nginx | grep "Active"
+      sudo nginx -t
+      if [[ $? -gt 0 ]] ; then
+          fError "$cE nginx -t$cT shows config doesn't work - try again"
+      else
+          #restart nginx
+          sudo systemctl -q restart nginx
+      fi
+    nvm: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    slsa-verifier: go install github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
+    snap: sudo apt install -y snapd
+    yarn: npm install --global yarn && echo "PATH=\"$PATH:$(yarn global bin)\"" >> ~/.bashrc
+  # --- my ... a set of tools to consistently report about your run -----------
+  my:
+    ip: curl -s wtfismyip.com/text
+    uid: echo $UID
+    usr: echo $USER
+    home: echo ~
+    wslusr: echo "$(wslvar USERPROFILE)"
+    wslhome: echo "$(wslpath "$(wslvar USERPROFILE)")" 
+  # --- nginx snippets:  clog nginx <snippet> ---------------------------------
+  nginx:
+    av: ls -al /etc/nginx/sites-enabled/
+    en: ls -al /etc/nginx/sites-available/
+  # --- project snippets:  clog project <snippet> ---------------------------
+  # typically used for global tool version propagation, node version etc.
+  project:
+    needs:
+      go-version: 1.23.3
+      hugo-version: 0.138.0
+      node-version: 22
+
+# #############################################################################
+#                 _
+#   _ _    __ _  (_)  _ _   __ __
+#  | ' \  / _` | | | | ' \  \ \ /
+#  |_||_| \__, | |_| |_||_| /_\_\
+#         |___/
+# #############################################################################
+# --- nginx installation configuration ----------------------------------------
+# these defaults correspond to the apt package defaults
+nginx:
+  configPath: embed
+  shellsnippets: []
+  folder:
+    available: /etc/nginx/sites-available/
+    enabled: /etc/nginx/sites-enabled/
+
+# #############################################################################
+#
+#   ___ __ __  __
+#  (_-< \ V / / _|
+#  /__/  \_/  \__|
+# #############################################################################
+# --- svc is a chi based website using cloglib/clogsvc ----------------------------
+svc:
+  configPath: embed
+  port: 11998
+  configFileName: server.config.yaml
+  # use the main env variable name unless overriden by the svc for web ops
+  env:
+    dbConnectionString: DB_CON_STR_CLOGSVC
+
+  db:
+    type: sqlite
+    #if no connection details specified then use env.dbConnectionString
+    defaultPageLimit: 20
+    defaultSort: CreatedAt
+  homeFolder: set-at-runtime
+  version:
+    short: "0.0.0"
+    long: 0.0.0-gitcommit
+
+  # webhook handling
+  # format: https://some-host.dns/a/hook/hookType/{source}/{project}/{semver}
+  # format: https://some-host.dns/a/hook/cicd/gitlab-deploy/$PROJECT/$vCODE
+  hookprefix: "/hook"
+  hooks:
+    # params for responding to /hook/website/{id}
+    - prefix: /website/staging/{id}
+      ruleName: Test staging website
+      something: Another property
+      somevalue: 600
+      somearray: [1, 2, 3, 4]
+# #############################################################################
