@@ -1,10 +1,13 @@
-package semver
+// package semver_test tries to make it hard to accidentally break
+// backwards compatibility in the package
+
+package semver_test
 
 import (
 	"time"
 )
 
-type LDgolangLinkerData struct {
+type refLinkerData struct {
 	BuildHash           string // usually `$(git rev-list -1 HEAD)`
 	BuildDate           string // usually `$(date +%F)`
 	BuildSemanticSuffix string // e.g.`rc` applied to VersionInfo.Short
@@ -12,7 +15,7 @@ type LDgolangLinkerData struct {
 	BuildAppTitle       string // default = basename of `module`  go.mod
 }
 
-type VersionInfo struct {
+type refVersionInfo struct {
 	AppTitle    string           `json:"apptitle"` // Command Line Of Go
 	AppName     string           `json:"appname"`  // clog
 	CodeName    string           `json:"codename"` // from releases.yaml
@@ -29,10 +32,11 @@ type VersionInfo struct {
 }
 
 // JSON & YAML field names are the same
-type ReleaseHistory struct {
+type refReleaseHistory struct {
 	Appname  string    `json:"appname"`
 	Version  string    `json:"version"`
 	Date     time.Time `json:"date"`
 	CodeName string    `json:"codename"`
 	Note     string    `json:"note"`
 }
+

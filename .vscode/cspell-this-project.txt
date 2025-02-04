@@ -92,6 +92,7 @@ ttycrayon
 unstaged
 ux
 vals
+vcode
 visualise
 Worktree
 wsync

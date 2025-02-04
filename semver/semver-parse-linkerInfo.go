@@ -19,7 +19,6 @@ import (
 )
 
 // dummy linker string
-const LinkerSemverDefault = "commithash|date|suffix|appname|apptitle"
 const ( // iota is reset to 0
 	lHASH     = iota
 	lDATE     = iota
@@ -28,11 +27,15 @@ const ( // iota is reset to 0
 	lAPPTITLE = iota
 )
 
-// read the linker data and take appropriate actions
+// history is exported via a function
+var history []ReleaseHistory // read from releases.yaml
+var inf VersionInfo
+
+// read the linker data and take appropriate cleaning actions
 func cleanLinkerData() error {
 	slog.Debug("Linker string is (" + SemVerInfo + ")")
 
-	defaultInfo := strings.Split(LinkerSemverDefault, "|")
+	defaultInfo := strings.Split(LinkerDataDefault, "|")
 	linkerInfo := strings.Split(SemVerInfo, "|")
 	//slog.Debug(" linkerInfo is ", "array", linkerInfo)
 	//slog.Debug("defaultInfo is ", "array", defaultInfo)
@@ -51,12 +54,12 @@ func cleanLinkerData() error {
 	}
 
 	if linkerInfo[lHASH] == defaultInfo[lHASH] {
-		Info.CommitId = "xxxx^xxxx|xxxx^xxxx|xxxx^xxxx|xxxx^xxxx|"
+		inf.CommitId = "xxxx^xxxx|xxxx^xxxx|xxxx^xxxx|xxxx^xxxx|"
 	} else {
-		Info.CommitId = linkerInfo[lHASH]
+		inf.CommitId = linkerInfo[lHASH]
 	}
 
-	if len(Info.CommitId) < 40 {
+	if len(inf.CommitId) < 40 {
 		msg := fmt.Sprintf("ldflags %s string fragment should be 40 chars - use %s", defaultInfo[lHASH], bashHash)
 		return errors.New(msg)
 	}
@@ -65,29 +68,29 @@ func cleanLinkerData() error {
 	now := time.Now().Format("2006-01-02")
 
 	if len(linkerInfo[lDATE]) == 0 || linkerInfo[lDATE] == defaultInfo[lDATE] {
-		Info.Date = now
+		inf.Date = now
 	} else {
-		Info.Date = linkerInfo[lDATE]
+		inf.Date = linkerInfo[lDATE]
 	}
 
 	// --- app name -------------------------------------------------------------
 	if len(linkerInfo[lAPPNAME]) == 0 || linkerInfo[lAPPNAME] == defaultInfo[lAPPNAME] {
 		bi, ok := debug.ReadBuildInfo()
 		if ok {
-			Info.AppName = filepath.Base(bi.Main.Path) // name of the module
+			inf.AppName = filepath.Base(bi.Main.Path) // name of the module
 		}
 	} else {
-		Info.AppName = linkerInfo[lAPPNAME]
+		inf.AppName = linkerInfo[lAPPNAME]
 	}
 
 	// --- app title-------------------------------------------------------------
 	if len(linkerInfo[lAPPTITLE]) == 0 || linkerInfo[lAPPTITLE] == defaultInfo[lAPPTITLE] {
 		bi, ok := debug.ReadBuildInfo()
 		if ok {
-			Info.AppTitle = filepath.Base(bi.Main.Path) // name of the module
+			inf.AppTitle = filepath.Base(bi.Main.Path) // name of the module
 		}
 	} else {
-		Info.AppTitle = linkerInfo[lAPPTITLE]
+		inf.AppTitle = linkerInfo[lAPPTITLE]
 	}
 
 	// --- suffix -------------------------------------------------------------
@@ -97,20 +100,20 @@ func cleanLinkerData() error {
 	}
 
 	//replace underscores with spaces and beautify
-	Info.AppTitle = highlightTitleCase(strings.ReplaceAll(Info.AppTitle, "_", " "))
-	Info.ARCH = runtime.GOARCH
-	Info.OS = runtime.GOOS
+	inf.AppTitle = strings.ReplaceAll(inf.AppTitle, "_", " ")
+	inf.ARCH = runtime.GOARCH
+	inf.OS = runtime.GOOS
 
-	Info.Version = Info.History[0].Version
-	Info.CodeName = Info.History[0].CodeName
-	Info.Note = Info.History[0].Note
+	inf.Version = history[0].Version
+	inf.CodeName = history[0].CodeName
+	inf.Note = history[0].Note
 
 	if len(suffix) > 0 {
-		Info.SuffixShort = "-" + suffix
-		Info.SuffixLong = "-" + suffix + "." + Info.CommitId[:4]
+		inf.SuffixShort = "-" + suffix
+		inf.SuffixLong = "-" + suffix + "." + inf.CommitId[:4]
 	} else {
-		Info.SuffixShort = ""
-		Info.SuffixLong = "+" + Info.CommitId[:4]
+		inf.SuffixShort = ""
+		inf.SuffixLong = "+" + inf.CommitId[:4]
 	}
 	//slog.Debug("semver.Info is ", "struct", Info)
 	return nil

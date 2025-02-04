@@ -89,8 +89,8 @@ var embeddedFs embed.FS
     // pass an FS and a filePath for the semver to read history
     semver.Initialise(embeddedFs, "releases.yaml")
 
-    fmt.Printf("short version=%s", semver.Info.Short)
-    fmt.Printf(" long version=%s", semver.Info.Long)
+    fmt.Printf("short version=%s", semver.inf.Short)
+    fmt.Printf(" long version=%s", semver.inf.Long)
 ```
 
 [sv]: https://semver.org/

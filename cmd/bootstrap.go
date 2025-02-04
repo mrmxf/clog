@@ -43,11 +43,11 @@ func BootStrap(rootCmd *cobra.Command) error {
 			slog.Warn("cannot initialize semantic version "+ err.Error())
 		}else{
 			//override default empty strings with real semver info
-			cfg.Set("clog.version.long", semver.Info.Long)
-			cfg.Set("clog.version.note", semver.Info.Note)
-			cfg.Set("clog.version.short", semver.Info.Short)
-			cfg.Set("clog.version.appname", semver.Info.AppName)
-			cfg.Set("clog.version.apptitle", semver.Info.AppTitle)
+			cfg.Set("clog.version.long", semver.Info().Long)
+			cfg.Set("clog.version.note", semver.Info().Note)
+			cfg.Set("clog.version.short", semver.Info().Short)
+			cfg.Set("clog.version.appname", semver.Info().AppName)
+			cfg.Set("clog.version.apptitle", semver.Info().AppTitle)
 			cfg.RegisterAlias("ver", "clog.version.short")
 			cfg.RegisterAlias("app", "clog.version.appname")
 			cfg.RegisterAlias("title", "clog.version.apptitle")

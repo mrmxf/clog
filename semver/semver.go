@@ -12,11 +12,12 @@ import (
 
 // linker will override this variable. We parse it at run time
 // See the semver package readme for details.
-var SemVerInfo = LinkerSemverDefault
+var SemVerInfo = LinkerDataDefault
+const LinkerDataDefault = "hash|date|suffix|app|title"
 
 // logic to valid the loading of the Info struct & linker data
 func Initialise(fs embed.FS, filePath string) error {
-	if err := getEmbeddedHistoryData(fs, filePath); err != nil {
+	if err := getEmbeddedHistory(fs, filePath); err != nil {
 		return err
 	}
 
@@ -25,16 +26,24 @@ func Initialise(fs embed.FS, filePath string) error {
 	}
 
 	// set up the Short & Long responses from the components
-	Info.Short = Info.Version + Info.SuffixShort
+	inf.Short = inf.Version + inf.SuffixShort
 
 	//see https://semver.org/
-	Info.Long = fmt.Sprintf("%s%s (%s:%s:%s:%s:%s)",
-		Info.Version,
-		Info.SuffixLong,
-		Info.CodeName,
-		Info.Date,
-		Info.OS,
-		Info.ARCH,
-		"\""+Info.Note+"\"")
+	inf.Long = fmt.Sprintf("%s%s (%s:%s:%s:%s:%s)",
+		inf.Version,
+		inf.SuffixLong,
+		inf.CodeName,
+		inf.Date,
+		inf.OS,
+		inf.ARCH,
+		"\""+inf.Note+"\"")
 	return nil
+}
+
+func History() []ReleaseHistory {
+	return history
+}
+
+func Info () VersionInfo {
+	return inf
 }

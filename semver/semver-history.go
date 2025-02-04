@@ -16,14 +16,14 @@ import (
 )
 
 // read the history and return the latest version string
-func getEmbeddedHistoryData(fs embed.FS, filePath string) error {
+func getEmbeddedHistory(fs embed.FS, filePath string) error {
 	yamlBytes, err := fs.ReadFile(filePath)
 	if err != nil {
 		e := fmt.Sprintf("Cannot read release history (%s)", filePath)
 		return errors.New(e)
 	}
 
-	err = yaml.Unmarshal(yamlBytes, &Info.History)
+	err = yaml.Unmarshal(yamlBytes, &history)
 	if err != nil {
 		e := fmt.Sprintf("Cannot parse embedded history %v\n%v\n", filePath, err)
 		return errors.New(e)

@@ -42,7 +42,7 @@ func (cfg *Config) setDefaults(configFilename *string) {
 		panic(msg)
 	}
 
-	searchPaths = cfg.GetStringSlice("clog.clogrc.search_order")
+	searchPaths = cfg.GetStringSlice("clog.clogrc.search-order")
 
 	homeFolder, err := os.UserHomeDir()
 	if err == nil {

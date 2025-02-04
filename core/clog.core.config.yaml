@@ -6,7 +6,7 @@
 #  \__| |_| \___/ \__, | (_) \__| \___/ |_|   \___| (_) \__| \___/ |_||_| |_|   |_| \__, |
 #                 |___/                                                             |___/
 ### when clog starts it uses these config values. 
-###    1. clog searches for `clog.config.yaml` in each `clog.clogrc.search_order` folder
+###    1. clog searches for `clog.config.yaml` in each `clog.clogrc.search-order` folder
 ###    2. for every match, the config is overlaid on previous configs
 ###    3. recommended order: machine config, user config, project config
 
@@ -23,34 +23,34 @@ clog:
       base: clog.config
       format: yaml
     # search order for config files. ENV variables substituted at run time
-    search_order:
+    search-order:
       - /var/clogrc/
       - $HOME/.config/clogrc/
       - ./clogrc/
   # these are the ENV variables that are searched for by various tools
   # override these to change the actual ENV variables used
   env:
-    db_token: DB_ROACH
+    db-token: DB_ROACH
     aws:
       access: AWS_ACCESS_KEY_ID
       secret: AWS_SECRET_ACCESS_KEY
     gitlab:
-      access_token: GLAT
+      access-token: GLAT
       user: GLUSR
     github:
-      access_token: GHAT
-      gist_token: GHGIST
+      access-token: GHAT
+      gist-token: GHGIST
       user: GHUSR
   # path to the yaml file defining release history - see semver package
-  history_file: "releases.yaml"
+  history-file: "releases.yaml"
   # detect home folder and make it available to clog
-  home_folder: set at runtime
+  home-folder: set at runtime
   # clog Jumbo --help to see the full font list
   jumbo:
     font: small
     sample: www.mrmxf.com
   version:
-    # set at runtime from clog.history_file
+    # set at runtime from clog.history-file
     short: "0.0.0"
     long: 0.0.0-type-hash
 # #############################################################################
@@ -81,7 +81,7 @@ check:
   default-core:
     report:
       - tag-ref: clog git vcode
-      - tag-HEAD: clog git tag head
+      - tag-head: clog git tag head
       - tag-latest: clog git tag latest
       - tag-origin: clog git tag origin
         # warn-group-NAME will perform simple conditions on parsed values
@@ -90,11 +90,11 @@ check:
           - tag-latest != tag-ref
           - tag-origin != tag-ref
       - branch: clog git branch
-      - hash-HEAD: clog git hash head
+      - hash-head: clog git hash head
       - hash-origin: clog git hash origin
       # warn-group-NAME checks previous results and ONLY warns if condition true
       - warn-group-hash:
-          - hash-HEAD != hash-origin
+          - hash-head != hash-origin
       - msg-latest: clog git message latest
       - msg-ref: clog git message ref
       # warn-group-NAME checks previous results and ONLY warns if condition true
@@ -110,30 +110,30 @@ check:
   gitlab-core-env:
     # report on the gitlab environment (empty snippet results in an echo)
     report:
-      - PATH:
-      - CI_COMMIT_BRANCH:
-      - CI_COMMIT_REF_SLUG:
-      - CI_PIPELINE_SOURCE:
-      - CI_MERGE_REQUEST_APPROVED:
-      - CI_MERGE_REQUEST_ID:
-      - CI_MERGE_REQUEST_LABELS:
-      - CI_MERGE_REQUEST_REF_PATH:
-      - CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:
-      - CI_BUILDS_DIR:
-      - CI_COMMIT_DESCRIPTION:
-      - CI_COMMIT_TAG:
-      - CI_JOB_STAGE:
-      - CI_JOB_TOKEN:
-      - CI_PIPELINE_NAME:
-      - CI_PROJECT_DIR:
-      - CI_PROJECT_PATH:
-      - CI_RUNNER_VERSION:
-      - CI_SERVER:
-      - GITLAB_USER_EMAIL:
-      - GITLAB_USER_ID:
-      - GITLAB_USER_LOGIN:
-      - GITLAB_USER_NAME:
-      - KUBECONFIG:
+      - PATH
+      - CI_COMMIT_BRANCH
+      - CI_COMMIT_REF_SLUG
+      - CI_PIPELINE_SOURCE
+      - CI_MERGE_REQUEST_APPROVED
+      - CI_MERGE_REQUEST_ID
+      - CI_MERGE_REQUEST_LABELS
+      - CI_MERGE_REQUEST_REF_PATH
+      - CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+      - CI_BUILDS_DIR
+      - CI_COMMIT_DESCRIPTION
+      - CI_COMMIT_TAG
+      - CI_JOB_STAGE
+      - CI_JOB_TOKEN
+      - CI_PIPELINE_NAME
+      - CI_PROJECT_DIR
+      - CI_PROJECT_PATH
+      - CI_RUNNER_VERSION
+      - CI_SERVER
+      - GITLAB_USER_EMAIL
+      - GITLAB_USER_ID
+      - GITLAB_USER_LOGIN
+      - GITLAB_USER_NAME
+      - KUBECONFIG
   tools:
     # check you have the tools you need for your projects
     report:
@@ -387,7 +387,7 @@ nginx:
 # #############################################################################
 # --- svc is a chi based website using cloglib/clogsvc ----------------------------
 svc:
-  configPath: embed
+  config-path: embed
   port: 11998
   configFileName: server.config.yaml
   # use the main env variable name unless overriden by the svc for web ops

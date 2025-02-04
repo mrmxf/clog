@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"github.com/mrmxf/clog/config"
+	"github.com/mrmxf/clog/crayon"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +25,7 @@ var Command = &cobra.Command{
 
 		if len(args)==0 {
 			fmt.Printf("%s (%s) %s\n",
-				config.Cfg().GetString("title"),
+				crayon.ColorCapitals(config.Cfg().GetString("title"),nil,nil),
 				config.Cfg().GetString("app"),
 				config.Cfg().GetString("clog.version.long"))			
 		os.Exit (0)
