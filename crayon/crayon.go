@@ -123,8 +123,8 @@ func Color() *CrayonColors {
 	filePlain := color.New(color.FgYellow)
 	fileBlock := color.New(color.BgYellow).Add(color.FgBlack)
 
-	headingPlain := color.New(color.FgCyan).Add(color.Bold)
-	headingBlock := color.New(color.BgGreen).Add(color.FgBlack).Add(color.Bold)
+	headingPlain := color.New(color.FgHiBlue).Add(color.Bold)
+	headingBlock := color.New(color.BgHiBlue).Add(color.FgBlack).Add(color.Bold)
 
 	infoPlain := color.New(color.FgHiYellow)
 	infoBlock := color.New(color.BgHiYellow).Add(color.FgBlue)
@@ -193,17 +193,19 @@ func SampleColors() string {
 	c := Color()
 
 	msg := ""
-	msg = msg + "Builtin  " + c.B("Builtin") + "   " + c.Bbg("Builtin") + "\n"
-	msg = msg + "Command  " + c.C("Command") + "   " + c.Cbg("Command") + "\n"
-	msg = msg + "Dim      " + c.D("Dim    ") + "   " + c.Dbg("Dim    ") + "\n"
-	msg = msg + "Error    " + c.E("Error  ") + "   " + c.Ebg("Error  ") + "\n"
-	msg = msg + "File     " + c.F("File   ") + "   " + c.Fbg("File   ") + "\n"
-	msg = msg + "Heading  " + c.H("Heading") + "   " + c.Hbg("Heading") + "\n"
-	msg = msg + "Info     " + c.I("Info   ") + "   " + c.Ibg("Info   ") + "\n"
-	msg = msg + "Success  " + c.S("Success") + "   " + c.Sbg("Success") + "\n"
-	msg = msg + "Text     " + c.T("Text   ") + "   " + c.Tbg("Text   ") + "\n"
-	msg = msg + "Url      " + c.U("Url    ") + "   " + c.Ubg("Url    ") + "\n"
-	msg = msg + "Warning  " + c.W("Warning") + "   " + c.Wbg("Warning") + "\n"
+	msg = msg + "Builtin   " + c.B("Builtin") + "   " + c.Bbg("Builtin") + "\n"
+	msg = msg + "Command   " + c.C("Command") + "   " + c.Cbg("Command") + "\n"
+	msg = msg + "Dim       " + c.D("Dim    ") + "   " + c.Dbg("Dim    ") + "\n"
+	msg = msg + "Error     " + c.E("Error  ") + "   " + c.Ebg("Error  ") + "\n"
+	msg = msg + "File      " + c.F("File   ") + "   " + c.Fbg("File   ") + "\n"
+	msg = msg + "Heading   " + c.H("Heading") + "   " + c.Hbg("Heading") + "\n"
+	msg = msg + "Info      " + c.I("Info   ") + "   " + c.Ibg("Info   ") + "\n"
+	msg = msg + "Success   " + c.S("Success") + "   " + c.Sbg("Success") + "\n"
+	msg = msg + "Text      " + c.T("Text   ") + "   " + c.Tbg("Text   ") + "\n"
+	msg = msg + "Url       " + c.U("Url    ") + "   " + c.Ubg("Url    ") + "\n"
+	msg = msg + "Warning   " + c.W("Warning") + "   " + c.Wbg("Warning") + "\n"
+	msg = msg + "Arch      " + c.Amd("Amd") + "  " + c.Arm("Arm") + "\n"
+	msg = msg + "OS        " + c.Lnx("Lnx") + "  " + c.Mac("Mac") + "  " + c.Win("Win") + "\n"
 	return msg
 }
 

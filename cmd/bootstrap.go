@@ -14,7 +14,10 @@ import (
 	"runtime"
 
 	"github.com/mrmxf/clog/cmd/cat"
+	"github.com/mrmxf/clog/cmd/copy"
+	"github.com/mrmxf/clog/cmd/crayon"
 	"github.com/mrmxf/clog/cmd/inc"
+	initialise "github.com/mrmxf/clog/cmd/init"
 	"github.com/mrmxf/clog/cmd/jumbo"
 	"github.com/mrmxf/clog/cmd/list"
 	"github.com/mrmxf/clog/cmd/version"
@@ -62,7 +65,10 @@ func BootStrap(rootCmd *cobra.Command) error {
 	rootCmd.SetUsageTemplate(cfg.GetString("clog.version.long") + rootCmd.UsageTemplate())
 
 	rootCmd.AddCommand(cat.Command)     		// script helper include command
+	rootCmd.AddCommand(copy.Command)   		  // copy an embedded file to a destination
+	rootCmd.AddCommand(crayon.Command)   		// colored terminal commands
 	rootCmd.AddCommand(inc.Command)     		// script helper include command
+	rootCmd.AddCommand(initialise.Command)  // create a clogrc
 	rootCmd.AddCommand(jumbo.Command)       // Jumbo text output
 	rootCmd.AddCommand(list.Command)        // list embedded files text output
 	rootCmd.AddCommand(version.Command)			// version reporting
@@ -76,9 +82,7 @@ func BootStrap(rootCmd *cobra.Command) error {
 	// clScripts.FindScriptsToAdd(rootCmd, "clogrc/*.sh")
 
 	//add in top level clog commands
-	// rootCmd.AddCommand(clCmd.CatCmd)     // Cat an embedded file
 	// rootCmd.AddCommand(clCheck.CheckCmd) // Check the current project
-	// rootCmd.AddCommand(clCmd.InitCmd)    // Create a new config file
 	// rootCmd.AddCommand(clCmd.LintCmd)    // Lint the current project with megalinter
 	// rootCmd.AddCommand(clCmd.ShCmd)           // run a snippet
 	// rootCmd.AddCommand(clCmd.ListSnippetsCmd) // list snippets
@@ -91,7 +95,6 @@ func BootStrap(rootCmd *cobra.Command) error {
 
 	// now bootstrap child commands
 	// clCi.BootStrap(rootCmd)
-	// clCore.BootStrap(rootCmd)
 	// clGit.BootStrap(rootCmd)
 	// clDocker.BootStrap(rootCmd)
 

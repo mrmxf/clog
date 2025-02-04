@@ -1,0 +1,24 @@
+//  Copyright ©2019-2024  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
+
+// Package cmd implements commands for the cobra CLI library
+
+package scripts
+
+import (
+	"fmt"
+	"os"
+)
+
+// Execute a shell snippet, print & return result
+// On error (exitStatus>0), and os.Exit(exitStatus)
+func ShellSnippet(snippet string) string {
+	result, exitStatus, err := CaptureShellSnippet(snippet, nil)
+
+	fmt.Print(result)
+
+	if err != nil || exitStatus > 0 {
+		os.Exit(exitStatus)
+	}
+	return result
+}

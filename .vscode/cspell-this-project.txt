@@ -2,12 +2,14 @@ ansicolor
 appname
 appsemver
 apptitle
+awscliv
 azuretools
 bashstr
 betterfountain
 charmbracelet
 cicd
 clogbin
+clogconfig
 clogdev
 cloglib
 clogrc
@@ -20,6 +22,7 @@ core
 coverprofile
 Dappname
 dbaeumer
+dearmor
 dpkg
 embeded
 environemnt
@@ -36,6 +39,7 @@ GOHOSTOS
 golangci
 gommon
 GOPATH
+hange
 hashorigin
 headhash
 headmessage
@@ -43,6 +47,7 @@ hookprefix
 Initialise
 initialised
 initialises
+intoto
 keymap
 keypress
 keyrings
@@ -56,6 +61,7 @@ ldflags
 Lhash
 Linkcheck
 Lsuffix
+ltrimstr
 messagelatest
 messageref
 metarex
@@ -69,6 +75,7 @@ piersdeseilligny
 rangav
 regexstr
 restream
+Retag
 rpts
 semver
 shellsnippet
@@ -90,11 +97,19 @@ treebehind
 treeclean
 ttycrayon
 unstaged
+upgradedev
+USERPROFILE
 ux
 vals
 vcode
 visualise
+withdeploy
 Worktree
+wslhome
+wslpath
+wslusr
+wslvar
 wsync
+wtfismyip
 zerve
 zerver
