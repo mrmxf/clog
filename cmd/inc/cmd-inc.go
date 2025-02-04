@@ -24,6 +24,7 @@ var IncFs embed.FS
 var DarkMode bool = false
 var JustCrayon bool = false
 
+// Command define the cobra settings for this command
 var Command = &cobra.Command{
 	Use:   CommandString,
 	Short: "send embedded helper script to stdout",

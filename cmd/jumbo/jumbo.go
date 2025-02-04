@@ -26,7 +26,7 @@ var showFonts bool
 var bareString bool
 var fontOverride string
 
-// initCmd represents the init command
+// Command define the cobra settings for this command
 var Command = &cobra.Command{
 	Use:   "Jumbo \"Some Text\" --font=thingy",
 	Short: "Create large comment text for scripts",

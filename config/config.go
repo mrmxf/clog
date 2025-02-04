@@ -84,6 +84,11 @@ func Cfg() *Config {
 	return cfg
 }
 
+// get the coreFs
+func CoreFs() embed.FS {
+	return coreFs
+}
+
 // get the ordered cache of embedded file systems searched
 func FsCache() []embed.FS {
 	return fsCache

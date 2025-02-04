@@ -13,7 +13,10 @@ import (
 	"log/slog"
 	"runtime"
 
+	"github.com/mrmxf/clog/cmd/cat"
 	"github.com/mrmxf/clog/cmd/inc"
+	"github.com/mrmxf/clog/cmd/jumbo"
+	"github.com/mrmxf/clog/cmd/list"
 	"github.com/mrmxf/clog/cmd/version"
 	"github.com/mrmxf/clog/config"
 	"github.com/mrmxf/clog/semver"
@@ -58,7 +61,10 @@ func BootStrap(rootCmd *cobra.Command) error {
 	//prepend cobra usage strings with build information
 	rootCmd.SetUsageTemplate(cfg.GetString("clog.version.long") + rootCmd.UsageTemplate())
 
+	rootCmd.AddCommand(cat.Command)     		// script helper include command
 	rootCmd.AddCommand(inc.Command)     		// script helper include command
+	rootCmd.AddCommand(jumbo.Command)       // Jumbo text output
+	rootCmd.AddCommand(list.Command)        // list embedded files text output
 	rootCmd.AddCommand(version.Command)			// version reporting
 
 
@@ -73,7 +79,6 @@ func BootStrap(rootCmd *cobra.Command) error {
 	// rootCmd.AddCommand(clCmd.CatCmd)     // Cat an embedded file
 	// rootCmd.AddCommand(clCheck.CheckCmd) // Check the current project
 	// rootCmd.AddCommand(clCmd.InitCmd)    // Create a new config file
-	// rootCmd.AddCommand(clCmd.JumboCmd)   // Jumbo text output
 	// rootCmd.AddCommand(clCmd.LintCmd)    // Lint the current project with megalinter
 	// rootCmd.AddCommand(clCmd.ShCmd)           // run a snippet
 	// rootCmd.AddCommand(clCmd.ListSnippetsCmd) // list snippets
