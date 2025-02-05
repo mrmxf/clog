@@ -62,66 +62,6 @@ func reportSnippets(cmd *cobra.Command, title string, key string, cmdPath string
 
 }
 
-func OldreportSnippets(name string, key string, cmdStr string, snippets map[string]string) {
-	fmt.Println(name + " in config key `" + key + "`")
-	if len(snippets) == 0 {
-		slog.Warn("No " + name + " found in config key `" + key + "`")
-	} else {
-		keys := make([]string, 0, len(snippets))
-		for k := range snippets {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-
-		for _, k := range keys {
-			if verboseListing {
-				fmt.Println("  " + cmdStr + k + ":   " + snippets[k])
-			} else {
-				fmt.Println("  " + cmdStr + k)
-			}
-		}
-	}
-}
-
-var OldListSnippetsCmd = listSnippetsCommand
-var OldlistSnippetsCommand = &cobra.Command{
-	Use:   "Snippets",
-	Short: "list snippets found in the config keys " + shellSnippetsKey + ", " + snippetsKey,
-	Long:  `local config adds & overwrites the core snippets`,
-
-	Run: func(cmd *cobra.Command, args []string) {
-		doCmdStr := cmd.Parent().CommandPath() + " "
-		snippets := config.Cfg().GetStringMapString(snippetsKey)
-		OldreportSnippets("Command Snippets", snippetsKey, doCmdStr, snippets)
-
-		doCmdStr = cmd.Parent().CommandPath() + " " + runSnippetString + " "
-		snippets = config.Cfg().GetStringMapString(shellSnippetsKey)
-		OldreportSnippets("Shell Snippets", shellSnippetsKey, doCmdStr, snippets)
-
-		if !verboseListing {
-			fmt.Println("\nuse clog Snippets --show to show full shell snippet stings")
-		}
-	},
-}
-
-// var ShCmd = shellSnippetCommand
-// var shellSnippetCommand = &cobra.Command{
-// 	Use:   runSnippetString,
-// 	Short: "run a shell snippet found in the config key `" + shellSnippetsKey + "`",
-// 	Long:  `local config adds & overwrites the core snippets`,
-
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		log := slogger.GetLogger()
-// 		snippet := config.Cfg().GetString(shellSnippetsKey + "." + args[0])
-
-//			if len(snippet) == 0 {
-//				slog.Error("snippet (" + args[0] + ") not found in clog.config.yaml")
-//				os.Exit(1)
-//			}
-//			slog.Debug("running shell snippet: "+args[0], "bash", snippet)
-//			scripts.ShellSnippet(snippet)
-//		},
-//	}
 var ListSnippetsCmd = listSnippetsCommand
 var listSnippetsCommand = &cobra.Command{
 	Use:   "Snippets",
