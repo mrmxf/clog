@@ -34,7 +34,7 @@ var Command = &cobra.Command{
 			fmt.Println(config.Cfg().GetString("ver"))		
 		os.Exit (0)
 		}
-		if args[0] == "not" {
+		if args[0] == "note" {
 			fmt.Println(config.Cfg().GetString("clog.version.note"))
 		os.Exit (0)
 		} 
