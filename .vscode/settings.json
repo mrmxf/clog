@@ -28,7 +28,15 @@
   // Guess the settings, then use overrides below else defaults
   "editor.detectIndentation": true,
   // Default rulers
-  "editor.rulers": [ 79, 80, 120 ],
+  "editor.rulers": [
+    79,
+    80,
+    120
+  ],
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file"
+  },
   "[html]": {
     "editor.tabSize": 2,
     "editor.rulers": [

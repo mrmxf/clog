@@ -80,6 +80,7 @@ rpts
 semver
 shellsnippet
 shellsnippets
+skript
 Slicify
 slsa
 somearray

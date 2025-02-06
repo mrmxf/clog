@@ -10,9 +10,9 @@
 ###    2. for every match, the config is overlaid on previous configs
 ###    3. recommended order: machine config, user config, project config
 
-#                      ⇓⇓⇓⇓⇓⇓⇓⇓⇓
-# ALL KEYS ARE    ⇒⇒  lowercase    ⇐⇐  only. THIS IS A VIPER SETTING.
-#                      ⇑⇑⇑⇑⇑⇑⇑⇑⇑
+#                        ⇓⇓⇓⇓⇓⇓⇓           ⇓⇓⇓⇓
+# ALL YAML KEYS ARE ⇒⇒ lowercase ⇔ with hyphens ⇐⇐ (not underscores) only.
+#                        ⇑⇑⇑⇑⇑⇑⇑           ⇑⇑⇑⇑
 
 # #############################################################################
 #  CLOG Configuration

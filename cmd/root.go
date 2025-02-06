@@ -1,4 +1,4 @@
-//  Copyright ©2018-2025    Mr MXF   info@mrmxf.com
+//  Copyright ©2017-2025    Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License    https://opensource.org/license/bsd-3-clause/
 //
 // command:
@@ -20,19 +20,23 @@ import (
 
 // CLI flag for changing the configuration file path
 var ConfigFilePath string
+
 // CLI flag for showing the long version string
 var ShowVersion bool
+
 // CLI flag for showing the short version string
 var ShowVersionShort bool
+
 // CLI flag for showing the note associated with this version
 var ShowVersionNote bool
+
 // CLI flag for changing the logging level
 var LogLevel int
 
-var RootCommand = &cobra.Command {
+var RootCommand = &cobra.Command{
 	Use:   "clog",
 	Short: "Command Line Of Go - interactive helper",
-	Long:  `
+	Long: `
 Command Line Of Go (clog)
 =========================
 Clog aggregates:
@@ -60,30 +64,30 @@ interactively: clog
 as a web ui:   clog Svc && open localhost:8765
 as api:      	 curl -H "Authorization: OAuth <ACCESS_TOKEN>" http://localhost:8765/api/version/command
 `,
-Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 
-	// Show the version (which will exit) if required
-	if ShowVersion || ShowVersionShort || ShowVersionNote {
-		version.Command.Run(cmd, args)
-	}
-	
+		// Show the version (which will exit) if required
+		if ShowVersion || ShowVersionShort || ShowVersionNote {
+			version.Command.Run(cmd, args)
+		}
+
 		//we get here if no subcommands appeared in the command line
 		//or the home key was pressed on the server
 		_, err := ui.HomeMenu(cmd)
 		if err != nil {
 			panic(err)
-	}
-},
+		}
+	},
 }
 
 func init() {
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)
-	
-		// Define persistent (global) flags and any flags for the root command
-		RootCommand.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "clog -c myClogfig.yaml   # clog Core Cat clogrc/core/clog.clConfig.yaml > myClogfig.yaml")
-		RootCommand.PersistentFlags().BoolVar(&ShowVersion, "version", false, "clog --version           # shows the full version string")
-		RootCommand.PersistentFlags().BoolVarP(&ShowVersionShort, "v", "v", false, "clog -v                  # shows just the semantic version")
-		RootCommand.PersistentFlags().BoolVarP(&ShowVersionNote, "note", "n", false, "clog --note              # shows just the version note")
-		RootCommand.PersistentFlags().IntVarP(&LogLevel, "loglevel", "L", 0, "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR")
+
+	// Define persistent (global) flags and any flags for the root command
+	RootCommand.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "clog -c myClogfig.yaml   # clog Core Cat clogrc/core/clog.clConfig.yaml > myClogfig.yaml")
+	RootCommand.PersistentFlags().BoolVar(&ShowVersion, "version", false, "clog --version           # shows the full version string")
+	RootCommand.PersistentFlags().BoolVarP(&ShowVersionShort, "v", "v", false, "clog -v                  # shows just the semantic version")
+	RootCommand.PersistentFlags().BoolVarP(&ShowVersionNote, "note", "n", false, "clog --note              # shows just the version note")
+	RootCommand.PersistentFlags().IntVarP(&LogLevel, "loglevel", "L", 0, "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR")
 }

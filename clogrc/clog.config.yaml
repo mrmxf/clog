@@ -11,7 +11,7 @@
 #                      ⇑⇑⇑⇑⇑⇑⇑⇑⇑
 clog:
   # path to the yaml file defining release history - see semver package
-  history_file: "releases.yaml"
+  history-file: "releases.yaml"
 
   snippets:
     git:

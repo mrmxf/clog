@@ -1,4 +1,4 @@
-//  Copyright ©2018-2025  Mr MXF   info@mrmxf.com
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
 
 // Package main is a sample build of clog.
@@ -47,7 +47,8 @@ func main() {
 // if you want to log the `init()` order for this application then set the
 // default log level to LevelDebug inside the slogger package
 func init() {
-	slogger.UsePrettyLogger(slog.LevelInfo)
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)
+
+	slogger.UsePrettyLogger(slog.LevelInfo)
 }

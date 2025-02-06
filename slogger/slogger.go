@@ -1,4 +1,4 @@
-// Copyright ©2018-2025 Mr MXF   info@mrmxf.com
+// Copyright ©2017-2025 Mr MXF   info@mrmxf.com
 // BSD-3-Clause License   https://opensource.org/license/bsd-3-clause/
 
 package slogger
@@ -19,6 +19,7 @@ var Logger *slog.Logger
 
 //the default logging level for the default logger
 var defaultLogLevel = slog.LevelInfo
+// var defaultLogLevel = slog.LevelDebug  //use this for init tracing
 
 func init() {
 	// uncomment this line to see init order
