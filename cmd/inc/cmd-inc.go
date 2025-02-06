@@ -54,6 +54,5 @@ var Command = &cobra.Command{
 func init() {
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)
-	Command.PersistentFlags().BoolVarP(&DarkMode, "darkmode", "d", false, "all colors for darkmode")
-	Command.PersistentFlags().BoolVarP(&JustCrayon, "justcrayon", "j", false, "return color helpers, not script helpers")
+	Command.PersistentFlags().BoolVarP(&DarkMode, "darkmode", "D", false, "all colors for darkmode")
 }

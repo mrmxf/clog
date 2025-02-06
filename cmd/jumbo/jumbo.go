@@ -84,8 +84,8 @@ func init() {
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)
 
-	Command.PersistentFlags().BoolVarP(&listFonts, "list", "l", false, "clog Jumbo -l       # list available fonts")
-	Command.PersistentFlags().BoolVarP(&showFonts, "show", "s", false, "clog Jumbo -s       # show available fonts")
-	Command.PersistentFlags().BoolVarP(&bareString, "bare", "b", false, "clog Jumbo -b \"Text without leading #\"")
-	Command.PersistentFlags().StringVarP(&fontOverride, "font", "f", "", "clog Jumbo -f rounded \"text in rounded font\"")
+	Command.PersistentFlags().BoolVarP(&listFonts, "list", "L", false, "clog Jumbo -l       # list available fonts")
+	Command.PersistentFlags().BoolVarP(&showFonts, "show", "S", false, "clog Jumbo -s       # show available fonts")
+	Command.PersistentFlags().BoolVarP(&bareString, "bare", "B", false, "clog Jumbo -b \"Text without leading #\"")
+	Command.PersistentFlags().StringVarP(&fontOverride, "font", "F", "", "clog Jumbo -f rounded \"text in rounded font\"")
 }

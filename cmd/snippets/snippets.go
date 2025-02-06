@@ -51,8 +51,8 @@ func NewSnippetsCommand(parentCmd *cobra.Command, opts SnippetsCmdOpts) *cobra.C
 			}
 		},
 	}
-	Command.PersistentFlags().BoolVar(&opts.Verbose, "verbose", false, "clog Snippets -v   # verbose scripts")
-	Command.PersistentFlags().BoolVar(&opts.Plain, "plain", false, "clog Snippets -p   # remove pretty colors")
+	Command.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "V",false, "clog Snippets -v   # verbose scripts")
+	Command.PersistentFlags().BoolVarP(&opts.Plain, "plain", "P", false, "clog Snippets -p   # remove pretty colors")
 	return Command
 }
 

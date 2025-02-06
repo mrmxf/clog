@@ -102,7 +102,6 @@ func recurseRawMap(parentCmd *cobra.Command, group SnippetGroup, depth int, raw 
 		default:
 			slog.Debug(fmt.Sprintf("%d.WARNING ignoring unexpected snippet (%s) of type %s", depth, kmd, snip))
 		}
-
 	}
 }
 
