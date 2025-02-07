@@ -66,17 +66,17 @@ as api:      	 curl -H "Authorization: OAuth <ACCESS_TOKEN>" http://localhost:87
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-	// Show the version string (and exit) if flags are set
-	if ShowVersion {
-		version.Command.Run(cmd, []string{})
-	}
-	if ShowVersionShort{
-		version.Command.Run(cmd, []string{"short"})
-	}
-	if ShowVersionNote {
-		version.Command.Run(cmd, []string{"note"})
-	}
-	
+		// Show the version string (and exit) if flags are set
+		if ShowVersion {
+			version.Command.Run(cmd, []string{})
+		}
+		if ShowVersionShort {
+			version.Command.Run(cmd, []string{"short"})
+		}
+		if ShowVersionNote {
+			version.Command.Run(cmd, []string{"note"})
+		}
+
 		//we get here if no subcommands appeared in the command line
 		//or the home key was pressed on the server
 		_, err := ui.HomeMenu(cmd)

@@ -30,7 +30,7 @@ func (cfg *Config) setDefaults(configFilename *string) {
 	}
 	//set the coreFs for other tasks to find the core files
 	coreFs = *fs
-	
+
 	//read the first root config found
 	rootConfig, err := fs.ReadFile(configPaths[0])
 	if err != nil {

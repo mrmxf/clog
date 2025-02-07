@@ -47,7 +47,7 @@ const escape = "\x1b"
 type CrayonColors struct {
 	Builtin func(a ...interface{}) string //a builtin like Core
 	Command func(a ...interface{}) string //CLI command like godoc
-	Debug     func(a ...interface{}) string //debug or de-emphasise something
+	Debug   func(a ...interface{}) string //debug or de-emphasise something
 	Dim     func(a ...interface{}) string //dim or de-emphasise something
 	Error   func(a ...interface{}) string //error
 	File    func(a ...interface{}) string //file or folder names

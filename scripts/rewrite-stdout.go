@@ -7,6 +7,9 @@ package scripts
 
 import (
 	"io"
+	"runtime"
+
+	"golang.org/x/exp/slog"
 )
 
 // execute the script and display progress
@@ -32,4 +35,10 @@ func rewriteStdout(w io.Writer, r io.Reader) ([]byte, error) {
 			return out, err
 		}
 	}
+}
+
+func init() {
+	// log the order of the init files in case there are problems
+	_, file, _, _ := runtime.Caller(0)
+	slog.Debug("init " + file)
 }

@@ -46,8 +46,8 @@ func ParseSnippets(rootCmd *cobra.Command, raw RawSnippets) (ParsedSnippets, err
 	return pSnips, nil
 }
 
-func kmdPath(c *cobra.Command, kmd string) string{
-	return fmt.Sprintf("%s %s",c.CommandPath(), kmd)
+func kmdPath(c *cobra.Command, kmd string) string {
+	return fmt.Sprintf("%s %s", c.CommandPath(), kmd)
 }
 
 func recurseRawMap(parentCmd *cobra.Command, group SnippetGroup, depth int, raw RawSnippets) {
@@ -60,10 +60,21 @@ func recurseRawMap(parentCmd *cobra.Command, group SnippetGroup, depth int, raw 
 			cmd := &cobra.Command{
 				Use:   kmd,
 				Short: kmdPath(parentCmd, kmd),
+				Annotations: map[string]string{
+					"command": kmdPath(parentCmd, kmd),
+					"depth":   fmt.Sprintf("%d", depth),
+					"is-a":    "snippet",
+					"script":  fmt.Sprintf("%d", skript),
+					"type":    fmt.Sprintf("%T", skript),
+				},
 				Run: func(cmd *cobra.Command, args []string) {
+					ident := fmt.Sprintf("snippet: %s", cmd.CommandPath())
 					strInt := fmt.Sprintf("%d", skript)
 					slog.Debug(fmt.Sprintf("snippet: %s\n$ %s\n", kmd, strInt))
-					exitStatus := scripts.StreamShellSnippet(strInt, nil)
+					exitStatus, err := scripts.AwaitShellSnippet(strInt, nil)
+					if err != nil {
+						slog.Error("failed to stream snippet "+ident, "error", err)
+					}
 					os.Exit(exitStatus)
 				},
 			}
@@ -75,9 +86,20 @@ func recurseRawMap(parentCmd *cobra.Command, group SnippetGroup, depth int, raw 
 			cmd := &cobra.Command{
 				Use:   kmd,
 				Short: "snippet " + kmdPath(parentCmd, kmd),
+				Annotations: map[string]string{
+					"command": kmdPath(parentCmd, kmd),
+					"depth":   fmt.Sprintf("%d", depth),
+					"is-a":    "snippet",
+					"script":  skript,
+					"type":    fmt.Sprintf("%T", skript),
+				},
 				Run: func(cmd *cobra.Command, args []string) {
-					slog.Debug(fmt.Sprintf("snippet: %s\n$ %s\n", kmd, skript))
-					exitStatus := scripts.StreamShellSnippet(skript, nil)
+					ident := fmt.Sprintf("snippet: %s", cmd.CommandPath())
+					slog.Debug(fmt.Sprintf("snippet: %s\n$ %s\n", ident, skript))
+					exitStatus, err := scripts.AwaitShellSnippet(skript, nil)
+					if err != nil {
+						slog.Error("failed to stream snippet "+ident, "error", err)
+					}
 					os.Exit(exitStatus)
 				},
 			}
@@ -89,8 +111,15 @@ func recurseRawMap(parentCmd *cobra.Command, group SnippetGroup, depth int, raw 
 			cmd := &cobra.Command{
 				Use:   kmd,
 				Short: kmdPath(parentCmd, kmd),
+				Annotations: map[string]string{
+					"command": kmdPath(parentCmd, kmd),
+					"depth":   fmt.Sprintf("%d", depth),
+					"is-a":    "snippet",
+					"script":  kmdPath(parentCmd, kmd) + " --help",
+					"type":    "node",
+				},
 				Run: func(cmd *cobra.Command, args []string) {
-            cmd.Help()
+					cmd.Help()
 					os.Exit(1)
 				},
 			}

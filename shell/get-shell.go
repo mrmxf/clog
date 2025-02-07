@@ -28,7 +28,7 @@ func GetShellPath() string {
 		os.Exit(1)
 	}
 	shellPath := strings.TrimSpace(string(whichShell))
-slog.Debug("Using shell: " + shellPath)
+	slog.Debug("Using shell: " + shellPath)
 
 	return shellPath
 }

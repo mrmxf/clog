@@ -5,7 +5,7 @@
 #                 |___/                            |_|
 # Values in this file are specific to building your project
 #
-# use  `clog Core Init`   to copy the core init into folder clogrc
+# use  `clog Init`   to copy the core init into folder clogrc
 #                      ⇓⇓⇓⇓⇓⇓⇓⇓⇓
 # ALL KEYS ARE    ⇒⇒  lowercase    ⇐⇐  only. THIS IS A VIPER SETTING.
 #                      ⇑⇑⇑⇑⇑⇑⇑⇑⇑
@@ -15,6 +15,7 @@ clog:
 
   snippets:
     git:
+      # get the target version for this project from releases.yaml
       vcode: yq -r '.[0].version' releases.yaml
     dev:
        configure: |

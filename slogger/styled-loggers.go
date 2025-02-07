@@ -21,7 +21,6 @@ func UsePrettyLogger(level slog.Level) {
 	slog.SetDefault(Logger)
 }
 
-
 func UsePlainLogger(level slog.Level) {
 	Logger = slog.New(
 		console.NewHandler(os.Stderr,

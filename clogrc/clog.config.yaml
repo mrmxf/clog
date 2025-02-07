@@ -13,18 +13,18 @@ clog:
   # path to the yaml file defining release history - see semver package
   history-file: "releases.yaml"
 
-  snippets:
-    git:
-      vcode: yq -r '.[0].version' releases.yaml
-    dev:
-       configure: |
-         # make some variables for standard build scripts
-         export bPROJECT=clog                            # project you're building
-         export vCODE=$(clog git vcode)                  # reference code version
-         export bType="Golang"
-         export bBASE="clog"                             # base name of build executable
-         export bMSG="$(clog  git message ref)"          # reference message
-         export bHASH="$(clog git hash head)"            # hash of head commit
-         # add a semver suffix unless on the main branch
-         export bSUFFIX="$(git branch --show-current)" && [[ "$bSUFFIX"=="main" ]] && bSUFFIX=""
-         
+snippets:
+  git:
+    vcode: yq -r '.[0].version' releases.yaml
+  project:
+      config: |
+        # make some variables for standard build scripts
+        export bPROJECT=clog                            # project you're building
+        export vCODE=$(clog git vcode)                  # reference code version
+        export bType="Golang"
+        export bBASE="clog"                             # base name of build executable
+        export bMSG="$(clog  git message ref)"          # reference message
+        export bHASH="$(clog git hash head)"            # hash of head commit
+        # add a semver suffix unless on the main branch
+        export bSUFFIX="$(git branch --show-current)" && [[ "$bSUFFIX"=="main" ]] && bSUFFIX=""
+        

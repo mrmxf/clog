@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 var Command = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version string",
@@ -23,23 +22,23 @@ var Command = &cobra.Command{
 		_, file, _, _ := runtime.Caller(0)
 		slog.Debug(fmt.Sprintf("run command: %s", file))
 
-		if len(args)==0 {
+		if len(args) == 0 {
 			fmt.Printf("%s (%s) %s\n",
-				crayon.ColorCapitals(config.Cfg().GetString("title"),nil,nil),
+				crayon.ColorCapitals(config.Cfg().GetString("title"), nil, nil),
 				config.Cfg().GetString("app"),
-				config.Cfg().GetString("clog.version.long"))			
-		os.Exit (0)
+				config.Cfg().GetString("clog.version.long"))
+			os.Exit(0)
 		}
 		if args[0] == "short" {
-			fmt.Println(config.Cfg().GetString("ver"))		
-		os.Exit (0)
+			fmt.Println(config.Cfg().GetString("ver"))
+			os.Exit(0)
 		}
 		if args[0] == "note" {
 			fmt.Println(config.Cfg().GetString("clog.version.note"))
-		os.Exit (0)
-		} 
-		slog.Error("unknown version argument ("+args[0]+")")
-		os.Exit (1)
+			os.Exit(0)
+		}
+		slog.Error("unknown version argument (" + args[0] + ")")
+		os.Exit(1)
 	},
 }
 

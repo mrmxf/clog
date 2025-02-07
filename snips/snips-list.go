@@ -45,7 +45,7 @@ func recurseListMap(cmdPath string, sMap SnippetGroup, d *ListSnippetsData, dept
 			}
 			fmt.Println(plainKmd)
 		case *SnippetGroup:
-			fmt.Println("+",plainKmd)
+			fmt.Println("+", plainKmd)
 			recurseListMap(cmdPath+" "+k, *snip.(*SnippetGroup), d, depth+1)
 		case string:
 			if d.Verbose {
@@ -56,7 +56,7 @@ func recurseListMap(cmdPath string, sMap SnippetGroup, d *ListSnippetsData, dept
 			slog.Error("WTF - (%T) %s %s", snipType, cmdPath, k)
 		}
 	}
-	if depth >0{
+	if depth > 0 {
 		fmt.Println(strings.Repeat("-", 80))
 	}
 }

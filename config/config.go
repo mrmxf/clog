@@ -41,7 +41,8 @@ var searchPaths []string
 //
 // fsSlice is a slice of embed.FS objects that are searched search for configs
 // configFilename is the name of the config file to load
-//                if nil or empty use `clog.config.yaml`
+//
+//	if nil or empty use `clog.config.yaml`
 func New(fsSlice *[]embed.FS, projectConfigFilePath *string) *Config {
 	//initialise viper with logger that can be uses throughout clog
 	cfg = &Config{

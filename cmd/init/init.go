@@ -1,8 +1,13 @@
 //  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
 //
-// command:
-//   $ clog Init
+// package init creates a basic clogrc folder and files if they are missing.
+//
+// It does 4 things:
+// 1. creates a clogrc folder if it doesn't exist
+// 2. copies core/sample/clog.config.yaml to clogrc/clog.config.yaml if missing
+// 3. copies core/clog.core.config.yaml to clogrc/tmp-clog.core.config.yaml
+// 4. copies all files in core/sample/init to clogrc if missing
 
 package init
 
@@ -24,6 +29,8 @@ var Command = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		sample := "core/sample/clog.config.yaml"
 		core := "core/clog.core.config.yaml"
+
+		// 1, create the clogrc folder if it doesn't exist
 		dstFolder := "clogrc"
 		_, err := os.Stat(dstFolder)
 		if err != nil {
@@ -34,12 +41,16 @@ var Command = &cobra.Command{
 				os.Exit(1)
 			}
 		}
+
+		// 2. create clog.config.yaml if it doesn't exist
 		dst := dstFolder + "/clog.config.yaml"
 		_, err = os.Stat(dst)
 		if err != nil {
 			// no config exists - try a copy and ignore any error
 			copy.Command.Run(cmd, []string{sample, dst})
 		}
+
+		// 3. create tmp-clog.core.config.yaml
 		dst = "clogrc/tmp-clog.core.config.yaml"
 		copy.Command.Run(cmd, []string{core, dst})
 	},

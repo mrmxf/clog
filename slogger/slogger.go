@@ -17,9 +17,24 @@ import (
 // the exported default logger
 var Logger *slog.Logger
 
-//the default logging level for the default logger
+type SlogStyle int
+
+const (
+	Plain SlogStyle = iota
+	Pretty
+	JSON
+	JOB
+)
+
+// the default logging level for the default logger
 var defaultLogLevel = slog.LevelInfo
+
 // var defaultLogLevel = slog.LevelDebug  //use this for init tracing
+
+// use this function to set al log level from a config file
+func SetLogger(level slog.Level, style SlogStyle) {
+
+}
 
 func init() {
 	// uncomment this line to see init order

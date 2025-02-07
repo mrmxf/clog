@@ -25,7 +25,7 @@ var Command = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		clogFs := config.CoreFs()
-		c:= crayon.Color()
+		c := crayon.Color()
 
 		// List the files to update
 		err := fs.WalkDir(clogFs, ".", func(path string, d fs.DirEntry, err error) error {

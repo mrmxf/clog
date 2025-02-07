@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -19,7 +20,7 @@ func CaptureShellSnippet(snippet string, env map[string]string) (string, int, er
 	shell := GetShellPath()
 	// inContainer := docker.IsRunningInDockerContainer()
 
-	slog.Debug("Capturing shell snippet: ", "shell", shell, "command", snippet)//, "inContainer", inContainer)
+	slog.Debug("Capturing shell snippet: ", "shell", shell, "command", snippet) //, "inContainer", inContainer)
 
 	cmd := exec.Command(shell, "-c", snippet)
 	cmd.Env = os.Environ()
@@ -43,7 +44,7 @@ func CaptureShellSnippet(snippet string, env map[string]string) (string, int, er
 }
 
 // Execute a shell snippet and stream the result, stdError & return status
-func StreamShellSnippet(snippet string, env map[string]string) int {
+func AwaitShellSnippet(snippet string, env map[string]string) (int, error) {
 	// figure out what shell we will run and log it for debugging
 	shell := GetShellPath()
 	// inContainer := docker.IsRunningInDockerContainer()
@@ -51,10 +52,16 @@ func StreamShellSnippet(snippet string, env map[string]string) int {
 	slog.Debug("Streaming shell snippet: ", "shell", shell, "command", snippet) //, "inContainer", inContainer)
 
 	args := []string{"-c", snippet}
-	exitStatus := Exec(shell, args, env)
+	exitStatus, err := Exec(shell, args, env)
 
 	//some DEBUG logging that will probably break workflows
 	slog.Debug("Status of shell snippet: " + fmt.Sprintf("%v", exitStatus))
 
-	return exitStatus
+	return exitStatus, err
+}
+
+func init() {
+	// log the order of the init files in case there are problems
+	_, file, _, _ := runtime.Caller(0)
+	slog.Debug("init " + file)
 }

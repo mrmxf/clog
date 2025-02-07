@@ -29,10 +29,10 @@ import (
 
 // find a filename in the list of embedded file systems
 func FindEmbedded(filename string) (*embed.FS, []string, error) {
-	slog.Debug(fmt.Sprintf(" searching for (%s) in %d file systems", filename,len(fsCache)))
+	slog.Debug(fmt.Sprintf(" searching for (%s) in %d file systems", filename, len(fsCache)))
 
 	// iterate through the File Systems in lexical order
-	for i, fs :=range(fsCache){
+	for i, fs := range fsCache {
 		matches := []string{}
 		slog.Debug(fmt.Sprintf("---------- fs: %d of %d", i, len(fsCache)))
 
@@ -41,7 +41,7 @@ func FindEmbedded(filename string) (*embed.FS, []string, error) {
 		matches, err := searchFolder(fs, path, filename, matches)
 		if err == nil {
 			if len(matches) > 0 {
-				slog.Debug(fmt.Sprintf(" Found %s in fs: %d",filename,i))
+				slog.Debug(fmt.Sprintf(" Found %s in fs: %d", filename, i))
 				return &fs, matches, err
 			}
 			// no error but no match - try next fs
@@ -49,7 +49,7 @@ func FindEmbedded(filename string) (*embed.FS, []string, error) {
 			continue
 		}
 	}
-	msg :=fmt.Sprintf("no %s in any fs",filename)
+	msg := fmt.Sprintf("no %s in any fs", filename)
 	slog.Debug(msg)
 	return nil, []string{""}, errors.New(msg)
 }
@@ -73,7 +73,7 @@ func searchFolder(efs embed.FS, path string, filename string, matches []string) 
 		return nil
 	})
 
-slog.Debug("end of search for " + filename)
+	slog.Debug("end of search for " + filename)
 
 	if found {
 		return matches, err

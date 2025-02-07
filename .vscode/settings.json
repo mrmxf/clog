@@ -1,8 +1,8 @@
 {
   "cSpell.customDictionaries": {
-    "cspell-this-project": {
-      "name": "cspell-this-project",
-      "path": "${workspaceRoot}/.vscode/cspell-this-project.txt",
+    "cspell-clog": {
+      "name": "cspell-clog",
+      "path": "${workspaceRoot}/.vscode/cspell-clog.txt",
       "description": "Words used in this project",
       "addWords": true
     },
@@ -10,12 +10,13 @@
     "internal-terms": false // Disable the `internal-terms` dictionary
   },
   "cSpell.dictionaries": [
-    "cspell-this-project"
+    "cspell-clog"
   ],
   "workbench.colorTheme": "Default Light Modern",
   "workbench.colorCustomizations": {
     "[Default Light Modern]": {
       "activityBar.background": "#C2A649",
+      "sideBar.background": "#c2a6490e",
       "activityBarBadge.foreground": "#ffffff",
       "statusBar.background": "#90b6457c",
       "statusBar.foreground": "#b6066f"

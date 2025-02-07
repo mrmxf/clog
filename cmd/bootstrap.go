@@ -22,8 +22,10 @@ import (
 	"github.com/mrmxf/clog/cmd/jumbo"
 	"github.com/mrmxf/clog/cmd/list"
 	"github.com/mrmxf/clog/cmd/snippets"
+	"github.com/mrmxf/clog/cmd/source"
 	"github.com/mrmxf/clog/cmd/version"
 	"github.com/mrmxf/clog/config"
+	"github.com/mrmxf/clog/scripts"
 	"github.com/mrmxf/clog/semver"
 	"github.com/mrmxf/clog/ux"
 	"github.com/spf13/cobra"
@@ -57,25 +59,23 @@ func BootStrap(rootCmd *cobra.Command) error {
 	rootCmd.AddCommand(initialise.Command) // create a clogrc
 	rootCmd.AddCommand(jumbo.Command)      // Jumbo text output
 	rootCmd.AddCommand(list.Command)       // list embedded files text output
+	rootCmd.AddCommand(source.Command)     // source a script or snippet
 	rootCmd.AddCommand(version.Command)    // version reporting
 
 	// create a new snippets command from the clog.snippets cfg() branch
-	branchKey:= "snippets"
-		opts:= snippets.SnippetsCmdOpts{
-		Use: "Snippets",
-		Key: branchKey,
+	branchKey := "snippets"
+	opts := snippets.SnippetsCmdOpts{
+		Use:     "Snippets",
+		Key:     branchKey,
 		Verbose: false,
-		Plain: false,
-		Raw: cfg.GetStringMap(branchKey),
+		Plain:   false,
+		Raw:     cfg.GetStringMap(branchKey),
 	}
-	snippetsTree :=snippets.NewSnippetsCommand(rootCmd, opts)
-	rootCmd.AddCommand(snippetsTree)    // main snippets
-	
-	//clCmd.AddCommandSnippets(rootCmd)
-	// clCmd.AddSnippets(rootCmd, "snippets")
+	snippetsTree := snippets.NewSnippetsCommand(rootCmd, opts)
+	rootCmd.AddCommand(snippetsTree) // main snippets
 
 	// load shell scripts so that they override snippets if there's a clash
-	// clScripts.FindScriptsToAdd(rootCmd, "clogrc/*.sh")
+	scripts.FindScripts(rootCmd, "clogrc/*.sh")
 
 	//add in top level clog commands
 	// rootCmd.AddCommand(clCheck.CheckCmd) // Check the current project

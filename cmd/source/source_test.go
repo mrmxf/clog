@@ -1,4 +1,8 @@
-package main_test
+//	Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//	BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
+//
+// package source_test checks the functions & searching
+package source_test
 
 import (
 	"testing"

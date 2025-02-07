@@ -19,9 +19,8 @@
 # =============================================================================
 clog:
   clogrc:
-    config:
-      base: clog.config
-      format: yaml
+    base: clog.config
+    format: yaml
     # search order for config files. ENV variables substituted at run time
     search-order:
       - /var/clogrc/
@@ -49,12 +48,21 @@ clog:
   jumbo:
     font: small
     sample: www.mrmxf.com
+  log:
+    # logLevel: debug | info | warn | error - all go to stdErr
+    level: debug
+    # logHandler: plain | pretty | json - default pretty handler for humans
+    style: pretty
   version:
     # set at runtime from clog.history-file
     short: "0.0.0"
     long: 0.0.0-type-hash
 # #############################################################################
-#      CHECK
+#        _                   ___   _                 _
+#   __  | |  ___   __ _     / __| | |_    ___   __  | |__
+#  / _| | | / _ \ / _` |   | (__  | ' \  / -_) / _| | / /
+#  \__| |_| \___/ \__, |    \___| |_||_| \___| \__| |_\_\
+#                 |___/
 # =============================================================================
 check:
   # checkLogLevel: debug | info | warn | error - all go to stdErr
@@ -142,12 +150,6 @@ check:
         - curl:  clog install check-for curl
         - docker: clog install check-for docker
 # #############################################################################
-#      DOCKER
-# =============================================================================
-docker:
-  # optional path to a url or file path or `clog`
-  configPath: clog
-# #############################################################################
 #     SNIPPETS
 # =============================================================================
 # --- command snippets clog <snippet> --------------------------------------------
@@ -167,12 +169,20 @@ snippets:
   # --- clog commands ---------------------------------------------------------
   upgrade: curl https://mrmxf.com/get/clog | bash
   upgradedev: curl https://mrmxf.com/get/clogdev | bash
-  # --- dev commands ----------------------------------------------------------
+#        _                     _
+#   __  | |  ___   __ _     __| |  ___  __ __
+#  / _| | | / _ \ / _` |   / _` | / -_) \ V /
+#  \__| |_| \___/ \__, |   \__,_| \___|  \_/
+#                 |___/
   # dev commands
   dev:
     godoc: godoc     -http=localhost:6060 &&     open http://localhost:6060/pkg/
     godoc-mac: godoc -http=localhost:6060 && xdg-open http://localhost:6060/pkg/
-  # --- git snippets clog git <snippet> ----------------------------------------
+#        _                         _   _
+#   __  | |  ___   __ _     __ _  (_) | |_
+#  / _| | | / _ \ / _` |   / _` | | | |  _|
+#  \__| |_| \___/ \__, |   \__, | |_|  \__|
+#                 |___/    |___/
   git:
     # IMPORTANT ZSH gets confused with "--" so use always use quotes to prevent null output
     # IMPORTANT YAML may parse logical expressions into arrays of strings e.g. [ -z "foo" ]
@@ -213,8 +223,9 @@ snippets:
       behind: if [ "$(git status|grep -oE '(merge the remote)')" ];then echo "Branch behind - do pull";exit 1;else echo "ok";fi
       clean: if [ "$(git status|grep -oE '(working tree clean)')" ];then echo "ok";else echo "Working tree not clean";exit 1;fi
     unstaged: if [ "$(git status|grep -oE '(Changes not staged)')" ];then echo "Commit unstaged changes";exit 1; else echo "ok";fi
-    vcode:
-      echo 'set "clog.config.yaml/snippets.git.vcode" to the project's reference semver'
+    # this is the default snippet to return the target release version for your project
+    # override in your project' clog.config.yaml
+    vcode: yq -r '.[0].version' releases.yaml
       # this is a command snippet because it takes a while to complete
     walk-parent-repos: |
       eval "$(clog Inc)" # set color strings
@@ -231,13 +242,11 @@ snippets:
         printf "$status$i$cX\n"
       done
 
-    # -------------------------------------------------------------------------
-    # --- install snippets ----------------------------------------------------
-    #   clog install clog  # tool install thyself
-  gitpod:
-    before: echo "script clogrc/clogconfig/snippets.gitpod.before not present"
-    command: echo "script clogrc/clogconfig/snippets.gitpod.command not present"
-    init: echo "script clogrc/clogconfig/snippets.gitpod.init not present"
+#        _                  _               _            _   _
+#   __  | |  ___   __ _    (_)  _ _    ___ | |_   __ _  | | | |
+#  / _| | | / _ \ / _` |   | | | ' \  (_-< |  _| / _` | | | | |
+#  \__| |_| \___/ \__, |   |_| |_||_| /__/  \__| \__,_| |_| |_|
+#                 |___/
   install:
     # --- snippets to check install
     # clog install check golang && echo "Yay, found it" || clog install golang
@@ -288,7 +297,7 @@ snippets:
     gh-mac: brew install gh
     hugo: |
       eval "$(clog Inc)"
-      j="$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest)"
+      j="$(curl -sL https://api.github.com/repos/gohugoio/hugo/releases/latest)"
       pkg=".deb"
       arch="arm" ; [[ "$(uname -m)" == "x86_64" ]] && arch="amd64"
       v="$(   echo $j | jq -r '.name   | ltrimstr("v")')"
@@ -296,9 +305,13 @@ snippets:
       # get the first release with "extended" this should ignore the withdeploy options
       url="$(echo "$urls" | grep "$v" | grep "$pkg" | grep "$arch" | grep "extended" | head -1)"
       # echo "$urls"
+      current="$(hugo version 2>/dev/null|grep -oE '[0-9]\.[0-9]+\.[0-9]')"
+      [[ "$v" == "$current" ]] && fSuccess "hugo $v already installed" && exit 0
+      [ -n "$current" ] && fWarn "upgrade hugo from$cS $current$cT to $cW $v"
+      fInfo ""
       fInfo "filter $(echo "$urls"|wc -l) installers for ($v)($pkg)($arch)(extended)[0]"
       fInfo "installing $cF $url"
-      curl -L "$url" > /tmp/hugo.deb
+      curl -sL "$url" > /tmp/hugo.deb
       sudo apt-get install -y /tmp/hugo.deb
     ko: |
       VERSION=0.17.1
@@ -343,7 +356,11 @@ snippets:
     slsa-verifier: go install github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
     snap: sudo apt install -y snapd
     yarn: npm install --global yarn && echo "PATH=\"$PATH:$(yarn global bin)\"" >> ~/.bashrc
-  # --- my ... a set of tools to consistently report about your run -----------
+#        _
+#   __  | |  ___   __ _     _ __    _  _
+#  / _| | | / _ \ / _` |   | '  \  | || |
+#  \__| |_| \___/ \__, |   |_|_|_|  \_, |
+#                 |___/             |__/
   my:
     ip: curl -s wtfismyip.com/text
     uid: echo $UID
@@ -351,17 +368,25 @@ snippets:
     home: echo ~
     wslusr: echo "$(wslvar USERPROFILE)"
     wslhome: echo "$(wslpath "$(wslvar USERPROFILE)")" 
-  # --- nginx snippets:  clog nginx <snippet> ---------------------------------
+#        _                                _
+#   __  | |  ___   __ _     _ _    __ _  (_)  _ _   __ __
+#  / _| | | / _ \ / _` |   | ' \  / _` | | | | ' \  \ \ /
+#  \__| |_| \___/ \__, |   |_||_| \__, | |_| |_||_| /_\_\
+#                 |___/           |___/
   nginx:
     av: ls -al /etc/nginx/sites-enabled/
     en: ls -al /etc/nginx/sites-available/
-  # --- project snippets:  clog project <snippet> ---------------------------
+#        _                                       _              _                             _
+#   __  | |  ___   __ _     _ __   _ _   ___    (_)  ___   __  | |_  
+#  / _| | | / _ \ / _` |   | '_ \ | '_| / _ \   | | / -_) / _| |  _| 
+#  \__| |_| \___/ \__, |   | .__/ |_|   \___/  _/ | \___| \__|  \__| 
+#                 |___/    |_|                |__/
   # typically used for global tool version propagation, node version etc.
   project:
     needs:
-      go-version: 1.23.3
-      hugo-version: 0.138.0
-      node-version: 22
+      go-version: 1.23.6
+      hugo-version: 0.143.0
+      node-version: 22.11
 
 # #############################################################################
 #                 _

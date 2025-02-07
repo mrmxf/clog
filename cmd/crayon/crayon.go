@@ -45,15 +45,13 @@ var Command = &cobra.Command{
 	},
 }
 
-
-
 // set Crayon Flags to provide output control for printing colors.
 //
 //	clog Core Crayon --help # display help for the flags
 func init() {
 	Command.PersistentFlags().BoolVarP(&hideShellScript, "comment", "C", false, "print the comment, no Shell script")
 	Command.PersistentFlags().BoolVarP(&hideComment, "script", "S", false, "print the Shell script, no comment")
-	Command.PersistentFlags().BoolVarP(&showExample,  "example", "E", false, "show an example of colors")
+	Command.PersistentFlags().BoolVarP(&showExample, "example", "E", false, "show an example of colors")
 	Command.PersistentFlags().BoolVarP(&DarkMode, "darkmode", "D", false, "all colors for darkmode")
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)

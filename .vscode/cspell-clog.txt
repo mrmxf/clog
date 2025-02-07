@@ -21,11 +21,13 @@ configparam
 core
 coverprofile
 Dappname
+darkmode
 dbaeumer
 dearmor
 dpkg
 embeded
 environemnt
+ESTRPIPE
 GHGIST
 GHUSR
 githubcli
@@ -83,6 +85,7 @@ shellsnippets
 skript
 Slicify
 slsa
+SMPTE
 somearray
 somevalue
 stdcopy

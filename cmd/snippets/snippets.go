@@ -38,12 +38,12 @@ func NewSnippetsCommand(parentCmd *cobra.Command, opts SnippetsCmdOpts) *cobra.C
 		Long:  `local config adds & overwrites the core snippets`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-		snips.ListSnippets(&snips.ListSnippetsData{
-				Title: opts.Title,
-				Key: opts.Key,
-				Parsed: &Snippets,
+			snips.ListSnippets(&snips.ListSnippetsData{
+				Title:   opts.Title,
+				Key:     opts.Key,
+				Parsed:  &Snippets,
 				Verbose: opts.Verbose,
-				Plain: opts.Plain,
+				Plain:   opts.Plain,
 			})
 
 			if !opts.Verbose {
@@ -51,7 +51,7 @@ func NewSnippetsCommand(parentCmd *cobra.Command, opts SnippetsCmdOpts) *cobra.C
 			}
 		},
 	}
-	Command.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "V",false, "clog Snippets -v   # verbose scripts")
+	Command.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "V", false, "clog Snippets -v   # verbose scripts")
 	Command.PersistentFlags().BoolVarP(&opts.Plain, "plain", "P", false, "clog Snippets -p   # remove pretty colors")
 	return Command
 }

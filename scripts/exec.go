@@ -6,27 +6,20 @@
 package scripts
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"sync"
 
 	"golang.org/x/exp/slog"
 )
 
-func RunScript(scriptName string, scriptPath string, args ...string) {
-	fmt.Println("Executing script", c.C(scriptPath), "install", c.C(scriptName))
-
-	bashArgs := []string{scriptPath}
-	bashArgs = append(bashArgs, "install")
-	bashArgs = append(bashArgs, args...)
-
-	Exec("bash", bashArgs, nil)
-}
+// error codes from https://adminschoice.com/exit-error-codes-in-bash-and-linux-os/
+const ERR_ESTRPIPE = 86
 
 // execute a command and restream Stdin & StdOut - return status
-func Exec(command string, args []string, env map[string]string) int {
+func Exec(command string, args []string, env map[string]string) (int, error) {
 	exe := exec.Command(command, args...)
 
 	// add in any env variables
@@ -48,7 +41,8 @@ func Exec(command string, args []string, env map[string]string) int {
 	err := exe.Start()
 	if err != nil {
 		slog.Error("FATAL cmd.Start() during scripts.Exec()")
-		slog.Error("FATAL trying to execute %s\n", strings.Join(args, " "),"err",err)
+		slog.Error("FATAL trying to execute %s\n", strings.Join(args, " "), "err", err)
+		return ERR_ESTRPIPE, err
 	}
 
 	// cmd.Wait() should be called only after we finish reading
@@ -71,6 +65,7 @@ func Exec(command string, args []string, env map[string]string) int {
 	_, err = rewriteStdout(os.Stderr, execStdErr)
 	if err != nil {
 		slog.Error("Failed to rewrite script os.Stderr " + err.Error())
+		return ERR_ESTRPIPE, err
 	}
 	// wait for all the standard output to be rewritten
 	wg.Wait()
@@ -85,8 +80,14 @@ func Exec(command string, args []string, env map[string]string) int {
 	}
 	if errStderr != nil {
 		slog.Warn("WARNING rewriting Stderr")
-		slog.Warn("WARNING executing %s\n", strings.Join(args, " "), "err",errStderr)
+		slog.Warn("WARNING executing %s\n", strings.Join(args, " "), "err", errStderr)
 	}
 
-	return exitCode
+	return exitCode, nil
+}
+
+func init() {
+	// log the order of the init files in case there are problems
+	_, file, _, _ := runtime.Caller(0)
+	slog.Debug("init " + file)
 }

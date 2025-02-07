@@ -16,8 +16,11 @@ import (
 	"github.com/mrmxf/clog/crayon"
 	"github.com/spf13/cobra"
 )
-var CommandString="Inc"
+
+var CommandString = "Inc"
+
 // IncFs is the file system for the embedded shell file - override at runtime to use your own
+//
 //go:embed inc.sh
 var IncFs embed.FS
 

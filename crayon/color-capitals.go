@@ -14,13 +14,17 @@ import (
 //
 // capital letters at the start of words use the caps highlighter,
 // everything else uses the bods highlighter.
-func ColorCapitals(str string, 
+func ColorCapitals(str string,
 	caps func(a ...interface{}) string,
 	bods func(a ...interface{}) string) string {
 	var pen = Color()
 
-	if caps==nil { caps = pen.Success	}
-	if bods==nil { bods = pen.Info    }
+	if caps == nil {
+		caps = pen.Success
+	}
+	if bods == nil {
+		bods = pen.Info
+	}
 
 	res := ""
 	skipped := ""

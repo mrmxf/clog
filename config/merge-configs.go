@@ -21,26 +21,26 @@ import (
 func (cfg *Config) mergeAllConfigs() {
 	slog.Debug("Merging user defined configs", "SearchPathList", searchPaths)
 
-	fName := cfg.GetString("clog.clogrc.config_base") + "." + cfg.GetString("clog.clogrc.config_format")
+	fName := cfg.GetString("clog.clogrc.base") + "." + cfg.GetString("clog.clogrc.format")
 	for _, path := range searchPaths {
 		fPath := strings.Replace(path, "~", os.Getenv("HOME"), 1)
 		fPath = strings.Replace(fPath, "$HOME", os.Getenv("HOME"), 1)
 		fPath = filepath.Join(fPath, fName)
 		fPathAbs, err := filepath.Abs(fPath)
 		if err != nil {
-		  slog.Debug("Error getting absolute path", "path", fPath, "error", err)
+			slog.Debug("Error getting absolute path", "path", fPath, "error", err)
 			continue
 		}
 		ioReader, err := os.Open(fPathAbs)
 		if err == nil {
-		  slog.Debug("Found config file", "path", fPathAbs)
+			slog.Debug("Found config file", "path", fPathAbs)
 			err := cfg.MergeConfig(ioReader)
 			if err != nil {
 				slog.Error("Error merging config file", "path", fPathAbs, "error", err)
 			}
 			ioReader.Close()
 		} else {
-		  slog.Debug("Did not find config file", "path", fPathAbs)
+			slog.Debug("Did not find config file", "path", fPathAbs)
 		}
 	}
 }

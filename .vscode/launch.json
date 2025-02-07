@@ -12,24 +12,25 @@
       "program": "${workspaceFolder}"
     },
     {
-      "name": "snippets",
+      "name": "Source snippets",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}",
       "args": [
-        "Snippets"
+        "Source",
+        "project",
+        "config"
       ]
     },
     {
-      "name": "git hash",
+      "name": "hello",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}",
       "args": [
-        "git",
-        "hash"
+        "hello"
       ]
     }
   ]

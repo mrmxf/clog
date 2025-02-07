@@ -13,6 +13,7 @@ import (
 // linker will override this variable. We parse it at run time
 // See the semver package readme for details.
 var SemVerInfo = LinkerDataDefault
+
 const LinkerDataDefault = "hash|date|suffix|app|title"
 
 // logic to valid the loading of the Info struct & linker data
@@ -44,6 +45,6 @@ func History() []ReleaseHistory {
 	return history
 }
 
-func Info () VersionInfo {
+func Info() VersionInfo {
 	return inf
 }
