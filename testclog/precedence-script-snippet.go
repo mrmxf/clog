@@ -1,4 +1,4 @@
-package test_clog
+package testclog
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func PrecedenceTests(t *testing.T) {
+func PrecedenceTest(t *testing.T) {
 
 	// Only pass t into top-level Convey calls
 	Convey("precedence of script-snippet-internal", t, func() {

@@ -95,5 +95,5 @@ func init() {
 	RootCommand.PersistentFlags().BoolVar(&ShowVersion, "version", false, "clog --version           # shows the full version string")
 	RootCommand.PersistentFlags().BoolVarP(&ShowVersionShort, "v", "v", false, "clog -v                  # shows just the semantic version")
 	RootCommand.PersistentFlags().BoolVarP(&ShowVersionNote, "note", "n", false, "clog --note              # shows just the version note")
-	RootCommand.PersistentFlags().IntVarP(&LogLevel, "loglevel", "L", 0, "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR")
+	RootCommand.PersistentFlags().IntVarP(&LogLevel, "loglevel", "l", 0, "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR")
 }

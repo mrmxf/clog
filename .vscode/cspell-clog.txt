@@ -95,6 +95,7 @@ synthesised
 taghead
 taglatest
 tagorigin
+testclog
 toolsai
 treeahead
 treebehind
