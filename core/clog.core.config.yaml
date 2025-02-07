@@ -195,37 +195,43 @@ snippets:
     # --- git message snippets:  clog git tag <snippet> -----------------------------
     message:
       latest: git log HEAD | head -5 | tail -1 | xargs
-      ref: echo 'set "clog.config.yaml/shellsnippets.git-message-ref" to a release message in your project'
+      # this is the default snippet to return the target commit message for
+      # your project override in your project' clog.config.yaml
+      ref: yq -r '.[0].note' releases.yaml
     origin: git config --get remote.origin.url
     # --- git tag snippets:  clog git tag <snippet> -----------------------------
     tag:
       head: git tag --points-at HEAD
       latest: git tag --sort=committerdate | tail -1
       origin: git ls-remote --tags origin | tail -1 | sed -r 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+      # this is the default snippet to return the target release version for your project
+      # override in your project' clog.config.yaml
+      ref: yq -r '.[0].version' releases.yaml
       tidy: |
         eval "$(clog Inc)"  # define display functions etc.
-        if [ -f clogrc/_cfg.sh ];then source clogrc/_cfg.sh;else echo "no clogrc/_cfg.sh" && exit 1;fi
+        eval "$(clog Source project config)"
+        VV="$(clog git tag ref)"
+        MM="$(clog git message ref)"
         #
-        fInfo "Retag to   $cH $vCODE$cX$cT $vCodeType ($cW $bMSG $cT)"
+        fInfo "Retag to$cH    $VV$cX$cT $vCodeType ($cW $MM $cT)"
         # silently delete existing tag if it exists
-        fInfo "${cC}git tag$cS -d$cH \"$vCODE\""
-                    git tag    -d      $vCODE       >/dev/null 2>&1
+        fInfo "${cC}git tag$cS -d$cH \"$VV\""
+                    git tag    -d      $VV       >/dev/null 2>&1
         # set the tag to the HEAD
-        fInfo "${cC}git tag$cS -a$cH \"$vCODE\"$cX$cS HEAD -m$cW \"$bMSG\""
-                    git tag    -a      "$vCODE"    HEAD -m     "$bMSG"
-        fInfo "${cC}git push$cS --delete$cE origin$cS \"$cH$vCODE\""
-                    git push    --delete    origin "$vCODE"      >/dev/null 2>&1
-        fInfo "${cC}git push$cE          origin$cS \"$cH$vCODE\""
-                    git push    origin     "$vCODE"
+        fInfo "${cC}git tag$cS -a$cH \"$VV\"$cX$cS HEAD -m$cW \"$MM\""
+                    git tag    -a      "$VV"    HEAD -m     "$MM"
+        fInfo "${cC}git push$cS --delete$cE origin$cS \"$cH$VV\""
+                    git push    --delete    origin "$VV"      >/dev/null 2>&1
+        fInfo "${cC}git push$cE          origin$cS \"$cH$VV\""
+                    git push    origin     "$VV"
     # --- git tree snippets:  clog git tree <snippet> ---------------------------
     tree:
       ahead: if [ "$(git status|grep -oE '(branch is ahead)')" ];then echo "Branch ahead - do push ";exit 1;else echo "ok";fi
       behind: if [ "$(git status|grep -oE '(merge the remote)')" ];then echo "Branch behind - do pull";exit 1;else echo "ok";fi
       clean: if [ "$(git status|grep -oE '(working tree clean)')" ];then echo "ok";else echo "Working tree not clean";exit 1;fi
     unstaged: if [ "$(git status|grep -oE '(Changes not staged)')" ];then echo "Commit unstaged changes";exit 1; else echo "ok";fi
-    # this is the default snippet to return the target release version for your project
-    # override in your project' clog.config.yaml
-    vcode: yq -r '.[0].version' releases.yaml
+    # deprecated - use clog git tag ref
+    vcode: clog git tag ref
       # this is a command snippet because it takes a while to complete
     walk-parent-repos: |
       eval "$(clog Inc)" # set color strings
@@ -431,7 +437,7 @@ svc:
 
   # webhook handling
   # format: https://some-host.dns/a/hook/hookType/{source}/{project}/{semver}
-  # format: https://some-host.dns/a/hook/cicd/gitlab-deploy/$PROJECT/$vCODE
+  # format: https://some-host.dns/a/hook/cicd/gitlab-deploy/$PROJECT/$(clog git tag ref)
   hookprefix: "/hook"
   hooks:
     # params for responding to /hook/website/{id}

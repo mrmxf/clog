@@ -15,13 +15,14 @@ clog:
 
 snippets:
   git:
-    vcode: yq -r '.[0].version' releases.yaml
+    tag:
+      ref: yq -r '.[0].version' releases.yaml
   project:
       config: |
         # make some variables for standard build scripts
         export bPROJECT=clog                            # project you're building
-        export vCODE=$(clog git vcode)                  # reference code version
-        export bType="Golang"
+        export bTAG=$(clog git tag ref)                 # reference code version
+        export bType="Golang"                           # type of project
         export bBASE="clog"                             # base name of build executable
         export bMSG="$(clog  git message ref)"          # reference message
         export bHASH="$(clog git hash head)"            # hash of head commit
