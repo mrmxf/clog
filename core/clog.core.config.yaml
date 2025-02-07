@@ -166,9 +166,6 @@ check:
 #          clog watch
 #    con
 snippets:
-  # --- clog commands ---------------------------------------------------------
-  upgrade: curl https://mrmxf.com/get/clog | bash
-  upgradedev: curl https://mrmxf.com/get/clogdev | bash
 #        _                     _
 #   __  | |  ___   __ _     __| |  ___  __ __
 #  / _| | | / _ \ / _` |   / _` | / -_) \ V /
@@ -278,9 +275,6 @@ snippets:
       cd /tmp
       unzip ./awscliv2.zip
       sudo ./aws/install
-    clog: "curl https://mrmxf.com/get/clog | bash"
-    clogdev: "curl https://mrmxf.com/get/clogdev | bash"
-    clogrc: "curl https://mrmxf.com/get/clogrc | bash"
     golang: 'echo download go1.23.0.linux-amd64.tar.gz and run: "rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz"'
     golang-mac: brew install go
     godoc: "go install golang.org/x/tools/cmd/godoc@latest"
