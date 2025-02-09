@@ -37,10 +37,14 @@ func AddScript(cmd *cobra.Command, filePath string) error {
 	if err != nil {
 		return err
 	}
+	if len(inf.CmdUse) == 0 {
+		// no command found in this script - skip
+		return nil
+	}
 	dupe, ok := allScripts[inf.CmdUse]
 	if ok {
-		slog.Error(fmt.Sprintf("Script (%s) duplicated (%s) & (%s)", inf.CmdUse, inf.FilePath, dupe.FilePath))
-		return fmt.Errorf("script " + inf.CmdUse + " already exists")
+		slog.Error(fmt.Sprintf("Script command (%s) duplicated (%s) & (%s)", inf.CmdUse, inf.FilePath, dupe.FilePath))
+		return fmt.Errorf("script %s already exists", inf.CmdUse)
 	}
 
 	script := &cobra.Command{

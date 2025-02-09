@@ -25,7 +25,7 @@ func FindScripts(rootCmd *cobra.Command, folderGlob string) {
 	scripts, err := filepath.Glob(folderGlob)
 	//if there is an error, log it and exit
 	if err != nil {
-		slog.Error("unable to fid scripts "+folderGlob, "err", err)
+		slog.Error("unable to find scripts "+folderGlob, "err", err)
 		os.Exit(1)
 	}
 

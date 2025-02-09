@@ -34,7 +34,7 @@ import (
 	// "github.com/mrmxf/clog/ux"
 )
 
-func BootStrap(rootCmd *cobra.Command) error {
+func BootStrap(bootCmd *cobra.Command) error {
 	cfg := config.Cfg()
 	historyFilename := cfg.GetString("clog.history-file")
 
@@ -49,18 +49,18 @@ func BootStrap(rootCmd *cobra.Command) error {
 	}
 
 	//prepend cobra usage strings with build information
-	rootCmd.SetUsageTemplate(cfg.GetString("clog.version.long") + rootCmd.UsageTemplate())
+	bootCmd.SetUsageTemplate(cfg.GetString("clog.version.long") + bootCmd.UsageTemplate())
 
-	// load all the builtin commands first
-	rootCmd.AddCommand(cat.Command)        // script helper include command
-	rootCmd.AddCommand(copy.Command)       // copy an embedded file to a destination
-	rootCmd.AddCommand(crayon.Command)     // colored terminal commands
-	rootCmd.AddCommand(inc.Command)        // script helper include command
-	rootCmd.AddCommand(initialise.Command) // create a clogrc
-	rootCmd.AddCommand(jumbo.Command)      // Jumbo text output
-	rootCmd.AddCommand(list.Command)       // list embedded files text output
-	rootCmd.AddCommand(source.Command)     // source a script or snippet
-	rootCmd.AddCommand(version.Command)    // version reporting
+	// load all the public builtin commands first
+	bootCmd.AddCommand(cat.Command)        // script helper include command
+	bootCmd.AddCommand(copy.Command)       // copy an embedded file to a destination
+	bootCmd.AddCommand(crayon.Command)     // colored terminal commands
+	bootCmd.AddCommand(inc.Command)        // script helper include command
+	bootCmd.AddCommand(initialise.Command) // create a clogrc
+	bootCmd.AddCommand(jumbo.Command)      // Jumbo text output
+	bootCmd.AddCommand(list.Command)       // list embedded files text output
+	bootCmd.AddCommand(source.Command)     // source a script or snippet
+	bootCmd.AddCommand(version.Command)    // version reporting
 
 	// create a new snippets command from the clog.snippets cfg() branch
 	branchKey := "snippets"
@@ -71,35 +71,17 @@ func BootStrap(rootCmd *cobra.Command) error {
 		Plain:   false,
 		Raw:     cfg.GetStringMap(branchKey),
 	}
-	snippetsTree := snippets.NewSnippetsCommand(rootCmd, opts)
-	rootCmd.AddCommand(snippetsTree) // main snippets
+	snippetsTree := snippets.NewSnippetsCommand(bootCmd, opts)
+	bootCmd.AddCommand(snippetsTree) // main snippets
 
 	// load shell scripts so that they override snippets if there's a clash
-	scripts.FindScripts(rootCmd, "clogrc/*.sh")
+	scripts.FindScripts(bootCmd, "clogrc/*.sh")
 
-	//add in top level clog commands
-	// rootCmd.AddCommand(clCheck.CheckCmd) // Check the current project
-	// rootCmd.AddCommand(clCmd.LintCmd)    // Lint the current project with megalinter
-	// rootCmd.AddCommand(clCmd.ShCmd)           // run a snippet
-	// rootCmd.AddCommand(clCmd.ListSnippetsCmd) // list snippets
-
-	// add in the top level menus for any child commands
-	// rootCmd.AddCommand(clCi.CiCmd)         // Core commands
-	// rootCmd.AddCommand(clCore.CoreCmd)     // Core commands
-	// rootCmd.AddCommand(clGit.GitCmd)       // Git tools
-	// rootCmd.AddCommand(clDocker.DockerCmd) // Docker tools
-
-	// now bootstrap child commands
-	// clCi.BootStrap(rootCmd)
-	// clGit.BootStrap(rootCmd)
-	// clDocker.BootStrap(rootCmd)
-
-	//add in subcommands for the various sub-packages
-	// once all the subcommands are loaded, the menus can be built
-	ux.BuildMenus(rootCmd)
+	//build the UX menus in case we're running interactively
+	ux.InitMenus(bootCmd)
 
 	// Finally, Execute the cobra command parser
-	return RootCommand.Execute()
+	return bootCmd.Execute()
 }
 
 func initialiseConfigFromSemver(eFs *embed.FS, paths []string) {

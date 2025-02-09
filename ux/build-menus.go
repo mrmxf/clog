@@ -45,7 +45,7 @@ func populateMenuLevel(cmd *cobra.Command, parent *MenuForm) {
 }
 
 // build the menu hierarchy from the root command
-func BuildMenus(rootCommand *cobra.Command) {
+func InitMenus(rootCommand *cobra.Command) {
 	HomeMenu = &MenuForm{
 		Parent: nil,
 		Cmd:    rootCommand,

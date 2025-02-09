@@ -37,7 +37,7 @@ func Initialise(fs embed.FS, filePath string) error {
 		inf.Date,
 		inf.OS,
 		inf.ARCH,
-		"\""+inf.Note+"\"")
+		inf.Note)
 	return nil
 }
 
