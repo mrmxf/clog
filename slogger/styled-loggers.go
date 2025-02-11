@@ -19,6 +19,7 @@ func UsePrettyLogger(level slog.Level) {
 		console.NewHandler(os.Stderr,
 			&console.HandlerOptions{Level: level}))
 	slog.SetDefault(Logger)
+	logLevel = level
 }
 
 func UsePlainLogger(level slog.Level) {
@@ -26,6 +27,7 @@ func UsePlainLogger(level slog.Level) {
 		console.NewHandler(os.Stderr,
 			&console.HandlerOptions{Level: level, NoColor: true}))
 	slog.SetDefault(Logger)
+	logLevel = level
 }
 
 // JobLogger is a no-color version of the PrettyLogger that is created
@@ -39,6 +41,7 @@ func NewJobLogger(path string, level slog.Level) (*slog.Logger, *os.File, error)
 		console.NewHandler(writer,
 			&console.HandlerOptions{Level: level, NoColor: true}))
 
+	logLevelFile = level
 	return newLogger, fileHandle, err
 }
 
@@ -46,6 +49,7 @@ func UseJSONLogger(level slog.Level) {
 	Logger = slog.New(slog.NewJSONHandler(os.Stderr,
 		&slog.HandlerOptions{Level: level}))
 	slog.SetDefault(Logger)
+	logLevel = level
 }
 
 func init() {

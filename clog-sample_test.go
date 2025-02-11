@@ -9,5 +9,5 @@ import (
 
 func TestSpec(t *testing.T) {
 	slog.Info("System tests for clog")
-	t.Run("Precedence", 	testclog.PrecedenceTest)
+	t.Run("Precedence", testclog.PrecedenceTest)
 }

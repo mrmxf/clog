@@ -17,6 +17,10 @@ import (
 // the exported default logger
 var Logger *slog.Logger
 
+// these are exported with a get function for clog Log
+var logLevel slog.Level
+var logLevelFile slog.Level
+
 type SlogStyle int
 
 const (
@@ -31,9 +35,14 @@ var defaultLogLevel = slog.LevelInfo
 
 // var defaultLogLevel = slog.LevelDebug  //use this for init tracing
 
-// use this function to set al log level from a config file
+// use this function to set a log level from a config file
 func SetLogger(level slog.Level, style SlogStyle) {
 
+}
+
+// get the active log levels for a split console / cicd logging experience
+func GetLogLevel() (logLevel slog.Level, logLevelFile slog.Level) {
+	return logLevel, logLevelFile
 }
 
 func init() {

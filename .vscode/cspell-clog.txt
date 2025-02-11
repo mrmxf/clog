@@ -73,6 +73,7 @@ originhash
 originsemver
 overriden
 pdate
+phsym
 piersdeseilligny
 rangav
 regexstr

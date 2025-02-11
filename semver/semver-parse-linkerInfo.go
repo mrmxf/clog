@@ -104,7 +104,7 @@ func cleanLinkerData() error {
 	title = strings.ReplaceAll(title, "\"", "")
 	title = strings.ReplaceAll(title, "\t", "")
 	title = strings.ReplaceAll(title, "\n", "")
-	
+
 	if len(title) == 0 || title == defaultInfo[lAPPTITLE] {
 		bi, ok := debug.ReadBuildInfo()
 		if ok {

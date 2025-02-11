@@ -76,7 +76,7 @@ func parseScriptInfo(filePath string) (*ScriptInfo, error) {
 			inf.CmdUse = mClog[2]
 			inf.NeedsOpts = (strings.Index(mClog[3], "[opts]") > 0)
 			iHash := strings.Index(mClog[3], "#")
-			if iHash > 0 {
+			if iHash >= 0 {
 				inf.CmdShort = strings.Trim(mClog[3][1+iHash:], " \t")
 			}
 
@@ -123,8 +123,8 @@ func parseScriptInfo(filePath string) (*ScriptInfo, error) {
 
 	// warn if there is a command with no help
 	if len(inf.CmdUse) > 0 && len(inf.CmdShort) == 0 {
-		slog.Warn("script " + c.F(filePath) + " has no short help. Please add")
-		slog.Warn("     ", c.W("# "), c.C("short"), c.W("> "), "some short help text for the menu")
+		slog.Warn("script " + c.F(filePath) + " has no short help. Please add:")
+		slog.Warn("     # short> some short help text for the menu")
 	}
 
 	return &inf, nil
