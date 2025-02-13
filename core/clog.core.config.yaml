@@ -210,6 +210,10 @@ snippets:
         VV="$(clog git tag ref)"
         MM="$(clog git message ref)"
         #
+        # golang projects require a "v", but semver doesn't
+        # add a v if needed for golang projects
+        [ -f "go.mod" ] && [[ "echo ${VV:0:1}" != "v" ]] && VV="v$VV"
+        #
         fInfo "Retag to$cH    $VV$cX$cT $vCodeType ($cW $MM $cT)"
         # silently delete existing tag if it exists
         fInfo "${cC}git tag$cS -d$cH \"$VV\""
@@ -229,8 +233,8 @@ snippets:
     unstaged: if [ "$(git status|grep -oE '(Changes not staged)')" ];then echo "Commit unstaged changes";exit 1; else echo "ok";fi
     # deprecated - use clog git tag ref
     vcode: clog git tag ref
-      # this is a command snippet because it takes a while to complete
-    walk-parent-repos: |
+    # walk the parent repos to see if they're unclean
+    parents: |
       eval "$(clog Inc)" # set color strings
       root=..
       [ -n "$GIT_WALK_REPOS_ROOT" ] && root="$GIT_WALK_REPOS_ROOT"
