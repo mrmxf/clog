@@ -10,22 +10,20 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
-
-	"github.com/phsym/console-slog"
 )
 
 func UsePrettyLogger(level slog.Level) {
 	Logger = slog.New(
-		console.NewHandler(os.Stderr,
-			&console.HandlerOptions{Level: level}))
+		NewPrettyHandler(os.Stderr,
+			&PrettyHandlerOptions{Level: level}))
 	slog.SetDefault(Logger)
 	logLevel = level
 }
 
 func UsePlainLogger(level slog.Level) {
 	Logger = slog.New(
-		console.NewHandler(os.Stderr,
-			&console.HandlerOptions{Level: level, NoColor: true}))
+		NewPrettyHandler(os.Stderr,
+			&PrettyHandlerOptions{Level: level, NoColor: true}))
 	slog.SetDefault(Logger)
 	logLevel = level
 }
@@ -38,8 +36,8 @@ func NewJobLogger(path string, level slog.Level) (*slog.Logger, *os.File, error)
 	writer := bufio.NewWriter(fileHandle)
 
 	newLogger := slog.New(
-		console.NewHandler(writer,
-			&console.HandlerOptions{Level: level, NoColor: true}))
+		NewPrettyHandler(writer,
+			&PrettyHandlerOptions{Level: level, NoColor: true}))
 
 	logLevelFile = level
 	return newLogger, fileHandle, err

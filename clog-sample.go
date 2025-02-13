@@ -51,4 +51,5 @@ func init() {
 	slog.Debug("init " + file)
 
 	slogger.UsePrettyLogger(slog.LevelError)
+	// slogger.UsePrettyLogger(slog.LevelDebug)
 }
