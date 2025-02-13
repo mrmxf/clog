@@ -50,7 +50,7 @@ var Command = &cobra.Command{
 
 		src, err := clogFs.Open(srcPath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
+			slog.Error(fmt.Sprintf("cannot open embedded file %s", srcPath), "err", err)
 			os.Exit(126)
 		}
 		defer src.Close()
@@ -59,7 +59,7 @@ var Command = &cobra.Command{
 
 		nBytes, err := io.Copy(dst, src)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s (%d bytes copied)\n", err, nBytes)
+			slog.Error(fmt.Sprintf("cannot read embedded file %s (%d bytes copied)", srcPath, nBytes), "err", err)
 			os.Exit(126)
 		}
 	},
