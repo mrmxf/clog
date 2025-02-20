@@ -23,6 +23,12 @@ type PrettyHandlerOptions struct {
 	// of the log statement and add a SourceKey attribute to the output.
 	AddSource bool
 
+	// Bare - only output the message
+	// Log -IN "First part "
+	// Log -IBN ", and second part"
+	// Log -IB ", of a 3 part console only log"
+	Bare bool
+
 	// Level reports the minimum record level that will be logged.
 	// The handler discards records with lower levels.
 	// If Level is nil, the handler assumes LevelInfo.
@@ -32,6 +38,9 @@ type PrettyHandlerOptions struct {
 
 	// Disable colorized output
 	NoColor bool
+
+	// Disable newline
+	NoNewLine bool
 
 	// TimeFormat is the format used for time.DateTime
 	TimeFormat string

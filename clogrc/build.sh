@@ -12,12 +12,11 @@ eval "$(clog Inc)"                      # shell embedded help (sh, zsh & bash)
 help="core/sh/help-golang.sh"           # build embedded help
 eval "$(clog Cat $help)"                # golang build helpers
 
-fInfo "Build$cC $PROJECT $cT using clog's$cF $help"
+clog Log -I "Build$cC $PROJECT $cT using clog's$cF $help"
 
-clog Check pre-build
-[ $? -gt 0 ] && exit 1
-clog Check build
-[ $? -gt 0 ] && exit 1
+clog Check pre-build && [ $? -gt 0 ] && exit 1
+clog Check tools     && [ $? -gt 0 ] && exit 1
+clog Check build     && [ $? -gt 0 ] && exit 1
 # ------------------------------------------------------------------------------
 go test
 [ $? -gt 0 ] && exit 1
@@ -40,4 +39,4 @@ fGoBuild tmp/$app-arm-lnx     linux   arm64 $hash "$suffix" $app "$title" "$link
 fGoBuild tmp/$app-arm-win.exe windows arm64 $hash "$suffix" $app "$title" "$linkerPath"
 fGoBuild tmp/$app-arm-mac     darwin  arm64 $hash "$suffix" $app "$title" "$linkerPath"
 
-fInfo "${cT}All built to the$cF tmp/$cT folder\n"
+clog Log -I "${cT}All built to the$cF tmp/$cT folder\n"

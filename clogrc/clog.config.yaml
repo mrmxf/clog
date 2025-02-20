@@ -58,8 +58,11 @@ check:
       - try: |
           vgo="$(go version|cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+')" 
           [[ "$vgo" == "$(clog project needs golang)" ]]
-        catch: |
-          clog Log -E "wrong go version. Need $(clog project needs golang)"
+        catch: clog Log -E "wrong go version. Need $(clog project needs golang)"
+  build:
+    blocks:
+      - try: go test
+        catch: clog Log -E "go test failed"
   # --- clog Check deploy -----------------------------------------------------
   aws-deploy:
     blocks:

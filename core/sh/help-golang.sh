@@ -83,7 +83,7 @@ fGoBuild(){
 
   # prepare build message
   buildMsg="$cos$gofile$cX $tPlatform $bPlatform"
-  clog Log -I "${cI}>>   INFO$cT $buildMsg\r"
+  clog Log -I "$buildMsg\r"
   
   GOOS="$goos" GOARCH="$goarch" go build -ldflags "$lds" -o $gofile
   if [ $? -gt 0 ]; then
