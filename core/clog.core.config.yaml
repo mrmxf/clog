@@ -204,8 +204,9 @@ snippets:
       head: git tag --points-at HEAD
       latest: git tag --sort=committerdate | tail -1
       origin: git ls-remote --tags origin | tail -1 | sed -r 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
-      # this is the default snippet to return the target release version for your project
+      # this is the default snippet to return the project's target tag
       # override in your project' clog.config.yaml
+      # golang requires a 'v': echo "v$(yq -r '.[0].version' releases.yaml)"
       ref: yq -r '.[0].version' releases.yaml
       tidy: |
         eval "$(clog Inc)"  # define display functions etc.
