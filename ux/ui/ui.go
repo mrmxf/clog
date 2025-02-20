@@ -2,10 +2,13 @@
 package ui
 
 import (
+	"fmt"
 	"github.com/mrmxf/clog/config"
 	"github.com/mrmxf/clog/ux"
 	"github.com/mrmxf/clog/ux/cli"
 	"github.com/spf13/cobra"
+	"log/slog"
+	"os"
 )
 
 var mode = ux.CLI
@@ -28,7 +31,15 @@ func findStartMenu(theCmd *cobra.Command) (*ux.MenuForm, error) {
 
 func matchMenuForm(theCmd *cobra.Command, menu *ux.MenuForm) (*ux.MenuForm, error) {
 	//if the desired command matches the current menu (e.g. home) then return
-	if theCmd == menu.Cmd {
+	cmdId := -1
+	if menu.Cmd != nil && menu.Cmd.Annotations != nil {
+		_, err := fmt.Sscanf(theCmd.Annotations["menu-id"], "%d", &cmdId)
+		if err != nil {
+			slog.Error("fatal error parsing menus in matchMenuForm")
+			os.Exit(1)
+		}
+	}
+	if cmdId == menu.Id {
 		return menu, nil
 	}
 	for _, MenuForm := range menu.Children {

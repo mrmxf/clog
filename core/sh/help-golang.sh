@@ -30,7 +30,7 @@ if [ -z "$1" ];then
   [ -z "$_a" ] && _m="$_m$cE missing$cT"
   [ -n "$_a" ] && _m="$_m $(aws --version|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'|head -1 2>/dev/null)"
 
-  fInfo "$_m"
+  clog Log -I "$_m"
 fi
 # -----------------------------------------------------------------------------
 
@@ -83,15 +83,15 @@ fGoBuild(){
 
   # prepare build message
   buildMsg="$cos$gofile$cX $tPlatform $bPlatform"
-  printf "${cI}>>   INFO$cT $buildMsg\r"
+  clog Log -I "${cI}>>   INFO$cT $buildMsg\r"
   
   GOOS="$goos" GOARCH="$goarch" go build -ldflags "$lds" -o $gofile
   if [ $? -gt 0 ]; then
-    fError "$buildMsg ...  build failed"
-    fError "Linker data string was:$cC -ldflags \"$lds\""
+    clog Log -E "$buildMsg ...  build failed"
+    clog Log -E "Linker data string was:$cC -ldflags \"$lds\""
   else
     size="$(du --apparent-size --block-size=M $gofile)"
-    fInfo "$buildMsg ... $size"
+    clog Log -I "$buildMsg ... $size"
   fi
 }
 
@@ -115,8 +115,8 @@ fDoHeading(){
   local t2=""   && [ -n "$6" ] && t2="$cX${cT}tag2=$cC$6 "
   local t3=""   && [ -n "$7" ] && t3="$cX${cT}tag3=$cI$7 "
   local xtra="" && [ -n "$8" ] && t4="$cX${cT}tag4=$cW$8 "
-  fInfo "Build $cOs$PROJECT$cT for $cArch$platform$cX$cT from=$cW$dockerfile$cT"
-  fInfo "      tags: $t1 $t2 $t3 $xtra"
+  clog Log -I "Build $cOs$PROJECT$cT for $cArch$platform$cX$cT from=$cW$dockerfile$cT"
+  clog Log -I "      tags: $t1 $t2 $t3 $xtra"
 }
 
 fMakeTags(){
@@ -140,7 +140,7 @@ fDockerBuild(){
   local t3="" && [ -n "$7" ] && t3="--tag $7"
   docker buildx build $dockerfile . $LoadOrPush --platform "$os/$arch" $t1 $t2 $t3
   if [ $? -gt 0 ]; then
-    printf "${cS}FAIL$cF $FF$cT build failed$cX\n"
+    clog Log -E  "${cS}FAIL$cF $FF$cT build failed$cX\n"
     exit 1
   fi
 }

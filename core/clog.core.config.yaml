@@ -15,8 +15,12 @@
 #                        ⇑⇑⇑⇑⇑⇑⇑           ⇑⇑⇑⇑
 
 # #############################################################################
-#  CLOG Configuration
-# =============================================================================
+#                      __   _
+#   __   ___   _ _    / _| (_)  __ _
+#  / _| / _ \ | ' \  |  _| | | / _` |
+#  \__| \___/ |_||_| |_|   |_| \__, |
+#                              |___/
+# -----------------------------------------------------------------------------
 clog:
   clogrc:
     base: clog.config
@@ -63,123 +67,122 @@ clog:
 #  / _| | | / _ \ / _` |   | (__  | ' \  / -_) / _| | / /
 #  \__| |_| \___/ \__, |    \___| |_||_| \___| \__| |_\_\
 #                 |___/
-# =============================================================================
+# -----------------------------------------------------------------------------
 check:
-  # checkLogLevel: debug | info | warn | error - all go to stdErr
-  checkLogLevel: Info
-  # logHandler: default | plain - default pretty handler for humans
-  logHandler: default
-
-  # the 2nd level keys define the CLI thing to check. If blank use default
-  # clog Check - use the default check list
-  # clog Check banana - check the list from check.banana: in the config file
-  #
-  # Syntax
-  # 2nd level key = checkName
-  #  e.g. check.banana
-  #
-  # 3rd level key - checkType
-  #    .report                      - report the value of a snippet
-  #    .report.warn-if
-  #    .report.warn-group-NAME
-  #    .report.error-if
-  #    .report.error-group-NAME
-  #    .dependencies                - report the status of dependencies
-
-  default-core:
-    report:
-      - tag-ref: clog git vcode
-      - tag-head: clog git tag head
-      - tag-latest: clog git tag latest
-      - tag-origin: clog git tag origin
-        # warn-group-NAME will perform simple conditions on parsed values
-      - warn-group-tags:
-          - tag-HEAD != tag-ref
-          - tag-latest != tag-ref
-          - tag-origin != tag-ref
-      - branch: clog git branch
-      - hash-head: clog git hash head
-      - hash-origin: clog git hash origin
-      # warn-group-NAME checks previous results and ONLY warns if condition true
-      - warn-group-hash:
-          - hash-head != hash-origin
-      - msg-latest: clog git message latest
-      - msg-ref: clog git message ref
-      # warn-group-NAME checks previous results and ONLY warns if condition true
-      - warn-group-msg:
-          - msg-latest != msg-ref
-        # warn-if will run snippets and return warning if $? >0
-      - warn-if:
-          - tree-clean: clog    git tree clean
-          - tree-ahead: clog    git tree ahead
-          - tree-behind: clog   git tree behind
-          - tree-unstaged: clog git unstaged
+  pre-build:
+    before: eval "$(clog Inc)"
+    blocks:
+      - finally: clog Log -I "        branch   $(clog git branch)"
+      - finally: clog Log -I "       tag-ref   $(clog git tag ref)"
+      - finally: clog Log -I "      tag-head   $(clog git tag head)"
+      - finally: clog Log -I "    tag-latest   $(clog git tag latest)"
+      - finally: clog Log -I "    tag-origin   $(clog git tag origin)"
+      - try: '[[ "$(clog git tag head)" != "$(clog git tag ref)" ]]'
+        ok: clog Log -I "Ok    tag-head == tag-ref"
+        catch: clog Log -W "      tag-head != tag-ref"
+      - try: '[[ "$(clog git tag latest)" != "$(clog git tag ref)" ]]'
+        ok: clog Log -I "Ok  tag-latest == tag-ref"
+        catch: clog Log -W "    tag-latest != tag-ref"
+      - try: '[[ "$(clog git tag origin)" != "$(clog git tag ref)" ]]'
+        ok: clog Log -I "Ok  tag-origin == tag-ref"
+        catch: clog Log -W "    tag-origin != tag-ref"
+      - try: '[[ "$(clog git hash head)" != "$(clog git hash origin)" ]]'
+        ok: clog Log -I "Ok   hash-head == hash-origin"
+        catch: clog Log -W "     hash-head != hash-origin"
+      - try: '[[ "$(clog git message latest)" != "$(clog git message ref)" ]]'
+        ok: clog Log -I "message latest == message-ref"
+        catch: |
+          clog Log -W "message latest != message-ref"
+          clog Log -W "($(clog git message latest)) != ($(clog git message ref))"
+      - try: clog    git tree clean
+        ok: clog Log -I "Ok working tree clean"
+        catch: clog Log -E "   working tree NOT clean"
+      - try: clog    git tree ahead
+        ok: clog Log -I "Ok working tree up to date with origin"
+        catch: clog Log -E "   working tree is ahead of origin"
+      - try: clog   git tree behind
+        ok: clog Log -I "Ok working tree up to date with origin"
+        catch: clog Log -E "   working tree is behind origin"
+      - try: clog git unstaged
+        ok: clog Log -I "Ok all changes staged"
+        catch: clog Log -E "   unstaged changes in working tree"
   # --- clog Check gitlab-env -------------------------------------------------
-  gitlab-core-env:
-    # report on the gitlab environment (empty snippet results in an echo)
-    report:
-      - PATH
-      - CI_COMMIT_BRANCH
-      - CI_COMMIT_REF_SLUG
-      - CI_PIPELINE_SOURCE
-      - CI_MERGE_REQUEST_APPROVED
-      - CI_MERGE_REQUEST_ID
-      - CI_MERGE_REQUEST_LABELS
-      - CI_MERGE_REQUEST_REF_PATH
-      - CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
-      - CI_BUILDS_DIR
-      - CI_COMMIT_DESCRIPTION
-      - CI_COMMIT_TAG
-      - CI_JOB_STAGE
-      - CI_JOB_TOKEN
-      - CI_PIPELINE_NAME
-      - CI_PROJECT_DIR
-      - CI_PROJECT_PATH
-      - CI_RUNNER_VERSION
-      - CI_SERVER
-      - GITLAB_USER_EMAIL
-      - GITLAB_USER_ID
-      - GITLAB_USER_LOGIN
-      - GITLAB_USER_NAME
-      - KUBECONFIG
+  gitlab-env:
+    blocks:
+      - finally: clog Log -I "                 \$REPO   $(REPO)"
+      - finally: clog Log -I "        \$REPORT_FOLDER   $(REPORT_FOLDER)"
+      - finally: clog Log -I "       \$golang Version   $(vGO)"
+      - finally: clog Log -I "   need golang Version   $(clog project needs golang)"
+      # - PATH
+      # - CI_COMMIT_BRANCH
+      # - CI_COMMIT_REF_SLUG
+      # - CI_PIPELINE_SOURCE
+      # - CI_MERGE_REQUEST_APPROVED
+      # - CI_MERGE_REQUEST_ID
+      # - CI_MERGE_REQUEST_LABELS
+      # - CI_MERGE_REQUEST_REF_PATH
+      # - CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+      # - CI_BUILDS_DIR
+      # - CI_COMMIT_DESCRIPTION
+      # - CI_COMMIT_TAG
+      # - CI_JOB_STAGE
+      # - CI_JOB_TOKEN
+      # - CI_PIPELINE_NAME
+      # - CI_PROJECT_DIR
+      # - CI_PROJECT_PATH
+      # - CI_RUNNER_VERSION
+      # - CI_SERVER
+      # - GITLAB_USER_EMAIL
+      # - GITLAB_USER_ID
+      # - GITLAB_USER_LOGIN
+      # - GITLAB_USER_NAME
+      # - KUBECONFIG
   tools:
-    # check you have the tools you need for your projects
-    report:
-      - warn-if:
-        - jq: clog install check-for jq
-        - curl:  clog install check-for curl
-        - docker: clog install check-for docker
+      - name: golang
+        try: |
+          vv="$(go version|cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+')" 
+          [[ "$vv" == "$(clog project needs golang)" ]]
+        catch: clog Log -E "wrong go version. Need $(clog project needs golang)"
+      - name: yq
+        try: which yq 2>/dev/null
+        catch: clog Log -E "yq not present.  $(clog project needs golang)"
+      - name: aws cli v2
+        try: |
+          vv="$(aws --version 2>/dev/null|grep -oE '\/[0-9]+\.[0-9]+\.[0-9]+'|head -1|tr -d [/]|head -c 2)"
+          [[ "2." != "$vv)" ]] && exit 1clog install aws"
 # #############################################################################
-#     SNIPPETS
-# =============================================================================
-# --- command snippets clog <snippet> --------------------------------------------
-# --- IMPORTANT: command snippets stream their output {for terminals}
-# --- IMPORTANT:   shell snippets buffer their output (batch mode)
-#
-#    These will take priority over any scripts you load, so a snippet in this
-#    section will make a script of the same command name invisible.
-#    e.g.
-#      commandsnippets:
-#        watch: devtool server --port=1234 --mode=DEBUG 2>logs/dbg
-#
-#      can be run with the command
-#          clog watch
-#    con
+#               _                       _
+#   ||_  _ _   (_)  _ __   _ __   ___  | |_   ___
+#  (_-< | ' \  | | | '_ \ | '_ \ / -_) |  _| (_-<
+#  / _/ |_||_| |_| | .__/ | .__/ \___|  \__| /__/
+#   ||             |_|    |_|
+# -----------------------------------------------------------------------------
 snippets:
-#        _                     _
-#   __  | |  ___   __ _     __| |  ___  __ __
-#  / _| | | / _ \ / _` |   / _` | / -_) \ V /
-#  \__| |_| \___/ \__, |   \__,_| \___|  \_/
-#                 |___/
-  # dev commands
+  #             _
+  #   ||_    __| |  ___  __ __
+  #  (_-<   / _` | / -_) \ V /
+  #  / _/   \__,_| \___|  \_/
+  #   ||
   dev:
     godoc: godoc     -http=localhost:6060 &&     open http://localhost:6060/pkg/
     godoc-mac: godoc -http=localhost:6060 && xdg-open http://localhost:6060/pkg/
-#        _                         _   _
-#   __  | |  ___   __ _     __ _  (_) | |_
-#  / _| | | / _ \ / _` |   / _` | | | |  _|
-#  \__| |_| \___/ \__, |   \__, | |_|  \__|
-#                 |___/    |___/
+#             _              _
+#   ||_    __| |  ___   __  | |__  ___   _ _
+#  (_-<   / _` | / _ \ / _| | / / / -_) | '_|
+#  / _/   \__,_| \___/ \__| |_\_\ \___| |_|
+#   ||
+  #https://www.docker.com/blog/multi-arch-images/
+  docker:
+    initx: |
+      # install qemu to emulate arm for building
+      docker run --privileged --rm tonistiigi/binfmt --install all
+      docker buildx create --name army
+      docker buildx use army
+  #                 _   _
+  #   ||_    __ _  (_) | |_
+  #  (_-<   / _` | | | |  _|
+  #  / _/   \__, | |_|  \__|
+  #   ||    |___/
   git:
     # IMPORTANT ZSH gets confused with "--" so use always use quotes to prevent null output
     # IMPORTANT YAML may parse logical expressions into arrays of strings e.g. [ -z "foo" ]
@@ -210,20 +213,16 @@ snippets:
         VV="$(clog git tag ref)"
         MM="$(clog git message ref)"
         #
-        # golang projects require a "v", but semver doesn't
-        # add a v if needed for golang projects
-        [ -f "go.mod" ] && [[ "echo ${VV:0:1}" != "v" ]] && VV="v$VV"
-        #
-        fInfo "Retag to$cH    $VV$cX$cT $vCodeType ($cW $MM $cT)"
+        clog Log -I "Retag to$cH    $VV$cX$cT $vCodeType ($cW $MM $cT)"
         # silently delete existing tag if it exists
-        fInfo "${cC}git tag$cS -d$cH \"$VV\""
+        clog Log -I "${cC}git tag$cS -d$cH \"$VV\""
                     git tag    -d      $VV       >/dev/null 2>&1
         # set the tag to the HEAD
-        fInfo "${cC}git tag$cS -a$cH \"$VV\"$cX$cS HEAD -m$cW \"$MM\""
+        clog Log -I "${cC}git tag$cS -a$cH \"$VV\"$cX$cS HEAD -m$cW \"$MM\""
                     git tag    -a      "$VV"    HEAD -m     "$MM"
-        fInfo "${cC}git push$cS --delete$cE origin$cS \"$cH$VV\""
+        clog Log -I "${cC}git push$cS --delete$cE origin$cS \"$cH$VV\""
                     git push    --delete    origin "$VV"      >/dev/null 2>&1
-        fInfo "${cC}git push$cE          origin$cS \"$cH$VV\""
+        clog Log -I "${cC}git push$cE          origin$cS \"$cH$VV\""
                     git push    origin     "$VV"
     # --- git tree snippets:  clog git tree <snippet> ---------------------------
     tree:
@@ -248,37 +247,53 @@ snippets:
         fi
         printf "$status$i$cX\n"
       done
-
-#        _                  _               _            _   _
-#   __  | |  ___   __ _    (_)  _ _    ___ | |_   __ _  | | | |
-#  / _| | | / _ \ / _` |   | | | ' \  (_-< |  _| / _` | | | | |
-#  \__| |_| \___/ \__, |   |_| |_||_| /__/  \__| \__,_| |_| |_|
-#                 |___/
+#          _               _            _   _
+#   ||_   (_)  _ _    ___ | |_   __ _  | | | |
+#  (_-<   | | | ' \  (_-< |  _| / _` | | | | |
+#  / _/   |_| |_||_| /__/  \__| \__,_| |_| |_|
+#   ||
   install:
     # --- snippets to check install
-    # clog install check golang && echo "Yay, found it" || clog install golang
-    check-for:
-      aws: "aws --version       >/dev/null 2>&1"
-      clog: "clog version       >/dev/null 2>&1"
-      curl: "curl --version     >/dev/null 2>&1"
+    # clog install have golang && echo "Yay, found it" || clog install golang
+    have:
+      aws: "      aws --version >/dev/null 2>&1"
+      clog: "    clog --version >/dev/null 2>&1"
+      curl: "    curl --version >/dev/null 2>&1"
       docker: "docker --version >/dev/null 2>&1"
-      golang: "go version       >/dev/null 2>&1"
-      godoc: "which godoc       >/dev/null 2>&1"
+      golang: "    go   version >/dev/null 2>&1"
+      godoc: "  which godoc       >/dev/null 2>&1"
       golangci-lint: "golangci-lint --version >/dev/null 2>&1"
-      glab: "glab version       >/dev/null 2>&1"
-      gh: "gdh --version        >/dev/null 2>&1"
-      hugo: "hugo version       >/dev/null 2>&1"
-      jq: "jq --version         >/dev/null 2>&1"
-      ko: "ko version           >/dev/null 2>&1"
-      nvm: "nvm --version       >/dev/null 2>&1"
+      glab: "    glab   version >/dev/null 2>&1"
+      gh: "       gdh --version >/dev/null 2>&1"
+      hugo: "    hugo   version >/dev/null 2>&1"
+      jq: "        jq --version >/dev/null 2>&1"
+      ko: "        ko   version >/dev/null 2>&1"
+      nvm: "      nvm --version >/dev/null 2>&1"
       slsa-verifier: "slsa-verifier version >dev/null 2>&1"
-      yarn: "yarn --version     >/dev/null 2>&1"
+      yarn: "    yarn --version >/dev/null 2>&1"
+      yq: "        yq --version >/dev/null 2>&1"
     # install snippets --------------------------------------------------------
     aws: |
       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
       cd /tmp
       unzip ./awscliv2.zip
       sudo ./aws/install
+    docker-engine: |
+      # Add Docker's official GPG key:
+      sudo apt-get update
+      sudo apt-get install ca-certificates curl
+      sudo install -m 0755 -d /etc/apt/keyrings
+      sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+      sudo chmod a+r /etc/apt/keyrings/docker.asc
+      # Add the repository to Apt sources:
+      arch="$(dpkg --print-architecture)"
+      DEBy=$(. /etc/os-release && echo "$VERSION_CODENAME")
+      echo  "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian  $DEBy stable"|sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      sudo apt-get update
+      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo usermod -aG docker $USER
+      newgrp docker
+      docker run hello-world
     golang: 'echo download go1.23.0.linux-amd64.tar.gz and run: "rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz"'
     golang-mac: brew install go
     godoc: "go install golang.org/x/tools/cmd/godoc@latest"
@@ -310,11 +325,11 @@ snippets:
       url="$(echo "$urls" | grep "$v" | grep "$pkg" | grep "$arch" | grep "extended" | head -1)"
       # echo "$urls"
       current="$(hugo version 2>/dev/null|grep -oE '[0-9]\.[0-9]+\.[0-9]')"
-      [[ "$v" == "$current" ]] && fSuccess "hugo $v already installed" && exit 0
-      [ -n "$current" ] && fWarn "upgrade hugo from$cS $current$cT to $cW $v"
-      fInfo ""
-      fInfo "filter $(echo "$urls"|wc -l) installers for ($v)($pkg)($arch)(extended)[0]"
-      fInfo "installing $cF $url"
+      [[ "$v" == "$current" ]] && clog Log -I "hugo $v already installed" && exit 0
+      [ -n "$current" ] && clog Log -W "upgrade hugo from$cS $current$cT to $cW $v"
+      clog Log -I ""
+      clog Log -I "filter $(echo "$urls"|wc -l) installers for ($v)($pkg)($arch)(extended)[0]"
+      clog Log -I "installing $cF $url"
       curl -sL "$url" > /tmp/hugo.deb
       sudo apt-get install -y /tmp/hugo.deb
     ko: |
@@ -351,7 +366,7 @@ snippets:
       systemctl status nginx | grep "Active"
       sudo nginx -t
       if [[ $? -gt 0 ]] ; then
-          fError "$cE nginx -t$cT shows config doesn't work - try again"
+          clog Log -E "$cE nginx -t$cT shows config doesn't work - try again"
       else
           #restart nginx
           sudo systemctl -q restart nginx
@@ -360,11 +375,14 @@ snippets:
     slsa-verifier: go install github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
     snap: sudo apt install -y snapd
     yarn: npm install --global yarn && echo "PATH=\"$PATH:$(yarn global bin)\"" >> ~/.bashrc
-#        _
-#   __  | |  ___   __ _     _ __    _  _
-#  / _| | | / _ \ / _` |   | '  \  | || |
-#  \__| |_| \___/ \__, |   |_|_|_|  \_, |
-#                 |___/             |__/
+    yq: |
+      sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+      sudo chmod +x /usr/bin/yq
+# 
+#   ||_    _ __    _  _
+#  (_-<   | '  \  | || |
+#  / _/   |_|_|_|  \_, |
+#   ||             |__/
   my:
     ip: curl -s wtfismyip.com/text
     uid: echo $UID
@@ -372,25 +390,25 @@ snippets:
     home: echo ~
     wslusr: echo "$(wslvar USERPROFILE)"
     wslhome: echo "$(wslpath "$(wslvar USERPROFILE)")" 
-#        _                                _
-#   __  | |  ___   __ _     _ _    __ _  (_)  _ _   __ __
-#  / _| | | / _ \ / _` |   | ' \  / _` | | | | ' \  \ \ /
-#  \__| |_| \___/ \__, |   |_||_| \__, | |_| |_||_| /_\_\
-#                 |___/           |___/
+#                        _
+#   ||_    _ _    __ _  (_)  _ _   __ __
+#  (_-<   | ' \  / _` | | | | ' \  \ \ /
+#  / _/   |_||_| \__, | |_| |_||_| /_\_\
+#   ||           |___/
   nginx:
     av: ls -al /etc/nginx/sites-enabled/
     en: ls -al /etc/nginx/sites-available/
-#        _                                       _              _                             _
-#   __  | |  ___   __ _     _ __   _ _   ___    (_)  ___   __  | |_  
-#  / _| | | / _ \ / _` |   | '_ \ | '_| / _ \   | | / -_) / _| |  _| 
-#  \__| |_| \___/ \__, |   | .__/ |_|   \___/  _/ | \___| \__|  \__| 
-#                 |___/    |_|                |__/
+#                               _              _
+#   ||_    _ __   _ _   ___    (_)  ___   __  | |_
+#  (_-<   | '_ \ | '_| / _ \   | | / -_) / _| |  _|
+#  / _/   | .__/ |_|   \___/  _/ | \___| \__|  \__|
+#   ||    |_|                |__/
   # typically used for global tool version propagation, node version etc.
   project:
     needs:
-      go-version: 1.23.6
-      hugo-version: 0.143.0
-      node-version: 22.11
+      golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'
+      hugo: hugo config --format yaml|yq -r '.module.hugoversion.min'|cut -c 2-20
+      node: echo "23.8.0"
 
 # #############################################################################
 #                 _

@@ -4,7 +4,9 @@
 
 package ux
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 const AliasVocabulary = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@"
 
@@ -40,6 +42,7 @@ type MenuForm struct {
 	Short    string
 	Key      string
 	Children []*MenuForm
+	Id       int
 }
 
 // Option struct represents a simple set of choices.

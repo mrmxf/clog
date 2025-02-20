@@ -11,23 +11,65 @@
 #                      ⇓⇓⇓⇓⇓⇓⇓⇓⇓
 # ALL KEYS ARE    ⇒⇒  lowercase    ⇐⇐  only. THIS IS A VIPER SETTING.
 #                      ⇑⇑⇑⇑⇑⇑⇑⇑⇑
+# #############################################################################
+#                      __   _
+#   __   ___   _ _    / _| (_)  __ _
+#  / _| / _ \ | ' \  |  _| | | / _` |
+#  \__| \___/ |_||_| |_|   |_| \__, |
+#                              |___/
+# -----------------------------------------------------------------------------
 clog:
   # path to the yaml file defining release history - see semver package
   history-file: "releases.yaml"
 
+# #############################################################################
+#               _                       _
+#   ||_  _ _   (_)  _ __   _ __   ___  | |_   ___
+#  (_-< | ' \  | | | '_ \ | '_ \ / -_) |  _| (_-<
+#  / _/ |_||_| |_| | .__/ | .__/ \___|  \__| /__/
+#   ||             |_|    |_|
+# -----------------------------------------------------------------------------
 snippets:
   git:
     tag:
       ref: yq -r '.[0].version' releases.yaml
+      # a go package needs a preceding "v"
+      refgo: echo "v$(clog git tag ref)"
+    message:
+      ref: yq -r '.[0].note' releases.yaml
+    suffix: b="$(git branch --show-current)";[[ "$b" == main ]]&&echo ""|||tr -d [:blank:]
   project:
-      config: |
-        # make some variables for standard build scripts
-        export bPROJECT=clog                            # project you're building
-        export bTAG=$(clog git tag ref)                 # reference code version
-        export bType="Golang"                           # type of project
-        export bBASE="clog"                             # base name of build executable
-        export bMSG="$(clog  git message ref)"          # reference message
-        export bHASH="$(clog git hash head)"            # hash of head commit
-        # add a semver suffix unless on the main branch
-        export bSUFFIX="$(git branch --show-current)" && [[ "$bSUFFIX"=="main" ]] && bSUFFIX=""
-        
+    config: |
+      # make some variables for standard build scripts
+      export PROJECT=clog                            # project you're building
+    needs:
+      # grab the golang version from go.mod
+      golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'
+# #############################################################################
+#        _                   ___   _                 _
+#   __  | |  ___   __ _     / __| | |_    ___   __  | |__
+#  / _| | | / _ \ / _` |   | (__  | ' \  / -_) / _| | / /
+#  \__| |_| \___/ \__, |    \___| |_||_| \___| \__| |_\_\
+#                 |___/
+# -----------------------------------------------------------------------------
+check:
+  tools:
+    blocks:
+      - try: |
+          vgo="$(go version|cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+')" 
+          [[ "$vgo" == "$(clog project needs golang)" ]]
+        catch: |
+          clog Log -E "wrong go version. Need $(clog project needs golang)"
+  # --- clog Check deploy -----------------------------------------------------
+  aws-deploy:
+    blocks:
+      # beware the first block needs double quotes or it becomes an array!
+      - try: "[ -n \"$CLOG_BUCKET\" ]"
+        ok: clog Log -I "\$CLOG_BUCKET ok"
+        catch: clog Log -E "\$CLOG_BUCKET not set - cannot deploy"
+      - try: aws --version 2>/dev/null| grep aws-cli/2. | head -c 10
+        ok: clog Log -I "aws cli v2 ok"
+        catch: clog Log -E "aws cli v2 not installed - try clog install aws"
+      - try: aws s3 cp --dryrun LICENSE $CLOG_BUCKET/LICENSE
+        ok: clog Log -I "aws s3 write access to bucket ok"
+        catch: clog Log -E "aws s3 cli - cannot write to \$CLOG_BUCKET/LICENSE"

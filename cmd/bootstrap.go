@@ -15,12 +15,15 @@ import (
 	"runtime"
 
 	"github.com/mrmxf/clog/cmd/cat"
+	"github.com/mrmxf/clog/cmd/check"
+	"github.com/mrmxf/clog/cmd/checklegacy"
 	"github.com/mrmxf/clog/cmd/copy"
 	"github.com/mrmxf/clog/cmd/crayon"
 	"github.com/mrmxf/clog/cmd/inc"
 	initialise "github.com/mrmxf/clog/cmd/init"
 	"github.com/mrmxf/clog/cmd/jumbo"
 	"github.com/mrmxf/clog/cmd/list"
+	"github.com/mrmxf/clog/cmd/logcmd"
 	"github.com/mrmxf/clog/cmd/snippets"
 	"github.com/mrmxf/clog/cmd/source"
 	"github.com/mrmxf/clog/cmd/version"
@@ -31,7 +34,6 @@ import (
 	"github.com/spf13/cobra"
 	// "github.com/mrmxf/clog/git"
 	// "github.com/mrmxf/clog/scripts"
-	// "github.com/mrmxf/clog/ux"
 )
 
 func BootStrap(bootCmd *cobra.Command) error {
@@ -52,15 +54,18 @@ func BootStrap(bootCmd *cobra.Command) error {
 	bootCmd.SetUsageTemplate(cfg.GetString("clog.version.long") + bootCmd.UsageTemplate())
 
 	// load all the public builtin commands first
-	bootCmd.AddCommand(cat.Command)        // script helper include command
-	bootCmd.AddCommand(copy.Command)       // copy an embedded file to a destination
-	bootCmd.AddCommand(crayon.Command)     // colored terminal commands
-	bootCmd.AddCommand(inc.Command)        // script helper include command
-	bootCmd.AddCommand(initialise.Command) // create a clogrc
-	bootCmd.AddCommand(jumbo.Command)      // Jumbo text output
-	bootCmd.AddCommand(list.Command)       // list embedded files text output
-	bootCmd.AddCommand(source.Command)     // source a script or snippet
-	bootCmd.AddCommand(version.Command)    // version reporting
+	bootCmd.AddCommand(cat.Command)         // script helper include command
+	bootCmd.AddCommand(checklegacy.Command) // copy an embedded file to a destination
+	bootCmd.AddCommand(check.Command)       // copy an embedded file to a destination
+	bootCmd.AddCommand(copy.Command)        // copy an embedded file to a destination
+	bootCmd.AddCommand(crayon.Command)      // colored terminal commands
+	bootCmd.AddCommand(inc.Command)         // script helper include command
+	bootCmd.AddCommand(initialise.Command)  // create a clogrc
+	bootCmd.AddCommand(jumbo.Command)       // Jumbo text output
+	bootCmd.AddCommand(list.Command)        // list embedded files text output
+	bootCmd.AddCommand(logcmd.Command)      // list embedded files text output
+	bootCmd.AddCommand(source.Command)      // source a script or snippet
+	bootCmd.AddCommand(version.Command)     // version reporting
 
 	// create a new snippets command from the clog.snippets cfg() branch
 	branchKey := "snippets"
@@ -78,7 +83,7 @@ func BootStrap(bootCmd *cobra.Command) error {
 	scripts.FindScripts(bootCmd, "clogrc/*.sh")
 
 	//build the UX menus in case we're running interactively
-	ux.InitMenus(bootCmd)
+	ux.BuildMenus(bootCmd)
 
 	// Finally, Execute the cobra command parser
 	return bootCmd.Execute()

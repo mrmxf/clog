@@ -6,7 +6,11 @@ awscliv
 azuretools
 bashstr
 betterfountain
+binfmt
+buildx
 charmbracelet
+checkloglevel
+checkv
 cicd
 clogbin
 clogconfig
@@ -18,6 +22,7 @@ CLOGSVC
 commandsnippets
 committerdate
 configparam
+containerd
 core
 coverprofile
 Dappname
@@ -33,8 +38,11 @@ GHUSR
 githubcli
 glab
 GLAT
+GLUSR
+goarch
 godoc
 godocmac
+gofile
 gofmt
 GOHOSTARCH
 GOHOSTOS
@@ -49,6 +57,7 @@ hookprefix
 Initialise
 initialised
 initialises
+initx
 intoto
 keymap
 keypress

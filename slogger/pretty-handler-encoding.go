@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -90,11 +91,20 @@ func (e encoder) writeSource(buf *buffer, pc uintptr, cwd string) {
 	e.writeColoredString(buf, " > ", e.opts.Theme.AttrKey())
 }
 
+func (e encoder) handleEscapesInMessage(msg string) string {
+	escape := "\x1b"
+	m := strings.ReplaceAll(msg, "\\e", escape)
+	m = strings.ReplaceAll(m, "\\n", "\n")
+	m = strings.ReplaceAll(m, "\\r", "\r")
+	return m
+}
+
 func (e encoder) writeMessage(buf *buffer, level slog.Level, msg string) {
+	escMsg := e.handleEscapesInMessage(msg)
 	if level >= slog.LevelInfo {
-		e.writeColoredString(buf, msg, e.opts.Theme.Message())
+		e.writeColoredString(buf, escMsg, e.opts.Theme.Message())
 	} else {
-		e.writeColoredString(buf, msg, e.opts.Theme.MessageDebug())
+		e.writeColoredString(buf, escMsg, e.opts.Theme.MessageDebug())
 	}
 }
 

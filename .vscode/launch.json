@@ -34,13 +34,15 @@
       ]
     },
     {
-      "name": "version",
+      "name": "log",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}",
       "args": [
-        "version"
+        "Log",
+        "-E",
+        "hell\\e[35mo this is magenta"
       ]
     }
   ]

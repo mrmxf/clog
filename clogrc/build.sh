@@ -12,9 +12,14 @@ eval "$(clog Inc)"                      # shell embedded help (sh, zsh & bash)
 help="core/sh/help-golang.sh"           # build embedded help
 eval "$(clog Cat $help)"                # golang build helpers
 
-fInfo "Build$cC $bPROJECT $cT using clog's$cF $help"
+fInfo "Build$cC $PROJECT $cT using clog's$cF $help"
 
-#clog Check
+clog Check pre-build
+[ $? -gt 0 ] && exit 1
+clog Check build
+[ $? -gt 0 ] && exit 1
+# ------------------------------------------------------------------------------
+go test
 [ $? -gt 0 ] && exit 1
 # ------------------------------------------------------------------------------
 

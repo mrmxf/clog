@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -8,6 +9,7 @@ import (
 )
 
 var HomeMenu *MenuForm
+var newMenuIndex = 100
 
 // iterate through the children of the command and fill the array
 func populateMenuLevel(cmd *cobra.Command, parent *MenuForm) {
@@ -19,7 +21,13 @@ func populateMenuLevel(cmd *cobra.Command, parent *MenuForm) {
 			Cmd:    childCmd,
 			Name:   childCmd.Name(),
 			Short:  childCmd.Short,
+			Id:     newMenuIndex,
 		}
+		if childCmd.Annotations == nil {
+			childCmd.Annotations = make(map[string]string)
+		}
+		childCmd.Annotations["menu-id"] = fmt.Sprintf("%d", newMenuIndex)
+		newMenuIndex++
 		if len(child.Name) > 0 {
 			parent.Children = append(parent.Children, child)
 		}
@@ -45,13 +53,19 @@ func populateMenuLevel(cmd *cobra.Command, parent *MenuForm) {
 }
 
 // build the menu hierarchy from the root command
-func InitMenus(rootCommand *cobra.Command) {
+func BuildMenus(rootCommand *cobra.Command) {
 	HomeMenu = &MenuForm{
 		Parent: nil,
 		Cmd:    rootCommand,
 		Name:   "home",
 		Key:    "/",
+		Id:     newMenuIndex,
 	}
+	if rootCommand.Annotations == nil {
+		rootCommand.Annotations = make(map[string]string)
+	}
+	rootCommand.Annotations["menu-id"] = fmt.Sprintf("%d", newMenuIndex)
+	newMenuIndex++
 	populateMenuLevel(rootCommand, HomeMenu)
 }
 
