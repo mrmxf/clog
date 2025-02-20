@@ -1,14 +1,14 @@
 module github.com/mrmxf/clog
 
-go 1.23.6
+go 1.24.0
 
 require (
 	github.com/charmbracelet/huh v0.6.0
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/fatih/color v1.18.0
 	github.com/longkai/rfc7807 v1.0.0
-	github.com/phsym/console-slog v0.3.1
 	github.com/smartystreets/goconvey v1.8.1
+	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
@@ -52,7 +52,6 @@ require (
 	github.com/smarty/assertions v1.15.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
-	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
