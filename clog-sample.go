@@ -50,6 +50,5 @@ func init() {
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)
 
-	slogger.UsePrettyLogger(slog.LevelError)
-	// slogger.UsePrettyLogger(slog.LevelDebug)
+	slogger.UsePrettyLogger(slog.LevelInfo)
 }
