@@ -33,8 +33,6 @@ snippets:
   git:
     tag:
       ref: echo "v$(yq -r '.[0].version' releases.yaml)" #add a v for golang
-      # a go package needs a preceding "v"
-      refgo: echo "v$(clog git tag ref)"
     message:
       ref: yq -r '.[0].note' releases.yaml
     suffix: b="$(git branch --show-current)";[[ "$b" == main ]]&&echo ""|||tr -d [:blank:]

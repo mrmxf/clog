@@ -77,16 +77,16 @@ check:
       - finally: clog Log -I "      tag-head   $(clog git tag head)"
       - finally: clog Log -I "    tag-latest   $(clog git tag latest)"
       - finally: clog Log -I "    tag-origin   $(clog git tag origin)"
-      - try: '[[ "$(clog git tag head)" != "$(clog git tag ref)" ]]'
+      - try: '[[ "$(clog git tag head)" == "$(clog git tag ref)" ]]'
         ok: clog Log -I "Ok    tag-head == tag-ref"
         catch: clog Log -W "      tag-head != tag-ref"
-      - try: '[[ "$(clog git tag latest)" != "$(clog git tag ref)" ]]'
+      - try: '[[ "$(clog git tag latest)" == "$(clog git tag ref)" ]]'
         ok: clog Log -I "Ok  tag-latest == tag-ref"
         catch: clog Log -W "    tag-latest != tag-ref"
-      - try: '[[ "$(clog git tag origin)" != "$(clog git tag ref)" ]]'
+      - try: '[[ "$(clog git tag origin)" == "$(clog git tag ref)" ]]'
         ok: clog Log -I "Ok  tag-origin == tag-ref"
         catch: clog Log -W "    tag-origin != tag-ref"
-      - try: '[[ "$(clog git hash head)" != "$(clog git hash origin)" ]]'
+      - try: '[[ "$(clog git hash head)" == "$(clog git hash origin)" ]]'
         ok: clog Log -I "Ok   hash-head == hash-origin"
         catch: clog Log -W "     hash-head != hash-origin"
       - try: '[[ "$(clog git message latest)" != "$(clog git message ref)" ]]'
@@ -96,16 +96,16 @@ check:
           clog Log -W "($(clog git message latest)) != ($(clog git message ref))"
       - try: clog    git tree clean
         ok: clog Log -I "Ok working tree clean"
-        catch: clog Log -E "   working tree NOT clean"
+        catch: clog Log -W "   working tree NOT clean"
       - try: clog    git tree ahead
         ok: clog Log -I "Ok working tree up to date with origin"
-        catch: clog Log -E "   working tree is ahead of origin"
+        catch: clog Log -W "   working tree is ahead of origin"
       - try: clog   git tree behind
         ok: clog Log -I "Ok working tree up to date with origin"
-        catch: clog Log -E "   working tree is behind origin"
+        catch: clog Log -W "   working tree is behind origin"
       - try: clog git unstaged
         ok: clog Log -I "Ok all changes staged"
-        catch: clog Log -E "   unstaged changes in working tree"
+        catch: clog Log -W "   unstaged changes in working tree"
   # --- clog Check gitlab-env -------------------------------------------------
   gitlab-env:
     blocks:
@@ -191,7 +191,7 @@ snippets:
     # --- git hash snippets:  clog git tag <snippet> -----------------------------
     hash:
       head: git rev-list -1 HEAD
-      origin: git ls-remote --tags origin | tail -1 | head -c 40
+      origin: git ls-remote --head --sort=-v:refname origin | grep $(clog git branch) | head -1 | head -c 40
     # --- git message snippets:  clog git tag <snippet> -----------------------------
     message:
       latest: git log HEAD | head -5 | tail -1 | xargs
@@ -203,7 +203,7 @@ snippets:
     tag:
       head: git tag --points-at HEAD
       latest: git tag --sort=committerdate | tail -1
-      origin: git ls-remote --tags origin | tail -1 | sed -r 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+      origin: git ls-remote --tags --sort=-v:refname origin | head -1 | grep -oE 'v{0,1}[0-9]+\.[0-9]+\.[0-9]+'
       # this is the default snippet to return the project's target tag
       # override in your project' clog.config.yaml
       # golang requires a 'v': echo "v$(yq -r '.[0].version' releases.yaml)"
