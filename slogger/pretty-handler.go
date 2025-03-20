@@ -104,6 +104,7 @@ func (h *Handler) Handle(_ context.Context, rec slog.Record) error {
 		h.enc.writeAttr(buf, a, h.group)
 		return true
 	})
+	h.enc.ColorOff(buf)
 	h.enc.NewLine(buf)
 	if _, err := buf.WriteTo(h.out); err != nil {
 		buf.Reset()

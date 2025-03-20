@@ -17,6 +17,10 @@ func (e encoder) NewLine(buf *buffer) {
 	buf.AppendByte('\n')
 }
 
+func (e encoder) ColorOff(buf *buffer) {
+	buf.AppendString("\x1b[0m")
+}
+
 func (e encoder) withColor(b *buffer, c ANSIMod, f func()) {
 	if c == "" || e.opts.NoColor {
 		f()

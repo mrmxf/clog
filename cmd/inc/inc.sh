@@ -38,8 +38,9 @@ fEcho() {
   esac
 
   # if the first parameter is a "_" then go up one line & delete it (overprint)
+  # https://en.wikipedia.org/wiki/ANSI_escape_code - up1, col1, del(EOL)
   local up=""
-  [[ "$1" == "_" ]] && up="\e[A\e[G\e2K" && shift
+  [[ "$1" == "_" ]] && up="\e[A\e[G\e[K" && shift
 
   printf "$up$cC$ln$cI>>$MSG$@$cX\n"
 }
