@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
+	"time"
 
 	slog "github.com/mrmxf/clog/slogger"
 	. "github.com/smartystreets/goconvey/convey"
@@ -35,7 +36,8 @@ func stripEscapes(s string) string {
 
 func checkLogOutput(t *testing.T, buf bytes.Buffer, title string, expected string) {
 	lenPrefix := len("2025-03-21 14:50:21 ")
-
+	now := time.Time()
+	bare := stripEscapes()
 	Convey(fmt.Sprintf("%s check", title), func() {
 
 		Convey("bufio len count", func() {
@@ -43,6 +45,10 @@ func checkLogOutput(t *testing.T, buf bytes.Buffer, title string, expected strin
 		})
 		Convey("output string == \"expected\"", func() {
 			s := buf.String()
+			So(stripEscapes(s), ShouldEqual, expected)
+		})
+		Convey("time stamp", func() {
+			logT := time.Parse()
 			So(stripEscapes(s), ShouldEqual, expected)
 		})
 
@@ -57,13 +63,45 @@ func TestSpec_Levels(t *testing.T) {
 		slog.UsePrettyIoLogger(out, slog.LevelDebug)
 
 		out.Reset(&buf)
+		slog.Trace("Trace")
+		out.Flush()
+		checkLogOutput(t, buf, "Trace", "--- Trace")
+
+		out.Reset(&buf)
 		slog.Debug("Debug")
 		out.Flush()
 		checkLogOutput(t, buf, "Debug", "DBG Debug")
 
-		// slog.Trace("Trace")
-		// slog.Info("Info")
-		// slog.Success("Success")
+		out.Reset(&buf)
+		slog.Info("Info")
+		out.Flush()
+		checkLogOutput(t, buf, "Info", "INF Info")
+
+		out.Reset(&buf)
+		slog.Success("Success")
+		out.Flush()
+		checkLogOutput(t, buf, "Success", " OK Success")
+
+		out.Reset(&buf)
+		slog.Warn("Warn")
+		out.Flush()
+		checkLogOutput(t, buf, "Warn", "WRN Warn")
+
+		out.Reset(&buf)
+		slog.Error("Error")
+		out.Flush()
+		checkLogOutput(t, buf, "Error", "ERR Error")
+
+		out.Reset(&buf)
+		slog.Fatal("Fatal")
+		out.Flush()
+		checkLogOutput(t, buf, "Fatal", "FTL Fatal")
+
+		out.Reset(&buf)
+		slog.Emergency("Emergency")
+		out.Flush()
+		checkLogOutput(t, buf, "Emergency", "!!! Emergency")
+
 	})
 
 }
