@@ -177,26 +177,42 @@ func (e encoder) writeLevel(buf *buffer, l slog.Level) {
 	var str string
 	var delta int
 	switch {
-	case l >= slog.LevelError:
+	case l >= LevelEmergency:
+		style = e.opts.Theme.LevelEmergency()
+		str = "!!!"
+		delta = int(l - LevelEmergency)
+	case l >= LevelFatal:
+		style = e.opts.Theme.LevelFatal()
+		str = "FTL"
+		delta = int(l - LevelFatal)
+	case l >= LevelError:
 		style = e.opts.Theme.LevelError()
 		str = "ERR"
-		delta = int(l - slog.LevelError)
-	case l >= slog.LevelWarn:
+		delta = int(l - LevelError)
+	case l >= LevelWarn:
 		style = e.opts.Theme.LevelWarn()
 		str = "WRN"
-		delta = int(l - slog.LevelWarn)
+		delta = int(l - LevelWarn)
+	case l >= LevelSuccess:
+		style = e.opts.Theme.LevelSuccess()
+		str = "OK"
+		delta = int(l - LevelSuccess)
 	case l >= slog.LevelInfo:
 		style = e.opts.Theme.LevelInfo()
 		str = "INF"
 		delta = int(l - slog.LevelInfo)
-	case l >= slog.LevelDebug:
+	case l >= LevelDebug:
 		style = e.opts.Theme.LevelDebug()
 		str = "DBG"
-		delta = int(l - slog.LevelDebug)
+		delta = int(l - LevelDebug)
+	case l >= LevelTrace:
+		style = e.opts.Theme.LevelTrace()
+		str = "TRC"
+		delta = int(l - LevelTrace)
 	default:
 		style = e.opts.Theme.LevelDebug()
 		str = "DBG"
-		delta = int(l - slog.LevelDebug)
+		delta = int(l - LevelDebug)
 	}
 	if delta != 0 {
 		str = fmt.Sprintf("%s%+d", str, delta)

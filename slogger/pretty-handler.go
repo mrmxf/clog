@@ -67,7 +67,7 @@ func NewPrettyHandler(out io.Writer, opts *PrettyHandlerOptions) *Handler {
 		opts = new(PrettyHandlerOptions)
 	}
 	if opts.Level == nil {
-		opts.Level = slog.LevelInfo
+		opts.Level = LevelInfo
 	}
 	if opts.TimeFormat == "" {
 		opts.TimeFormat = time.DateTime

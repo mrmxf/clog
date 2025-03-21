@@ -1,10 +1,16 @@
 //  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
 //
-// clog's config package
+// clog's config package - wrap Viper for multi-project init
 //
 // usage:
-// Cfg:= config.BootStrap( ClogFs )
+// Cfg := config.New( &[]embed.FS{CoreFs, AppFs, OtherFs} )
+//
+//  if cfg := config.Cfg(); cfg==nil{
+//		os.ExplodeFrontPanel()
+//    os.Exit(255)
+//  }
+//
 //
 // clogrc search order - see clogrc/core/clog.config.yaml
 
@@ -43,7 +49,7 @@ var searchPaths []string
 // configFilename is the name of the config file to load
 //
 //	if nil or empty use `clog.config.yaml`
-func New(fsSlice *[]embed.FS, projectConfigFilePath *string) *Config {
+func New(fsSlice *[]embed.FS, configCLI *string) *Config {
 	//initialise viper with logger that can be uses throughout clog
 	cfg = &Config{
 		viper.New(),
@@ -59,7 +65,7 @@ func New(fsSlice *[]embed.FS, projectConfigFilePath *string) *Config {
 
 	// populate a new config object, load in the embedded config and set the
 	// initial search paths to find other configs to overlay
-	cfg.setDefaults(projectConfigFilePath)
+	cfg.setDefaults(configCLI)
 
 	// Merge the config file with defaults - ignore errors
 	cfg.mergeAllConfigs()
@@ -82,6 +88,7 @@ func New(fsSlice *[]embed.FS, projectConfigFilePath *string) *Config {
 
 // get the config object
 func Cfg() *Config {
+
 	return cfg
 }
 

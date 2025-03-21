@@ -25,7 +25,9 @@ func (cfg *Config) mergeAllConfigs() {
 	for _, path := range searchPaths {
 		fPath := strings.Replace(path, "~", os.Getenv("HOME"), 1)
 		fPath = strings.Replace(fPath, "$HOME", os.Getenv("HOME"), 1)
-		fPath = filepath.Join(fPath, fName)
+		if !(strings.HasSuffix(fPath, ".yaml") || strings.HasSuffix(fPath, ".json")) {
+			fPath = filepath.Join(fPath, fName)
+		}
 		fPathAbs, err := filepath.Abs(fPath)
 		if err != nil {
 			slog.Debug("Error getting absolute path", "path", fPath, "error", err)

@@ -13,7 +13,7 @@ func matchNextArg(cmd *cobra.Command, arg string) (*cobra.Command, error) {
 			return c, nil
 		}
 	}
-	return nil, fmt.Errorf("Command " + arg + " not found")
+	return nil, fmt.Errorf("command %s not found", arg)
 }
 
 func FindSnippet(rootCmd *cobra.Command, args []string) (*cobra.Command, error) {

@@ -69,10 +69,14 @@ type Theme interface {
 	AttrKey() ANSIMod
 	AttrValue() ANSIMod
 	AttrValueError() ANSIMod
+	LevelEmergency() ANSIMod
+	LevelFatal() ANSIMod
 	LevelError() ANSIMod
 	LevelWarn() ANSIMod
+	LevelSuccess() ANSIMod
 	LevelInfo() ANSIMod
 	LevelDebug() ANSIMod
+	LevelTrace() ANSIMod
 	Level(level slog.Level) ANSIMod
 }
 
@@ -85,10 +89,14 @@ type ThemeDef struct {
 	attrKey        ANSIMod
 	attrValue      ANSIMod
 	attrValueError ANSIMod
+	levelEmergency ANSIMod
+	levelFatal     ANSIMod
 	levelError     ANSIMod
 	levelWarn      ANSIMod
+	levelSuccess   ANSIMod
 	levelInfo      ANSIMod
 	levelDebug     ANSIMod
+	levelTrace     ANSIMod
 }
 
 func (t ThemeDef) Name() string            { return t.name }
@@ -99,20 +107,32 @@ func (t ThemeDef) MessageDebug() ANSIMod   { return t.messageDebug }
 func (t ThemeDef) AttrKey() ANSIMod        { return t.attrKey }
 func (t ThemeDef) AttrValue() ANSIMod      { return t.attrValue }
 func (t ThemeDef) AttrValueError() ANSIMod { return t.attrValueError }
+func (t ThemeDef) LevelEmergency() ANSIMod { return t.levelEmergency }
+func (t ThemeDef) LevelFatal() ANSIMod     { return t.levelFatal }
 func (t ThemeDef) LevelError() ANSIMod     { return t.levelError }
 func (t ThemeDef) LevelWarn() ANSIMod      { return t.levelWarn }
+func (t ThemeDef) LevelSuccess() ANSIMod   { return t.levelSuccess }
 func (t ThemeDef) LevelInfo() ANSIMod      { return t.levelInfo }
 func (t ThemeDef) LevelDebug() ANSIMod     { return t.levelDebug }
+func (t ThemeDef) LevelTrace() ANSIMod     { return t.levelTrace }
 func (t ThemeDef) Level(level slog.Level) ANSIMod {
 	switch {
-	case level >= slog.LevelError:
+	case level >= LevelEmergency:
+		return t.LevelEmergency()
+	case level >= LevelFatal:
+		return t.LevelFatal()
+	case level >= LevelError:
 		return t.LevelError()
-	case level >= slog.LevelWarn:
+	case level >= LevelWarn:
 		return t.LevelWarn()
+	case level >= LevelSuccess:
+		return t.LevelSuccess()
 	case level >= slog.LevelInfo:
 		return t.LevelInfo()
-	default:
+	case level >= slog.LevelDebug:
 		return t.LevelDebug()
+	default:
+		return t.LevelTrace()
 	}
 }
 
@@ -126,10 +146,14 @@ func NewDefaultTheme() Theme {
 		attrKey:        ToANSICode(Cyan),
 		attrValue:      ToANSICode(),
 		attrValueError: ToANSICode(Bold, Red),
-		levelError:     ToANSICode(BrightRed),
+		levelEmergency: ToANSICode(Bold, Red),
+		levelFatal:     ToANSICode(BrightRed),
+		levelError:     ToANSICode(Red),
 		levelWarn:      ToANSICode(Magenta),
+		levelSuccess:   ToANSICode(Green),
 		levelInfo:      ToANSICode(BrightYellow),
 		levelDebug:     ToANSICode(),
+		levelTrace:     ToANSICode(Gray),
 	}
 }
 
@@ -143,9 +167,13 @@ func NewBrightTheme() Theme {
 		attrKey:        ToANSICode(BrightCyan),
 		attrValue:      ToANSICode(),
 		attrValueError: ToANSICode(Bold, BrightRed),
+		levelEmergency: ToANSICode(Bold, Red),
+		levelFatal:     ToANSICode(BrightRed),
 		levelError:     ToANSICode(BrightRed),
 		levelWarn:      ToANSICode(BrightYellow),
+		levelSuccess:   ToANSICode(BrightGreen),
 		levelInfo:      ToANSICode(BrightGreen),
 		levelDebug:     ToANSICode(),
+		levelTrace:     ToANSICode(Gray),
 	}
 }

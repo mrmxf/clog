@@ -19,7 +19,7 @@ var defaultConfigFilename = "clog.core.config.yaml"
 // root keys  using viper.setDefaults survive a config file merge
 // child keys using viper.setDefaults are lost
 
-func (cfg *Config) setDefaults(configFilename *string) {
+func (cfg *Config) setDefaults(configCLI *string) {
 	cfg.SetConfigName("clog.config")
 	cfg.SetConfigType("yaml")
 
@@ -38,22 +38,27 @@ func (cfg *Config) setDefaults(configFilename *string) {
 		panic(msg)
 	}
 	//parse & load the config
-	err = cfg.ReadConfig(bytes.NewBuffer(rootConfig))
-	if err != nil {
+	if err = cfg.ReadConfig(bytes.NewBuffer(rootConfig)); err != nil {
 		msg := fmt.Sprintf("config.setDefaults() failed reading clog's embedded file system: %s", err.Error())
 		panic(msg)
 	}
 
-	//overlay various other configs
+	//overlay various other configs with configCLI being the highest priority
 	searchPaths = cfg.GetStringSlice("clog.clogrc.search-order")
+	if configCLI != nil && len(*configCLI) > 2 {
+		searchPaths = append(searchPaths, *configCLI)
+	}
 
-	homeFolder, err := os.UserHomeDir()
-	if err == nil {
+	if homeFolder, err := os.UserHomeDir(); err == nil {
 		cfg.Set("clog.homeFolder", homeFolder)
 	}
 
 	//store the startup defaults
 	cfg.SetDefault("isInteractive", false)
+	cfg.SetDefault("clog.clogrc.config_base", ".clog")
+	cfg.SetDefault("clog.clogrc.config_format", "yaml")
+
+	//override the defaults in viper for finding other configs
 	if fn := cfg.GetString("clog.clogrc.config_base"); len(fn) > 0 {
 		cfg.SetConfigName(fn)
 	}

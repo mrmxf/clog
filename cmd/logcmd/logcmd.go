@@ -37,7 +37,7 @@ var Command = &cobra.Command{
 		logMsg := strings.Join(args, " ")
 		// most serious flag wins
 		logFlag := "none"
-		if up{
+		if up {
 			//up one line, start of line, del EOL
 			fmt.Print("\x1b[A\x1b[G\x1b[K")
 		}

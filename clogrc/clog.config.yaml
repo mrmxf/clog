@@ -74,3 +74,6 @@ check:
       - try: aws s3 cp --dryrun LICENSE $CLOG_BUCKET/LICENSE
         ok: clog Log -I "aws s3 write access to bucket ok"
         catch: clog Log -E "aws s3 cli - cannot write to \$CLOG_BUCKET/LICENSE"
+      - try: go test
+        ok: clog Log -I "go test passed"
+        catch: clog Log -E "go test failed"

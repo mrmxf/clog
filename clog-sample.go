@@ -10,13 +10,13 @@ package main
 
 import (
 	"embed"
-	"log/slog"
 	"os"
 	"runtime"
 
 	"github.com/mrmxf/clog/cmd"
 	"github.com/mrmxf/clog/config"
 	"github.com/mrmxf/clog/slogger"
+	slog "github.com/mrmxf/clog/slogger"
 )
 
 //go:embed releases.yaml

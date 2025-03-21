@@ -15,7 +15,7 @@ import (
 var refLoggerType *slog.Logger
 
 func refStyledLogger(level slog.Level) {}
-func refJobLogger(path string, level slog.Level) (*slog.Logger, *os.File, error) {
+func refTeeLogger(path string, level slog.Level) (*slog.Logger, *os.File, error) {
 	return nil, nil, nil
 }
 
@@ -58,12 +58,12 @@ func TestSpec(t *testing.T) {
 				So(slogger.UsePlainLogger, ShouldHaveSameTypeAs, refStyledLogger)
 			})
 
-			// NewJobLogger
-			Convey("NewJobLogger should exist", func() {
-				So(slogger.NewJobLogger, ShouldNotBeNil)
+			// NewTeeLogger
+			Convey("NewTeeLogger should exist", func() {
+				So(slogger.NewTeeLogger, ShouldNotBeNil)
 			})
-			Convey("NewJobLogger should be the right type", func() {
-				So(slogger.NewJobLogger, ShouldHaveSameTypeAs, refJobLogger)
+			Convey("NewTeeLogger should be the right type", func() {
+				So(slogger.NewTeeLogger, ShouldHaveSameTypeAs, refTeeLogger)
 			})
 		})
 

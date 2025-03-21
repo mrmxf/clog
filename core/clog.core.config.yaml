@@ -23,13 +23,14 @@
 # -----------------------------------------------------------------------------
 clog:
   clogrc:
-    base: clog.config
     format: yaml
-    # search order for config files. ENV variables substituted at run time
+    # search & load config files. Search order reset with each new config file.
     search-order:
-      - /var/clogrc/
-      - $HOME/.config/clogrc/
-      - ./clogrc/
+      - /var/clogrc/clog.config.yaml
+      - $HOME/.config/clogrc/clog.config.yaml
+      - ./clogrc/clog.config.yaml
+      - ./clogrc/clog.yaml
+      - .clog.yaml
   # these are the ENV variables that are searched for by various tools
   # override these to change the actual ENV variables used
   env:
@@ -316,6 +317,7 @@ snippets:
       && sudo apt update \
       && sudo apt install gh -y
     gh-mac: brew install gh
+    git: sudo apt-get install -y git-all
     hugo: |
       eval "$(clog Inc)"
       j="$(curl -sL https://api.github.com/repos/gohugoio/hugo/releases/latest)"
@@ -334,6 +336,7 @@ snippets:
       clog Log -I "installing $cF $url"
       curl -sL "$url" > /tmp/hugo.deb
       sudo apt-get install -y /tmp/hugo.deb
+    jq: sudo apt-get install -y jq
     ko: |
       VERSION=0.17.1
       curl -sSfL "https://github.com/ko-build/ko/releases/download/v${VERSION}/ko_${VERSION}_${OS}_${ARCH}.tar.gz" > /tmp/ko.tar.gz
@@ -373,12 +376,14 @@ snippets:
           #restart nginx
           sudo systemctl -q restart nginx
       fi
+    node-red: docker run --detach -p 1880:1880 -v $HOME/.node-red:/data --name nodered --rm nodered/node-red
     nvm: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
     slsa-verifier: go install github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
     snap: sudo apt install -y snapd
     yarn: npm install --global yarn && echo "PATH=\"$PATH:$(yarn global bin)\"" >> ~/.bashrc
     yq: |
-      sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+      arch="arm64" ; [[ "$(uname -m)" == "x86_64" ]] && arch="amd64"
+      sudo curl -Ls --output /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_$arch
       sudo chmod +x /usr/bin/yq
 # 
 #   ||_    _ __    _  _
