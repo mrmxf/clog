@@ -207,7 +207,7 @@ func (e encoder) writeLevel(buf *buffer, l slog.Level) {
 		delta = int(l - LevelDebug)
 	case l >= LevelTrace:
 		style = e.opts.Theme.LevelTrace()
-		str = "TRC"
+		str = "---"
 		delta = int(l - LevelTrace)
 	default:
 		style = e.opts.Theme.LevelDebug()

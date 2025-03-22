@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,21 +36,28 @@ func stripEscapes(s string) string {
 }
 
 func checkLogOutput(t *testing.T, buf bytes.Buffer, title string, expected string) {
-	lenPrefix := len("2025-03-21 14:50:21 ")
-	now := time.Time()
-	bare := stripEscapes()
+	ltt := len("2025-03-21 14:50:21")
+	raw := buf.String()
+	got := stripEscapes(raw)
+	msg := strings.TrimSpace(got)
+	ttt := strings.TrimSpace(got)
+	if len(got) > ltt {
+		msg = strings.TrimSpace(got[ltt:])
+		ttt = strings.TrimSpace(got[:ltt])
+	}
 	Convey(fmt.Sprintf("%s check", title), func() {
 
 		Convey("bufio len count", func() {
-			So(buf.Len(), ShouldEqual, lenPrefix+len(expected))
+			So(len(got), ShouldEqual, ltt+len(expected)+2)
 		})
-		Convey("output string == \"expected\"", func() {
-			s := buf.String()
-			So(stripEscapes(s), ShouldEqual, expected)
+		Convey(fmt.Sprintf("output string == \"%s\"", expected), func() {
+			So(msg, ShouldEqual, expected)
 		})
 		Convey("time stamp", func() {
-			logT := time.Parse()
-			So(stripEscapes(s), ShouldEqual, expected)
+			logTimestamp, err := time.Parse("2006-01-02 15:04:05", ttt)
+			So(err, ShouldBeNil)
+			age := time.Until(logTimestamp)
+			So(age.Seconds(), ShouldBeLessThan, 0.500)
 		})
 
 	})
@@ -58,49 +66,49 @@ func checkLogOutput(t *testing.T, buf bytes.Buffer, title string, expected strin
 func TestSpec_Levels(t *testing.T) {
 	// Check each level works correctly
 	Convey("Each level should work properly", t, func() {
-		var buf bytes.Buffer
-		out := bufio.NewWriter(&buf)
-		slog.UsePrettyIoLogger(out, slog.LevelDebug)
+		buf := bytes.NewBuffer(nil)
+		out := bufio.NewWriter(buf)
+		slog.UsePrettyIoLogger(out, slog.LevelTrace)
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Trace("Trace")
 		out.Flush()
-		checkLogOutput(t, buf, "Trace", "--- Trace")
+		checkLogOutput(t, *buf, "Trace", "--- Trace")
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Debug("Debug")
 		out.Flush()
-		checkLogOutput(t, buf, "Debug", "DBG Debug")
+		checkLogOutput(t, *buf, "Debug", "DBG Debug")
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Info("Info")
 		out.Flush()
-		checkLogOutput(t, buf, "Info", "INF Info")
+		checkLogOutput(t, *buf, "Info", "INF Info")
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Success("Success")
 		out.Flush()
-		checkLogOutput(t, buf, "Success", " OK Success")
+		checkLogOutput(t, *buf, "Success", "OK Success")
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Warn("Warn")
 		out.Flush()
-		checkLogOutput(t, buf, "Warn", "WRN Warn")
+		checkLogOutput(t, *buf, "Warn", "WRN Warn")
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Error("Error")
 		out.Flush()
-		checkLogOutput(t, buf, "Error", "ERR Error")
+		checkLogOutput(t, *buf, "Error", "ERR Error")
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Fatal("Fatal")
 		out.Flush()
-		checkLogOutput(t, buf, "Fatal", "FTL Fatal")
+		checkLogOutput(t, *buf, "Fatal", "FTL Fatal")
 
-		out.Reset(&buf)
+		buf.Reset()
 		slog.Emergency("Emergency")
 		out.Flush()
-		checkLogOutput(t, buf, "Emergency", "!!! Emergency")
+		checkLogOutput(t, *buf, "Emergency", "!!! Emergency")
 
 	})
 

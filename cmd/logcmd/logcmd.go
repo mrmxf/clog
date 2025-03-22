@@ -7,9 +7,10 @@ package logcmd
 
 import (
 	"fmt"
-	"log/slog"
 	"runtime"
 	"strings"
+
+	slog "github.com/mrmxf/clog/slogger"
 
 	"github.com/spf13/cobra"
 )
@@ -89,13 +90,13 @@ func init() {
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)
 
-	Command.PersistentFlags().BoolVarP(&debug, "trace", "T", false, "clog Log -T \"Trace message\"")
+	Command.PersistentFlags().BoolVarP(&trace, "trace", "T", false, "clog Log -T \"Trace message\"")
 	Command.PersistentFlags().BoolVarP(&debug, "debug", "D", false, "clog Log -D \"Debug message\"")
 	Command.PersistentFlags().BoolVarP(&info, "info", "I", false, "clog Log -I \"Info message\"")
 	Command.PersistentFlags().BoolVarP(&success, "success", "S", false, "clog Log -S \"Success message\"")
 	Command.PersistentFlags().BoolVarP(&warn, "warn", "W", false, "clog Log -W \"Warn message\"")
 	Command.PersistentFlags().BoolVarP(&error, "error", "E", false, "clog Log -E \"Error message\"")
-	Command.PersistentFlags().BoolVarP(&error, "fatal", "F", false, "clog Log -E \"Fatal message\"")
-	Command.PersistentFlags().BoolVarP(&error, "emergency", "X", false, "clog Log -X \"Emergency message\"")
+	Command.PersistentFlags().BoolVarP(&fatal, "fatal", "F", false, "clog Log -E \"Fatal message\"")
+	Command.PersistentFlags().BoolVarP(&emergency, "emergency", "X", false, "clog Log -X \"Emergency message\"")
 	Command.PersistentFlags().BoolVarP(&up, "up", "U", false, "clog Log -UI \"up (overprint) Info message\"")
 }

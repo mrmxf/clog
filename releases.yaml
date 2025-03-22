@@ -1,4 +1,5 @@
 # code names here: https://clutch.co/resources/software-development-glossary-88-essential-terms
+- {version: "0.7.6", date: 2025-03-22, codename: "alpha", note: more logging levels + better config paths}
 - {version: "0.7.5", date: 2025-03-20, codename: "alpha", note: added -U to clog Log}
 - {version: "0.7.4", date: 2025-02-10, codename: "alpha", note: fix clog Check + log inline colors}
 - {version: "0.7.3", date: 2025-02-10, codename: "alpha", note: fix slogger colors}
