@@ -33,7 +33,7 @@ var allScripts ScriptMap = make(ScriptMap)
 // Add a script from a given filename
 func AddScript(cmd *cobra.Command, filePath string) error {
 
-	inf, err := parseScriptInfo(filePath)
+	inf, err := ParseScriptInfo(filePath)
 	if err != nil {
 		return err
 	}
