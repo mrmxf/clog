@@ -29,7 +29,7 @@ var fontOverride string
 // Command define the cobra settings for this command
 var Command = &cobra.Command{
 	Use:   "Jumbo \"Some Text\" --font=thingy",
-	Short: "Create large comment text for scripts",
+	Short: "Create large comment text for scripts to stdout",
 	Long:  `Fonts can be chosen in [clogrc/clog.config.yaml]`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jString := strings.Join(args, " ")
@@ -40,7 +40,7 @@ var Command = &cobra.Command{
 		if listFonts {
 			fmt.Println("Available fonts:")
 			for _, font := range jumboFontList {
-				cmd.Println("  " + font)
+				fmt.Println("  " + font)
 			}
 			return
 		}

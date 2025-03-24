@@ -9,6 +9,7 @@
 package list
 
 import (
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"runtime"
@@ -35,9 +36,9 @@ var Command = &cobra.Command{
 			clogFsStat, _ := fs.Stat(clogFs, path)
 
 			if clogFsStat.IsDir() {
-				cmd.Printf("%v/\n", c.I(path))
+				fmt.Printf("%v/\n", c.I(path))
 			} else {
-				cmd.Printf("%v\n", path)
+				fmt.Printf("%v\n", path)
 			}
 			return nil
 		})

@@ -19,7 +19,7 @@ import (
 
 var Command = &cobra.Command{
 	Use:   "Copy",
-	Short: "copy an embedded file to a folder",
+	Short: "copy an embedded file to a file system",
 	Long:  `returns error status 1 if file not found.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
