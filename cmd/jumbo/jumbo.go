@@ -20,15 +20,25 @@ import (
 
 const defaultFont = "standard"
 
-// various flags for the command
+// listFonts enumerates available font names
 var listFonts bool
+
+// display [text] in every available font. If [text] is not specificed then
+// config setting clog.jumbo.sample is used
 var showFonts bool
-var bareString bool
+
+// fontOverride forces a font, otherwise the default from config setting
+// clog.jumbo.font is used
 var fontOverride string
+
+// commentStyle controls the comment settings of the output word
+// see: https://gist.github.com/dk949/88b2652284234f723decaeb84db2576c
+// available comment styles with clog help Jumbo
+var commentStyle string
 
 // Command define the cobra settings for this command
 var Command = &cobra.Command{
-	Use:   "Jumbo \"Some Text\" --font=thingy",
+	Use:   "Jumbo [text] --font=thingy",
 	Short: "Create large comment text for scripts to stdout",
 	Long:  `Fonts can be chosen in [clogrc/clog.config.yaml]`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -67,15 +77,48 @@ var Command = &cobra.Command{
 			font = defaultFont
 		}
 
+		prefix := ""
+		suffix := ""
+		switch commentStyle {
+		case "go":
+			prefix = "// "
+			suffix = ""
+		case "html":
+			prefix = "<!-- "
+			suffix = "-->"
+		case "hugo":
+			prefix = "{{/* "
+			suffix = " */}}"
+		case "js":
+			prefix = "/* "
+			suffix = " */"
+		case "sh":
+			prefix = "# "
+			suffix = ""
+		case "tex":
+			prefix = "% "
+			suffix = ""
+		case "none":
+			prefix = ""
+			suffix = ""
+		default:
+			prefix = "#"
+			suffix = ""
+		}
+
 		myFigure := figure.NewFigure(strings.Join(args, " "), font, false)
 		stringSlice := myFigure.Slicify()
 
+		maxLen := 0
 		for s := range stringSlice {
-			if bareString {
-				fmt.Println(stringSlice[s])
-			} else {
-				fmt.Println("# " + stringSlice[s])
+			if len(stringSlice[s]) > maxLen {
+				maxLen = len(stringSlice[s])
 			}
+		}
+		// print out the text with appropriate comments - padRight each line
+		for s := range stringSlice {
+			row := fmt.Sprintf("%s%*s%s", prefix, -maxLen, stringSlice[s], suffix)
+			fmt.Println(row)
 		}
 	},
 }
@@ -84,8 +127,9 @@ func init() {
 	_, file, _, _ := runtime.Caller(0)
 	slog.Debug("init " + file)
 
-	Command.PersistentFlags().BoolVarP(&listFonts, "list", "L", false, "clog Jumbo -l       # list available fonts")
-	Command.PersistentFlags().BoolVarP(&showFonts, "show", "S", false, "clog Jumbo -s       # show available fonts")
-	Command.PersistentFlags().BoolVarP(&bareString, "bare", "B", false, "clog Jumbo -b \"Text without leading #\"")
-	Command.PersistentFlags().StringVarP(&fontOverride, "font", "F", "", "clog Jumbo -f rounded \"text in rounded font\"")
+	Command.PersistentFlags().BoolVarP(&listFonts, "list", "L", false, "clog Jumbo -L         # list available fonts")
+	Command.PersistentFlags().BoolVarP(&showFonts, "show", "S", false, "clog Jumbo -S text    # print text in all fonts")
+	Command.PersistentFlags().StringVarP(&fontOverride, "font", "F", "", "clog Jumbo -F rounded \"text in rounded font\"")
+	// https://gist.github.com/dk949/88b2652284234f723decaeb84db2576c
+	Command.PersistentFlags().StringVarP(&commentStyle, "commentStyle", "C", "sh", "clog Jumbo -C none    # go|html|hugo|js|sh|tex|none")
 }
