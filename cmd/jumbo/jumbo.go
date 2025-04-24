@@ -95,6 +95,9 @@ var Command = &cobra.Command{
 		case "sh":
 			prefix = "# "
 			suffix = ""
+		case "sql":
+			prefix = "-- "
+			suffix = ""
 		case "tex":
 			prefix = "% "
 			suffix = ""
@@ -131,5 +134,5 @@ func init() {
 	Command.PersistentFlags().BoolVarP(&showFonts, "show", "S", false, "clog Jumbo -S text    # print text in all fonts")
 	Command.PersistentFlags().StringVarP(&fontOverride, "font", "F", "", "clog Jumbo -F rounded \"text in rounded font\"")
 	// https://gist.github.com/dk949/88b2652284234f723decaeb84db2576c
-	Command.PersistentFlags().StringVarP(&commentStyle, "commentStyle", "C", "sh", "clog Jumbo -C none    # go|html|hugo|js|sh|tex|none")
+	Command.PersistentFlags().StringVarP(&commentStyle, "commentStyle", "C", "sh", "clog Jumbo -C none    # go|html|hugo|js|sh|sql|tex|none")
 }
