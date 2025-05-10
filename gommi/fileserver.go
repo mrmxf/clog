@@ -5,9 +5,11 @@ package gommi
 
 import (
 	"embed"
+	"errors"
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -52,18 +54,43 @@ func setContentType(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// FileServerFs sets up an http.FileServerFs handler to serve
-// static files from a http.FileSystem.
-func FileServerFs(r chi.Router, eFs embed.FS, route string, eFsRootPath string) error {
-	if strings.ContainsAny(route, "{}*") {
-		slog.Error("FileServerFs route does not permit any URL parameters.")
-		return
+// NewFileServer sets up an http.FileServerFs handler to serve
+// static files from a http.FileSystem mounted on the os filesystem.
+func NewFileServer(r chi.Router, prefix string, mountPath string) error {
+	// ensure that we can mount the folder
+	abs, err := filepath.Abs(mountPath)
+	if err != nil {
+		msg := "gommi.NewEmbedFileServer cannot find mountPath"
+		slog.Error(msg, "mountPath", mountPath)
+		return errors.New(msg)
+	}
+	// make a new fs at the mount point
+	webFs := os.DirFS(abs)
+	return fileServerFs(r, webFs, prefix, mountPath)
+}
+
+// NewEmbedFileServer sets up an http.FileServerFs handler to serve
+// static files from a http.FileSystem mounted on and embed.FS
+func NewEmbedFileServer(r chi.Router, embedFs embed.FS, prefix string, mountPath string) error {
+	// make a new fs at the mount point
+	fs, err := fs.Sub(embedFs, mountPath)
+	if err != nil {
+		msg := "gommi.NewEmbedFileServer cannot find mountPath"
+		slog.Error(msg, "mountPath", mountPath)
+		return errors.New(msg)
 	}
 
-	fSys, err := fs.Sub(eFs, eFsRootPath)
-	if err != nil {
-		slog.Error("FileServerFs cannot find embedded files")
-		return
+	// ensure that we can mount the folder
+	return fileServerFs(r, fs, prefix, mountPath)
+}
+
+// FileServerFs sets up an http.FileServerFs handler to serve
+// static files from a http.FileSystem.
+func fileServerFs(r chi.Router, webFs fs.FS, route string, mountPath string) error {
+	if strings.ContainsAny(route, "{}*") {
+		msg := "gommi.FileServerFs route does not permit any URL parameters"
+		slog.Error(msg)
+		return errors.New(msg)
 	}
 
 	// check for trailing slash
@@ -78,7 +105,7 @@ func FileServerFs(r chi.Router, eFs embed.FS, route string, eFsRootPath string) 
 			setContentType(w, r)
 			rCtx := chi.RouteContext(r.Context())
 			pathPrefix := strings.TrimSuffix(rCtx.RoutePattern(), "/*")
-			fs := http.StripPrefix(pathPrefix, http.FileServer(http.FS(fSys)))
+			fs := http.StripPrefix(pathPrefix, http.FileServer(http.FS(webFs)))
 			fs.ServeHTTP(w, r)
 		})
 }
