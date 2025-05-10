@@ -49,6 +49,7 @@ gofmt
 GOHOSTARCH
 GOHOSTOS
 golangci
+gommi
 gommon
 GOPATH
 hange

@@ -86,7 +86,7 @@ func NewEmbedFileServer(r chi.Router, embedFs embed.FS, prefix string, mountPath
 
 // FileServerFs sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem.
-func fileServerFs(r chi.Router, webFs fs.FS, route string, mountPath string) error {
+func (r *ChiMux) FileServerFs(eFs embed.FS, route string, eFsRootPath string) error {
 	if strings.ContainsAny(route, "{}*") {
 		msg := "gommi.FileServerFs route does not permit any URL parameters"
 		slog.Error(msg)

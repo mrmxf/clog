@@ -23,6 +23,11 @@ import (
 	slogchi "github.com/samber/slog-chi"
 )
 
+
+type ChiMux struct{
+	chi.Mux
+}
+
 // the default logger
 var logger *slog.Logger
 
@@ -33,7 +38,7 @@ var mux *chi.Mux
 var Port = 8080
 
 // Bare is a a bare mux with no routes - just a slog logger & recoverer
-func Bare() (*chi.Mux, error) {
+func Bare() (*ChiMux, error) {
 	mux = chi.NewRouter()
 	// Create a slog logger, which:
 	//   - Logs to stdout.
