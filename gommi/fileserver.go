@@ -50,28 +50,32 @@ func setContentType(w http.ResponseWriter, r *http.Request) {
 	case ".xml":
 		w.Header().Set("Content-Type", "application/xml")
 	default:
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/html")
 	}
 }
 
 // NewFileServer sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem mounted on the os filesystem.
-func NewFileServer(r chi.Router, prefix string, mountPath string) error {
+func (r *ChiMux) NewFileServer(prefix string, mountPath string) error {
 	// ensure that we can mount the folder
 	abs, err := filepath.Abs(mountPath)
 	if err != nil {
 		msg := "gommi.NewEmbedFileServer cannot find mountPath"
 		slog.Error(msg, "mountPath", mountPath)
+		if abortOnError {
+			os.Exit(1)
+		}
 		return errors.New(msg)
 	}
 	// make a new fs at the mount point
-	webFs := os.DirFS(abs)
-	return fileServerFs(r, webFs, prefix, mountPath)
+	r.webFs = os.DirFS(abs)
+	slog.Info("initialising os file server on prefix", "prefix", prefix, "mountPath", abs)
+	return r.fileServerFs(prefix, abs)
 }
 
 // NewEmbedFileServer sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem mounted on and embed.FS
-func NewEmbedFileServer(r chi.Router, embedFs embed.FS, prefix string, mountPath string) error {
+func (r *ChiMux) NewEmbedFileServer(embedFs embed.FS, prefix string, mountPath string) error {
 	// make a new fs at the mount point
 	fs, err := fs.Sub(embedFs, mountPath)
 	if err != nil {
@@ -79,33 +83,43 @@ func NewEmbedFileServer(r chi.Router, embedFs embed.FS, prefix string, mountPath
 		slog.Error(msg, "mountPath", mountPath)
 		return errors.New(msg)
 	}
-
+	r.webFs = fs
+	slog.Info("initialising embed file server on prefix", "prefix", prefix, "mountPath", mountPath)
 	// ensure that we can mount the folder
-	return fileServerFs(r, fs, prefix, mountPath)
+	return r.fileServerFs(prefix, mountPath)
 }
 
-// FileServerFs sets up an http.FileServerFs handler to serve
+// fileServerFs sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem.
-func (r *ChiMux) FileServerFs(eFs embed.FS, route string, eFsRootPath string) error {
-	if strings.ContainsAny(route, "{}*") {
-		msg := "gommi.FileServerFs route does not permit any URL parameters"
+func (r *ChiMux) fileServerFs(prefix string, mountPath string) error {
+	if strings.ContainsAny(prefix, "{}*") {
+		msg := "gommi.fileServerFs route does not permit any URL parameters"
 		slog.Error(msg)
 		return errors.New(msg)
 	}
 
-	// check for trailing slash
-	if route != "/" && route[len(route)-1] != '/' {
-		r.Get(route, http.RedirectHandler(route+"/", http.StatusMovedPermanently).ServeHTTP)
-		route += "/"
+	// chi prefix must start with slash
+	if !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
 	}
-	route += "*"
+	// check for trailing slash on prefix
+	switch {
+	case prefix == "":
+		prefix = "/"
+	case strings.HasSuffix(prefix, "/"):
+		break
+	default:
+		prefix += "/"
+	}
+	// setup a GET handler serving static files for `prefix/*`
+	r.Get(prefix+"*", r.serveFile)
+	return nil
+}
 
-	r.Get(route,
-		func(w http.ResponseWriter, r *http.Request) {
-			setContentType(w, r)
-			rCtx := chi.RouteContext(r.Context())
-			pathPrefix := strings.TrimSuffix(rCtx.RoutePattern(), "/*")
-			fs := http.StripPrefix(pathPrefix, http.FileServer(http.FS(webFs)))
-			fs.ServeHTTP(w, r)
-		})
+func (r *ChiMux) serveFile(w http.ResponseWriter, req *http.Request) {
+	setContentType(w, req)
+	rCtx := chi.RouteContext(req.Context())
+	pathPrefix := strings.TrimSuffix(rCtx.RoutePattern(), "/*")
+	fs := http.StripPrefix(pathPrefix, http.FileServer(http.FS(r.webFs)))
+	fs.ServeHTTP(w, req)
 }

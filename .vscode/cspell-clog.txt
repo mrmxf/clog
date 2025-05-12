@@ -35,6 +35,7 @@ dpkg
 embeded
 environemnt
 ESTRPIPE
+fontobject
 GHGIST
 GHUSR
 githubcli
