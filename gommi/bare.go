@@ -4,7 +4,7 @@
 // gommi  - Golang Mimimal Modular InterWeb
 //
 // simple static web server tools that will serve a static site from inside
-// a contaienr.
+// a container.
 //
 // Usually pages are served from:
 //  - templates in the embedded file system for basic server side rendering

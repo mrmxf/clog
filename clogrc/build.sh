@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
-# clog>  build         # build the clog-sample
-#        _                                                 _
-#   __  | |  ___   __ _   ___   ___  __ _   _ __    _ __  | |  ___
-#  / _| | | / _ \ / _` | |___| (_-< / _` | | '  \  | '_ \ | | / -_)
-#  \__| |_| \___/ \__, |       /__/ \__,_| |_|_|_| | .__/ |_| \___|
-#                 |___/                            |_|
+#  clog> build     #  build & inject metadata into clog
+#  _                _        _
+# ( )            _ (_ )     ( )
+# | |_    _   _ (_) | |    _| |
+# | '_`\ ( ) ( )| | | |  /'_` |
+# | |_) )| (_) || | | | ( (_| |
+# (_,__/'`\___/'(_)(___)`\__,_)
 # ------------------------------------------------------------------------------
 # load build config and script helpers
 eval "$(clog Source project config)"    # configure project - local config

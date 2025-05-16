@@ -61,8 +61,8 @@ fGoBuild(){
   local car="$cArm"
   [[ "$goarch" == "amd64" ]] && car=$cAmd
 
-  # determine build local OS & bCPU
-  bCPU="${cAmd}amd$cX" && case $(uname -m) in arm*) bCPU="${cArm}arm$cX";; esac
+  # determine build local OS & cpu
+  cpu="${cAmd}amd$cX" && case $(uname -m) in arm*) cpu="${cArm}arm$cX";; esac
   case "$(uname -s)" in
     Linux*)  bOSV=${cLnx}Linux$cX;;
     Darwin*)  bOSV=${cMac}Mac$cX;;
@@ -73,7 +73,7 @@ fGoBuild(){
   pad=$((17-${#goos}-${#goarch}))
   spaces="$(echo '----------'|head -c $pad)"
   printf -v tPlatform "for %s %s" "$cos$goos$cX/$car$goarch$cX" "$spaces"
-  printf -v bPlatform "(built on %14s)" "$bOSV/$bCPU"
+  printf -v bPlatform "(built on %14s)" "$bOSV/$cpu"
 
   # create linker data info:
   ldi="$commitHash|$buildDate|$buildSuffix|$buildAppName|$buildAppTitle"
@@ -85,10 +85,18 @@ fGoBuild(){
   buildMsg="$cos$gofile$cX $tPlatform $bPlatform"
   clog Log -I "$buildMsg\r"
   
-  GOOS="$goos" GOARCH="$goarch" go build -ldflags "$lds" -o $gofile
-  if [ $? -gt 0 ]; then
+  # build with or without linker data depending on a supplied path
+  if [ -z "$linkerDataSemverPath" ]; then
+    GOOS="$goos" GOARCH="$goarch" go build -o $gofile
+    err=$?
+  else
+    GOOS="$goos" GOARCH="$goarch" go build -o $gofile -ldflags "$lds"
+    err=$?
+  fi
+
+  if [ $err -gt 0 ]; then
     clog Log -E "$buildMsg ...  build failed"
-    clog Log -E "Linker data string was:$cC -ldflags \"$lds\""
+    [ -n "$linkerDataSemverPath" ] &&  clog Log -UE "Linker data string was:$cC -ldflags \"$lds\""
   else
     size="$(du --apparent-size --block-size=M $gofile)"
     clog Log -I "$buildMsg ... $size"

@@ -16,7 +16,6 @@ import (
 
 	"github.com/mrmxf/clog/cmd/cat"
 	"github.com/mrmxf/clog/cmd/check"
-	"github.com/mrmxf/clog/cmd/checklegacy"
 	"github.com/mrmxf/clog/cmd/copy"
 	"github.com/mrmxf/clog/cmd/crayon"
 	"github.com/mrmxf/clog/cmd/inc"
@@ -24,6 +23,7 @@ import (
 	"github.com/mrmxf/clog/cmd/jumbo"
 	"github.com/mrmxf/clog/cmd/list"
 	"github.com/mrmxf/clog/cmd/logcmd"
+	"github.com/mrmxf/clog/cmd/should"
 	"github.com/mrmxf/clog/cmd/snippets"
 	"github.com/mrmxf/clog/cmd/source"
 	"github.com/mrmxf/clog/cmd/version"
@@ -32,8 +32,6 @@ import (
 	"github.com/mrmxf/clog/semver"
 	"github.com/mrmxf/clog/ux"
 	"github.com/spf13/cobra"
-	// "github.com/mrmxf/clog/git"
-	// "github.com/mrmxf/clog/scripts"
 )
 
 func BootStrap(bootCmd *cobra.Command) error {
@@ -50,22 +48,22 @@ func BootStrap(bootCmd *cobra.Command) error {
 		initialiseConfigFromSemver(eFs, paths)
 	}
 
-	//prepend cobra usage strings with build information
+	// prepend cobra usage strings with build information
 	bootCmd.SetUsageTemplate(cfg.GetString("clog.version.long") + bootCmd.UsageTemplate())
 
 	// load all the public builtin commands first
-	bootCmd.AddCommand(cat.Command)         // script helper include command
-	bootCmd.AddCommand(checklegacy.Command) // copy an embedded file to a destination
-	bootCmd.AddCommand(check.Command)       // copy an embedded file to a destination
-	bootCmd.AddCommand(copy.Command)        // copy an embedded file to a destination
-	bootCmd.AddCommand(crayon.Command)      // colored terminal commands
-	bootCmd.AddCommand(inc.Command)         // script helper include command
-	bootCmd.AddCommand(initialise.Command)  // create a clogrc
-	bootCmd.AddCommand(jumbo.Command)       // Jumbo text output
-	bootCmd.AddCommand(list.Command)        // list embedded files text output
-	bootCmd.AddCommand(logcmd.Command)      // list embedded files text output
-	bootCmd.AddCommand(source.Command)      // source a script or snippet
-	bootCmd.AddCommand(version.Command)     // version reporting
+	bootCmd.AddCommand(cat.Command)        // script helper include command
+	bootCmd.AddCommand(check.Command)      // copy an embedded file to a destination
+	bootCmd.AddCommand(copy.Command)       // copy an embedded file to a destination
+	bootCmd.AddCommand(crayon.Command)     // colored terminal commands
+	bootCmd.AddCommand(inc.Command)        // script helper include command
+	bootCmd.AddCommand(initialise.Command) // create a clogrc
+	bootCmd.AddCommand(jumbo.Command)      // Jumbo text output
+	bootCmd.AddCommand(list.Command)       // list embedded files text output
+	bootCmd.AddCommand(logcmd.Command)     // list embedded files text output
+	bootCmd.AddCommand(should.Command)     // logic helper for bash scripts
+	bootCmd.AddCommand(source.Command)     // source a script or snippet
+	bootCmd.AddCommand(version.Command)    // version reporting
 
 	// create a new snippets command from the clog.snippets cfg() branch
 	branchKey := "snippets"
@@ -82,10 +80,11 @@ func BootStrap(bootCmd *cobra.Command) error {
 	// load shell scripts so that they override snippets if there's a clash
 	scripts.FindScripts(bootCmd, "clogrc/*.sh")
 
-	//build the UX menus in case we're running interactively
+	// build the UX menus in case we're running interactively
 	ux.BuildMenus(bootCmd)
 
-	// Finally, Execute the cobra command parser
+	// Finally, Execute the cobra command parser on the configured hierarchy
+	// the return value of the command is returned to the shell
 	return bootCmd.Execute()
 }
 
@@ -94,7 +93,7 @@ func initialiseConfigFromSemver(eFs *embed.FS, paths []string) {
 	if err != nil {
 		slog.Warn("cannot initialize semantic version " + err.Error())
 	} else {
-		//override default empty strings with real semver info
+		// override default empty strings with real semver info
 		config.Cfg().Set("clog.version.long", semver.Info().Long)
 		config.Cfg().Set("clog.version.note", semver.Info().Note)
 		config.Cfg().Set("clog.version.short", semver.Info().Short)

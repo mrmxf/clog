@@ -29,17 +29,30 @@ clog:
 # -----------------------------------------------------------------------------
   snippets:
     git:
-    tag:
-      ref: yq -r '.[0].version' releases.yaml
-      # a go package needs a preceding "v"
-      refgo: echo "v$(clog git tag ref)"
-    message:
-      ref: yq -r '.[0].note' releases.yaml
-    suffix: b="$(git branch --show-current)";[[ "$b" == main ]]&&echo ""|||tr -d [:blank:]
-  project:
-    config: |
-      # make some variables for standard build scripts
-      export PROJECT="$(basename $(pwd))              # project you're building
-    needs:
-      # grab the golang version from go.mod
-      golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'
+      tag:
+        ref: yq -r '.[0].version' releases.yaml
+        # a go package needs a preceding "v"
+        refgo: echo "v$(clog git tag ref)"
+      message:
+        ref: yq -r '.[0].note' releases.yaml
+    suffix: |
+      b="$(git branch --show-current)"
+      [[ "$b" == main ]] && echo "" || echo "$b"|tr -d '[:blank:]'
+    project:
+      config: |
+        # make some variables for standard build scripts
+        export PROJECT="$(basename $(pwd))"           # project you're building
+        export DOCKER_NS=mrmxf
+      needs:
+        # grab the golang version from go.mod
+        golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'
+        # hunt for the hugo version
+        hugo: |
+          # grab the version from configuration
+          if [ -f hugo .yaml ];then
+            yq -r '.module.hugoVersion.min' hugo.yaml
+          elif [ -f config/_default/module.yaml ];then
+            yq -r '.hugoVersion.min' config/_default/module.yaml
+          else
+            echo "hugo config not found"
+          fi

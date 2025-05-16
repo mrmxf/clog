@@ -56,6 +56,7 @@ func setContentType(w http.ResponseWriter, r *http.Request) {
 
 // NewFileServer sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem mounted on the os filesystem.
+// When building a container with ko.build that will be mounted
 func (r *ChiMux) NewFileServer(prefix string, mountPath string) error {
 	// ensure that we can mount the folder
 	abs, err := filepath.Abs(mountPath)
@@ -70,12 +71,12 @@ func (r *ChiMux) NewFileServer(prefix string, mountPath string) error {
 	// make a new fs at the mount point
 	r.webFs = os.DirFS(abs)
 	slog.Info("initialising os file server on prefix", "prefix", prefix, "mountPath", abs)
-	return r.fileServerFs(prefix, abs)
+	return r.fileServerFs(prefix)
 }
 
 // NewEmbedFileServer sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem mounted on and embed.FS
-func (r *ChiMux) NewEmbedFileServer(embedFs embed.FS, prefix string, mountPath string) error {
+func (r *ChiMux) NewEmbedFileServer(embedFs embed.FS, prefix string) error {
 	// make a new fs at the mount point
 	fs, err := fs.Sub(embedFs, mountPath)
 	if err != nil {
@@ -86,12 +87,12 @@ func (r *ChiMux) NewEmbedFileServer(embedFs embed.FS, prefix string, mountPath s
 	r.webFs = fs
 	slog.Info("initialising embed file server on prefix", "prefix", prefix, "mountPath", mountPath)
 	// ensure that we can mount the folder
-	return r.fileServerFs(prefix, mountPath)
+	return r.fileServerFs(prefix)
 }
 
 // fileServerFs sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem.
-func (r *ChiMux) fileServerFs(prefix string, mountPath string) error {
+func (r *ChiMux) fileServerFs(prefix string) error {
 	if strings.ContainsAny(prefix, "{}*") {
 		msg := "gommi.fileServerFs route does not permit any URL parameters"
 		slog.Error(msg)
