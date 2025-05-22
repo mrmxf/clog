@@ -16,6 +16,9 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+var mountPath string
+var urlPrefix string
+
 func setContentType(w http.ResponseWriter, r *http.Request) {
 	ext := filepath.Ext(r.RequestURI)
 	switch ext {
