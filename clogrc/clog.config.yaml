@@ -43,7 +43,7 @@ snippets:
     needs:
       # grab the golang version from go.mod
       golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'
-  testy: |
+  argstest: |
     echo "MAKE=($1) ($2) ($3) ($4)"
     echo "Another line"
     echo "$1 is still one"

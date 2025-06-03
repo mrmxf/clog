@@ -99,7 +99,7 @@ fGoBuild(){
     [ -n "$linkerDataSemverPath" ] &&  clog Log -UE "Linker data string was:$cC -ldflags \"$lds\""
   else
     size="$(du --apparent-size --block-size=M $gofile)"
-    clog Log -I "$buildMsg ... $size"
+    clog Log -IU "$buildMsg ... $size"
   fi
 }
 

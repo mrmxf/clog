@@ -127,6 +127,9 @@ var Command = &cobra.Command{
 			group.Name = YamlKey
 		}
 		err = runBlocks(cmd, YamlKey, group)
+		if err != nil {
+			os.Exit(1)
+		}
 	},
 }
 
@@ -199,8 +202,9 @@ func runBlocks(cmd *cobra.Command, key string, group CheckGroup) error {
 		slog.Info(fmt.Sprintf("Check %s passed (%d blocks)", group.Name, len(group.Blocks)))
 		return nil
 	}
-	slog.Error(fmt.Sprintf("Check %s failed (%d/%d blocks errored)", group.Name, fail, len(group.Blocks)))
-	return nil
+	msg:= fmt.Errorf("check %s failed (%d/%d blocks errored)", group.Name, fail, len(group.Blocks))
+	slog.Error(msg.Error())
+	return msg
 }
 
 func validateRawBlockKeys(key string, iBlk int, block map[string]interface{}) (*CheckBlock, bool) {

@@ -107,37 +107,8 @@ check:
       - try: clog git unstaged
         ok: clog Log -I "Ok all changes staged"
         catch: clog Log -W "   unstaged changes in working tree"
-  # --- clog Check gitlab-env -------------------------------------------------
-  gitlab-env:
-    blocks:
-      - finally: clog Log -I "                 \$REPO   $(REPO)"
-      - finally: clog Log -I "        \$REPORT_FOLDER   $(REPORT_FOLDER)"
-      - finally: clog Log -I "       \$golang Version   $(vGO)"
-      - finally: clog Log -I "   need golang Version   $(clog project needs golang)"
-      # - PATH
-      # - CI_COMMIT_BRANCH
-      # - CI_COMMIT_REF_SLUG
-      # - CI_PIPELINE_SOURCE
-      # - CI_MERGE_REQUEST_APPROVED
-      # - CI_MERGE_REQUEST_ID
-      # - CI_MERGE_REQUEST_LABELS
-      # - CI_MERGE_REQUEST_REF_PATH
-      # - CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
-      # - CI_BUILDS_DIR
-      # - CI_COMMIT_DESCRIPTION
-      # - CI_COMMIT_TAG
-      # - CI_JOB_STAGE
-      # - CI_JOB_TOKEN
-      # - CI_PIPELINE_NAME
-      # - CI_PROJECT_DIR
-      # - CI_PROJECT_PATH
-      # - CI_RUNNER_VERSION
-      # - CI_SERVER
-      # - GITLAB_USER_EMAIL
-      # - GITLAB_USER_ID
-      # - GITLAB_USER_LOGIN
-      # - GITLAB_USER_NAME
-      # - KUBECONFIG
+  # --- clog Check github deprecated - use the clogwork/.github/workflows/dump-context -
+
   tools:
       - name: golang
         try: |
@@ -277,23 +248,26 @@ snippets:
       yq: "        yq --version >/dev/null 2>&1"
     # install snippets --------------------------------------------------------
     aws: |
-      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+      [[ "$(dpkg --print-architecture)" == "amd64" ]] && awsZFB="x86_64"
+      [[ "$(dpkg --print-architecture)" == "arm64" ]] && awsZFB="aarch64"
+      curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-$awsZFB.zip" -o "/tmp/awscliv2.zip"
       cd /tmp
-      unzip ./awscliv2.zip
-      sudo ./aws/install
+      unzip -q ./awscliv2.zip
+      sudo ./aws/install --update
+
     docker-engine: |
       # Add Docker's official GPG key:
-      sudo apt-get update
-      sudo apt-get install ca-certificates curl
-      sudo install -m 0755 -d /etc/apt/keyrings
+      sudo apt-get -qq update; sudo apt-get -qq upgrade
+      sudo apt-get install -yq ca-certificates curl
+      sudo install -q -m 0755 -d /etc/apt/keyrings
       sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
       sudo chmod a+r /etc/apt/keyrings/docker.asc
       # Add the repository to Apt sources:
       arch="$(dpkg --print-architecture)"
       DEBy=$(. /etc/os-release && echo "$VERSION_CODENAME")
       echo  "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian  $DEBy stable"|sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-      sudo apt-get update
-      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo apt-get -qq update
+      sudo apt-get install -yq --autoremove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
       sudo usermod -aG docker $USER
       newgrp docker
       docker run hello-world
@@ -318,6 +292,10 @@ snippets:
       && sudo apt install gh -y
     gh-mac: brew install gh
     git: sudo apt-get install -y git-all
+    homebrew: |
+      [[ "$(uname -m)" == "arm64" ]] && clog Log -W "arm is badly supported!"
+      sudo apt-get install -y build-essential procps curl file git
+      curl -fSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
     hugo: |
       eval "$(clog Inc)"
       j="$(curl -sL https://api.github.com/repos/gohugoio/hugo/releases/latest)"
@@ -360,8 +338,8 @@ snippets:
       curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
       && sudo install minikube-linux-amd64 /usr/local/bin/minikube
     nginx: |
-      sudo apt-get update;  sudo apt-get upgrade -y -q
-      sudo apt-get install -y -q nginx
+      sudo apt-get -qq update;  sudo apt-get -yq upgrade
+      sudo apt-get install -yq nginx
       if [ -n "$(which ufw)" ]; then
         sudo ufw allow "Nginx Full" > /dev/null   # Allow HTTP, HTTPS
         sudo ufw reload
@@ -397,14 +375,6 @@ snippets:
     home: echo ~
     wslusr: echo "$(wslvar USERPROFILE)"
     wslhome: echo "$(wslpath "$(wslvar USERPROFILE)")" 
-#                        _
-#   ||_    _ _    __ _  (_)  _ _   __ __
-#  (_-<   | ' \  / _` | | | | ' \  \ \ /
-#  / _/   |_||_| \__, | |_| |_||_| /_\_\
-#   ||           |___/
-  nginx:
-    av: ls -al /etc/nginx/sites-enabled/
-    en: ls -al /etc/nginx/sites-available/
 #                               _              _
 #   ||_    _ __   _ _   ___    (_)  ___   __  | |_
 #  (_-<   | '_ \ | '_| / _ \   | | / -_) / _| |  _|
