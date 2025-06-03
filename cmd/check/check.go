@@ -152,7 +152,7 @@ func capture(before string, stepStr string, i int, stepName string, env map[stri
 // stream a command with custom environment
 func stream(before string, stepStr string, i int, stepName string, env map[string]string) (int, error) {
 	cmdStr := splice(before, stepStr)
-	exitStatus, err := scripts.AwaitShellSnippet(cmdStr, env)
+	exitStatus, err := scripts.AwaitShellSnippet(cmdStr, env, []string{})
 	return exitStatus, err
 }
 
