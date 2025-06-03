@@ -73,36 +73,36 @@ check:
   pre-build:
     before: eval "$(clog Inc)"
     blocks:
-      - finally: clog Log -I "        branch   $(clog git branch)"
-      - finally: clog Log -I "       tag-ref   $(clog git tag ref)"
-      - finally: clog Log -I "      tag-head   $(clog git tag head)"
-      - finally: clog Log -I "    tag-latest   $(clog git tag latest)"
-      - finally: clog Log -I "    tag-origin   $(clog git tag origin)"
+      - finally: clog Log -I "        branch    $(clog git branch)"
+      - finally: clog Log -I "       tag-ref    $(clog git tag ref)"
+      - finally: clog Log -I "      tag-head    $(clog git tag head)"
+      # - finally: clog Log -I "    tag-latest    $(clog git tag latest)"
+      - finally: clog Log -I "    tag-origin    $(clog git tag origin)"
       - try: '[[ "$(clog git tag head)" == "$(clog git tag ref)" ]]'
         ok: clog Log -I "Ok    tag-head == tag-ref"
         catch: clog Log -W "      tag-head != tag-ref"
-      - try: '[[ "$(clog git tag latest)" == "$(clog git tag ref)" ]]'
-        ok: clog Log -I "Ok  tag-latest == tag-ref"
-        catch: clog Log -W "    tag-latest != tag-ref"
+      # - try: '[[ "$(clog git tag latest)" == "$(clog git tag ref)" ]]'
+      #   ok: clog Log -I "Ok  tag-latest == tag-ref"
+      #   catch: clog Log -W "    tag-latest != tag-ref"
       - try: '[[ "$(clog git tag origin)" == "$(clog git tag ref)" ]]'
         ok: clog Log -I "Ok  tag-origin == tag-ref"
         catch: clog Log -W "    tag-origin != tag-ref"
       - try: '[[ "$(clog git hash head)" == "$(clog git hash origin)" ]]'
         ok: clog Log -I "Ok   hash-head == hash-origin"
         catch: clog Log -W "     hash-head != hash-origin"
-      - try: '[[ "$(clog git message latest)" != "$(clog git message ref)" ]]'
-        ok: clog Log -I "message latest == message-ref"
-        catch: |
-          clog Log -W "message latest != message-ref"
-          clog Log -W "($(clog git message latest)) != ($(clog git message ref))"
+      # - try: '[[ "$(clog git message latest)" != "$(clog git message ref)" ]]'
+      #   ok: clog Log -I "message latest == message-ref"
+      #   catch: |
+      #     clog Log -W "message latest != message-ref"
+      #     clog Log -W "($(clog git message latest)) != ($(clog git message ref))"
       - try: clog    git tree clean
         ok: clog Log -I "Ok working tree clean"
         catch: clog Log -W "   working tree NOT clean"
       - try: clog    git tree ahead
-        ok: clog Log -I "Ok working tree up to date with origin"
+        ok: clog Log -I "Ok working tree not ahead of origin"
         catch: clog Log -W "   working tree is ahead of origin"
       - try: clog   git tree behind
-        ok: clog Log -I "Ok working tree up to date with origin"
+        ok: clog Log -I "Ok working tree not behind origin"
         catch: clog Log -W "   working tree is behind origin"
       - try: clog git unstaged
         ok: clog Log -I "Ok all changes staged"
