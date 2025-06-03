@@ -12,10 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
-	"strings"
 
-	"github.com/mrmxf/clog/cmd/checklegacy"
-	"github.com/mrmxf/clog/cmd/jumbo"
 	"github.com/mrmxf/clog/config"
 	"github.com/mrmxf/clog/scripts"
 	"github.com/mrmxf/clog/shell"
@@ -81,31 +78,6 @@ var Command = &cobra.Command{
 			slog.Error(fmt.Sprintf("cannot run Check - check group (%s) not found in clog.config.yaml", YamlKey))
 			os.Exit(1)
 		}
-
-		// ------------------------------------------------------------------------
-		// this to be deleted v0.9.0 - BACKWARDS COMPATIBILITY
-		keys := cfg.GetStringMap(YamlKey)
-		legacy := false
-		for key, _ := range keys {
-			// if we match legacy keys in v1 check then invoke legacy  mode
-			switch strings.ToLower(key) {
-			case "checkloglevel":
-				legacy = true
-			case "dependencies":
-				legacy = true
-			case "report":
-				legacy = true
-			}
-		}
-		if legacy {
-			jumbo.Command.Run(cmd, []string{"Legacy Check mode"})
-			slog.Warn("Running legacy checks found in clog.config.yaml")
-			slog.Warn("Remove ALL legacy checks to remove this message")
-			slog.Warn("v0.9.0 will remove support for legacy mode")
-			checklegacy.Command.RunE(cmd, args)
-			os.Exit(1)
-		}
-		// ------------------------------------------------------------------------
 
 		// parse the check2 key into a CheckGroup struct
 		blocks := []CheckBlock{}
