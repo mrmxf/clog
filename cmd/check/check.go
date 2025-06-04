@@ -1,7 +1,7 @@
-//  Copyright ©2019-2024  Mr MXF   info@mrmxf.com
-//  BSD-3-Clause License         https://opensource.org/license/bsd-3-clause/
+//  Copyright ©2017-2025  Mr MXF  info@mrmxf.com
+//  BSD-3-Clause License          https://opensource.org/license/bsd-3-clause/
 //
-// package check2 creates a python/java/js try-catch-finally block in go
+// package check creates a try-catch-finally block of scripts
 
 package check
 
@@ -55,7 +55,7 @@ type CheckGroup struct {
 var Command = &cobra.Command{
 	Use:   "Check",
 	Short: "run all blocks in a check group defined in config",
-	Long:  `returns error = number of fatal issues found.`,
+	Long:  longHelp,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Cfg()
@@ -158,9 +158,12 @@ func runBlocks(cmd *cobra.Command, key string, group CheckGroup) error {
 				}
 			} else {
 				if len(b.Catch) > 0 {
-					//step 2. catch exists - fail is only incremented if a catch key exists
-					fail++
-					stream(group.Before, b.Catch, i, "catch", env)
+					//step 2. catch exists
+					exit, _:=stream(group.Before, b.Catch, i, "catch", env)
+					// fail is only incremented if a catch returns an error
+					if exit>0 {
+						fail++
+					}
 				}
 			}
 		}

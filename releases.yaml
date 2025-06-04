@@ -1,4 +1,5 @@
 # code names here: https://clutch.co/resources/software-development-glossary-88-essential-terms
+- {version: "0.7.13", date: 2025-06-04, codename: "alpha", note: clog Check error status & help}
 - {version: "0.7.12", date: 2025-06-03, codename: "alpha", note: snippet error return}
 - {version: "0.7.11", date: 2025-06-03, codename: "alpha", note: add arguments to snippets}
 - {version: "0.7.10", date: 2025-05-23, codename: "alpha", note: remove gommi CLI}
