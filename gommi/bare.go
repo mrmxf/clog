@@ -43,7 +43,7 @@ var abortOnError = true
 
 // Bare is a a bare mux with no routes - just a slog logger & recoverer
 func Bare(continueOnError ...bool) (*ChiMux, error) {
-	slogger.UsePrettyLogger(slog.LevelInfo)
+	slogger.UseJSONLogger(slog.LevelInfo)
 	if len(continueOnError) > 0 {
 		abortOnError = !continueOnError[0]
 	}
