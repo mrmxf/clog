@@ -52,7 +52,7 @@ func AwaitShellSnippet(snippet string, env map[string]string, cliArgs []string) 
 	slog.Debug("Streaming shell snippet: ", "shell", shell, "command", snippet) //, "inContainer", inContainer)
 
 	//append a dummy executable and the arguments so that $1 in the script works.
-	args := append([]string{"-c", snippet, "dummy-clog-exe"}, cliArgs...)
+	args := append([]string{"-c", snippet, "clog(snippet)"}, cliArgs...)
 	exitStatus, err := Exec(shell, args, env)
 
 	//some DEBUG logging that will probably break workflows
