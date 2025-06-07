@@ -36,7 +36,7 @@ import (
 
 func BootStrap(bootCmd *cobra.Command) error {
 	cfg := config.Cfg()
-	historyFilename := cfg.GetString("clog.history-file")
+	historyFilename := cfg.GetString("clog.releases-path")
 
 	// find the embedded release history file in the embedded file systems
 	// last one found wins - this is usually the project's embedded fs

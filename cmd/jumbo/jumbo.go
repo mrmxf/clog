@@ -40,7 +40,7 @@ var commentStyle string
 var Command = &cobra.Command{
 	Use:   "Jumbo [text] --font=thingy",
 	Short: "Create large comment text for scripts to stdout",
-	Long:  `Fonts can be chosen in [clogrc/clog.config.yaml]`,
+	Long:  `Fonts can be chosen in [clogrc/clog.yaml]`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jString := strings.Join(args, " ")
 		if len(jString) == 0 {

@@ -14,7 +14,7 @@ import (
 	"runtime"
 )
 
-var defaultConfigFilename = "clog.core.config.yaml"
+var defaultConfigFilename = "core.clog.yaml"
 
 // root keys  using viper.setDefaults survive a config file merge
 // child keys using viper.setDefaults are lost

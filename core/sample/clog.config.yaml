@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 clog:
   # path to the yaml file defining release history - see semver package
-  history-file: "releases.yaml"
+  releases-path: "releases.yaml"
 
 # #############################################################################
 #               _                       _

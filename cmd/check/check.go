@@ -61,7 +61,7 @@ var Command = &cobra.Command{
 		cfg := config.Cfg()
 
 		if cfg.Get(YamlKey) == nil {
-			slog.Error("cannot run Check - no " + YamlKey + " key found in clog.config.yaml")
+			slog.Error("cannot run Check - no " + YamlKey + " key found in clog.yaml")
 			os.Exit(1)
 		}
 
@@ -75,7 +75,7 @@ var Command = &cobra.Command{
 		// check which group we are running
 		YamlKey = YamlKey + "." + args[0]
 		if cfg.Get(YamlKey) == nil {
-			slog.Error(fmt.Sprintf("cannot run Check - check group (%s) not found in clog.config.yaml", YamlKey))
+			slog.Error(fmt.Sprintf("cannot run Check - check group (%s) not found in clog.yaml", YamlKey))
 			os.Exit(1)
 		}
 
@@ -185,7 +185,7 @@ func runBlocks(cmd *cobra.Command, key string, group CheckGroup) error {
 func validateRawBlockKeys(key string, iBlk int, block map[string]interface{}) (*CheckBlock, bool) {
 	errCount := 0
 	newBlock := CheckBlock{}
-	// check all the keys from clog.config.yaml against reference keys
+	// check all the keys from clog.yaml against reference keys
 	for k := range block {
 		if _, isValid := validRequiredKeys[k]; isValid {
 			errCount++
