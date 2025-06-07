@@ -12,7 +12,7 @@
 //  }
 //
 //
-// clogrc search order - see clogrc/core/clog.yaml
+// clogrc search order - see core/clog.yaml
 
 package config
 
@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// export the Fs with the `core/` folder
+// export the Fs with the `core/` folder - initialised by calling program
 var coreFs embed.FS
 
 // Config type embeds the Viper struct and extends it

@@ -5,7 +5,7 @@
 
 package check
 
-const longHelp =`
+const longHelp = `
 usage: clog Check my-group
 
 this will search for a "check.my-group" key in your clog.yaml config file.

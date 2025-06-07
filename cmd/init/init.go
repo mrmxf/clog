@@ -5,9 +5,9 @@
 //
 // It does 4 things:
 // 1. creates a clogrc folder if it doesn't exist
-// 2. copies core/sample/clog.yaml to clogrc/clog.yaml if missing
-// 3. copies core/core.clog.yaml to clogrc/tmp-core.clog.yaml
-// 4. copies all files in core/sample/init to clogrc if missing
+// 2. copies tpl/clog.yaml to clogrc/clog.yaml if missing
+// 3. copies core.clog.yaml to clogrc/tmp-core.clog.yaml
+// 4. copies all files in tpl/init to clogrc if missing
 
 package init
 
@@ -27,8 +27,8 @@ var Command = &cobra.Command{
 	Long:  `create missing clogrc/clog.yaml and clogrc/tmp-core.clog.yaml.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		sample := "core/sample/clog.yaml"
-		core := "core/core.clog.yaml"
+		sample := "tpl/clog.yaml"
+		core := "core.clog.yaml"
 
 		// 1, create the clogrc folder if it doesn't exist
 		dstFolder := "clogrc"

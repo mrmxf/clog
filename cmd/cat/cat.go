@@ -14,6 +14,7 @@ import (
 	"runtime"
 
 	"github.com/mrmxf/clog/config"
+	"github.com/mrmxf/clog/core"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,7 @@ import (
 //
 // ```
 //
-//	source <(clog Cat core/inc.sh)
+//	eval "$(clog Cat tpl/help-golang.sh)"
 //
 // ```
 //
@@ -48,7 +49,7 @@ var Command = &cobra.Command{
 		clogFs := config.CoreFs()
 		srcPath := args[0]
 
-		src, err := clogFs.Open(srcPath)
+		src, err := clogFs.Open(core.Clean(srcPath))
 		if err != nil {
 			slog.Error(fmt.Sprintf("cannot open embedded file %s", srcPath), "err", err)
 			os.Exit(126)

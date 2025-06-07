@@ -9,7 +9,7 @@
 # load build config and script helpers
 eval "$(clog Source project config)"    # configure project - local config
 eval "$(clog Inc)"                      # shell embedded help (sh, zsh & bash)
-help="core/sh/help-golang.sh"           # build embedded help
+help="tpl/help-golang.sh"           # build embedded help
 eval "$(clog Cat $help)"                # golang build helpers
 
 clog Log -I "Build$cC $PROJECT $cT using clog's$cF $help"

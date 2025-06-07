@@ -91,7 +91,7 @@ func init() {
 	slog.Debug("init " + file)
 
 	// Define persistent (global) flags and any flags for the root command
-	RootCommand.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "clog -c myClogfig.yaml   # clog Core Cat clogrc/core/clog.yaml > myClogfig.yaml")
+	RootCommand.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "clog -c myClogfig.yaml   # clog Cat core.clog.yaml > myClogfig.yaml")
 	RootCommand.PersistentFlags().BoolVar(&ShowVersion, "version", false, "clog --version           # shows the full version string")
 	RootCommand.PersistentFlags().BoolVarP(&ShowVersionShort, "v", "v", false, "clog -v                  # shows just the semantic version")
 	RootCommand.PersistentFlags().BoolVarP(&ShowVersionNote, "note", "n", false, "clog --note              # shows just the version note")

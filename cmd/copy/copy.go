@@ -2,7 +2,7 @@
 //  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
 //
 // command:
-//   $ clog Core Cp core/file/path local/file/path
+//   $ clog Copy file/path local/disc/file/path
 
 package copy
 
@@ -14,6 +14,7 @@ import (
 	"runtime"
 
 	"github.com/mrmxf/clog/config"
+	"github.com/mrmxf/clog/core"
 	"github.com/spf13/cobra"
 )
 
@@ -23,11 +24,11 @@ var Command = &cobra.Command{
 	Long:  `returns error status 1 if file not found.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fs := config.CoreFs()
+		clogFs := config.CoreFs()
 		srcPath := args[0]
 		dstPath := args[1]
 
-		src, err := fs.Open(srcPath)
+		src, err := clogFs.Open(core.Clean(srcPath))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 			os.Exit(126)

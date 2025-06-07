@@ -43,7 +43,7 @@ var Command = &cobra.Command{
 			return nil
 		})
 		if err != nil {
-			slog.Error("Cannot ls embedded fs" + err.Error())
+			slog.Error("Cannot List embedded files" + err.Error())
 		}
 
 	},

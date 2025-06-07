@@ -159,9 +159,9 @@ func runBlocks(cmd *cobra.Command, key string, group CheckGroup) error {
 			} else {
 				if len(b.Catch) > 0 {
 					//step 2. catch exists
-					exit, _:=stream(group.Before, b.Catch, i, "catch", env)
+					exit, _ := stream(group.Before, b.Catch, i, "catch", env)
 					// fail is only incremented if a catch returns an error
-					if exit>0 {
+					if exit > 0 {
 						fail++
 					}
 				}
@@ -177,7 +177,7 @@ func runBlocks(cmd *cobra.Command, key string, group CheckGroup) error {
 		slog.Info(fmt.Sprintf("Check %s passed (%d blocks)", group.Name, len(group.Blocks)))
 		return nil
 	}
-	msg:= fmt.Errorf("check %s failed (%d/%d blocks errored)", group.Name, fail, len(group.Blocks))
+	msg := fmt.Errorf("check %s failed (%d/%d blocks errored)", group.Name, fail, len(group.Blocks))
 	slog.Error(msg.Error())
 	return msg
 }
