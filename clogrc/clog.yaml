@@ -43,8 +43,8 @@ snippets:
     [[ "$b" == main ]] && echo "" || echo "$b"|tr -d '[:blank:]'
   project:
     config: |
-      # make some variables for standard build scripts
-      export PROJECT=clog                            # project you're building
+      # make some variables for standard build scripts -----------------------|
+      export PROJECT=$(basename $(pwd))               # project you're building
     needs:
       # grab the golang version from go.mod
       golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'

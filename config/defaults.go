@@ -25,7 +25,7 @@ func (cfg *Config) setDefaults(configCLI *string) {
 
 	fs, configPaths, err := FindEmbedded(defaultConfigFilename)
 	if err != nil {
-		slog.Error("embedded config ()" + defaultConfigFilename + ") " + err.Error())
+		slog.Error("embedded config (" + defaultConfigFilename + ") " + err.Error())
 		os.Exit(1)
 	}
 	//set the coreFs for other tasks to find the core files
@@ -50,21 +50,11 @@ func (cfg *Config) setDefaults(configCLI *string) {
 	}
 
 	if homeFolder, err := os.UserHomeDir(); err == nil {
-		cfg.Set("clog.homeFolder", homeFolder)
+		cfg.Set("clog.home-folder", homeFolder)
 	}
 
 	//store the startup defaults
 	cfg.SetDefault("isInteractive", false)
-	cfg.SetDefault("clog.clogrc.config_base", ".clog")
-	cfg.SetDefault("clog.clogrc.config_format", "yaml")
-
-	//override the defaults in viper for finding other configs
-	if fn := cfg.GetString("clog.clogrc.config_base"); len(fn) > 0 {
-		cfg.SetConfigName(fn)
-	}
-	if ff := cfg.GetString("clog.clogrc.config_format"); len(ff) > 0 {
-		cfg.SetConfigType(ff)
-	}
 }
 
 func init() {
