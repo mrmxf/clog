@@ -44,8 +44,11 @@
       "program": "${workspaceFolder}",
       "args": [
         "Log",
-        "-T",
-        "hell\\e[35mo this is magenta"
+        "-B",
+        "1",
+        "P",
+        "OK message",
+        "ERR message"
       ]
     }
   ]

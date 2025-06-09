@@ -195,7 +195,7 @@ func (e encoder) writeLevel(buf *buffer, l slog.Level) {
 		delta = int(l - LevelWarn)
 	case l >= LevelSuccess:
 		style = e.opts.Theme.LevelSuccess()
-		str = "OK"
+		str = " OK"
 		delta = int(l - LevelSuccess)
 	case l >= slog.LevelInfo:
 		style = e.opts.Theme.LevelInfo()
@@ -207,7 +207,7 @@ func (e encoder) writeLevel(buf *buffer, l slog.Level) {
 		delta = int(l - LevelDebug)
 	case l >= LevelTrace:
 		style = e.opts.Theme.LevelTrace()
-		str = "---"
+		str = "TRC"
 		delta = int(l - LevelTrace)
 	default:
 		style = e.opts.Theme.LevelDebug()

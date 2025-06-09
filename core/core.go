@@ -64,7 +64,6 @@ func FindEmbeddedFile(filename string) ([]string, error) {
 	return searchFolder(CoreFs, "", filename, matches)
 }
 
-
 // searchFolder walks a path looking for filename is the efs file system.
 // It will append the path to that file in the matches slice.
 // it only returns an error if there is an error walking the file system. Not
