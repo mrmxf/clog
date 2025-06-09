@@ -34,10 +34,10 @@ snippets:
   bc-releases-yaml: yq -r '.clog."releases-path"' clogrc/clog.yaml
   git:
     tag:
-      ref: echo "v$(yq -r '.[0].version'"$(clog bc-releases-yaml)")" #add a v for golang
+      ref: echo "v$(yq -r '.[0].version' "$(clog bc-releases-yaml)")" #add a v for golang
       refgo: echo "v$(clog git tag ref)"    
     message:
-      ref: yq -r '.[0].note'"$(clog bc-releases-yaml)"
+      ref: yq -r '.[0].note' "$(clog bc-releases-yaml)"
   suffix: |
     b="$(git branch --show-current)"
     [[ "$b" == main ]] && echo "" || echo "$b"|tr -d '[:blank:]'
