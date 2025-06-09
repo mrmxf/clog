@@ -84,7 +84,7 @@ var Command = &cobra.Command{
 			// -  err + prod builds: Fail and exit (i.e. exit code 1)
 			// -  ok  + either     : print out success
 			var exitCode int
-			_, err := fmt.Sscanf(args[0],"%d", &exitCode)
+			_, err := fmt.Sscanf(args[0], "%d", &exitCode)
 			if len(args) < 4 || err != nil {
 				slog.Error("clog Log -B requires 4 arguments")
 				slog.Error("   arg[0]           \"$?\" exit code of command to log for")
@@ -93,14 +93,13 @@ var Command = &cobra.Command{
 				slog.Error("   arg[3]  \"Err Message\" string to be logged for $?=0")
 				os.Exit(1)
 			}
-			if exitCode ==0{
+			if exitCode == 0 {
 				slog.Success(args[2])
-			}
-			if len(args[1])>0{
+			} else if len(args[1]) > 0 {
 				// fragile production mode
 				slog.Error(args[3])
 				os.Exit(1)
-			}else{
+			} else {
 				// fragile production mode
 				slog.Warn(args[3])
 			}
