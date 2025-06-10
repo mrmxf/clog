@@ -93,15 +93,16 @@ var Command = &cobra.Command{
 				slog.Error("   arg[3]  \"Err Message\" string to be logged for $?=0")
 				os.Exit(1)
 			}
+			errInfo := fmt.Sprintf(" {err:%d, prod:\"%s\"}", exitCode, args[1])
 			if exitCode == 0 {
 				slog.Success(args[2])
 			} else if len(args[1]) > 0 {
 				// fragile production mode
-				slog.Error(args[3])
+				slog.Error(args[3] + errInfo)
 				os.Exit(1)
 			} else {
 				// fragile production mode
-				slog.Warn(args[3])
+				slog.Warn(args[3] + errInfo)
 			}
 			logFlag = "B"
 		}

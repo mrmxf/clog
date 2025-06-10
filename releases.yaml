@@ -2,6 +2,7 @@
 # v0.8.0 targets the new consistent Mr MXF infrastructure and build pipelines - new schema
 # -----------------------------------------------------------------------------
 # code names here: https://clutch.co/resources/software-development-glossary-88-essential-terms
+- {version: "0.7.18", date: 2025-06-09, codename: "alpha", note: Log --build fix2}
 - {version: "0.7.18", date: 2025-06-09, codename: "alpha", note: Log --build fix}
 - {version: "0.7.17", date: 2025-06-09, codename: "alpha", note: Log --build logic}
 - {version: "0.7.16", date: 2025-06-07, codename: "alpha", note: removed legacy config}
