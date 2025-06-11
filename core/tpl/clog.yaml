@@ -61,7 +61,7 @@ snippets:
   bc-wants-stage-flow:  yq -r '.[0].flow|select(.=="stage")' "$(clog bc-releases-yaml)"
   bc-wants-test-flow:  yq -r '.[0].flow|select(.=="test")' "$(clog bc-releases-yaml)"
   bc-wants-schedule-flow:  yq -r '.[0].flow|select(.=="schedule")' "$(clog bc-releases-yaml)"
-  bc-log-divider: eval "$(clog Crayon)";for i in {1..8};do DIV="$DIV$cW▬▬▬▬▬▬▬▬▬$cE|";done;printf "$DIV$cX\n"
+  bc-logs-hr: eval "$(clog Crayon)";for i in {1..8};do DIV="$DIV$cW▬▬▬▬▬▬▬▬▬$cE|";done;printf "$DIV$cX\n"
 
   list-bucket: |
     clog Log -I "\$CLOG_BUCKET=$CLOG_BUCKET/clogbin"

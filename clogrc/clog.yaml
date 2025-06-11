@@ -45,7 +45,8 @@ snippets:
   bc-main-repo: echo "mrmxf/clog"
   bc-prod-logic-build: |
     do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
-    do="$do(from releases.yaml)"
+    [ -z "$do" ] && do="dev(from releases.yaml)" || do="prod(from releases.yaml)" 
+
     # rules - ensure valid brach for workflow
     [[ "create" == "$GITHUB_EVENT_NAME " ]] && git checkout main
     # overrides always win - prod override strongest
@@ -54,7 +55,7 @@ snippets:
     echo "$do"
   bc-prod-logic-deploy: |
     do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
-    do="$do(from releases.yaml)"
+    [ -z "$do" ] && do="dev(from releases.yaml)" || do="prod(from releases.yaml)" 
     # rules
     [[ "create" == "$GITHUB_EVENT_NAME " ]] && git checkout main
     [ -n "$(clog git branch)" ] && [[ "$(clog git branch)" != "main" ]] && do="dev(not main branch)"
@@ -66,7 +67,8 @@ snippets:
   bc-wants-stage-flow:  yq -r '.[0].flow|select(.=="stage")' "$(clog bc-releases-yaml)"
   bc-wants-test-flow:  yq -r '.[0].flow|select(.=="test")' "$(clog bc-releases-yaml)"
   bc-wants-schedule-flow:  yq -r '.[0].flow|select(.=="schedule")' "$(clog bc-releases-yaml)"
-  bc-log-divider: eval "$(clog Crayon)";for i in {1..8};do DIV="$DIV$cW▬▬▬▬▬▬▬▬▬$cE|";done;printf "$DIV$cX\n"
+  bc-log-hr: eval "$(clog Crayon)";for i in {1..8};do HR="$HR\e[09${i}m▬▬▬▬▬▬▬▬▬$cE|";done;printf "$HR$cX\n"
+
   # ---------------------------------------------------------------------------------------------------------
   git:
     tag:
@@ -202,7 +204,7 @@ snippets:
     clog Log -I "$(((++STEP))).  Check build";     clog Check build;     ERR=$((ERR+$?))
     clog Log -I "$(((++STEP))).  Check deploy";    clog Check deploy;    ERR=$((ERR+$?))
     clog Log -B "$ERR" "$doPROD" "✅ checks ok" "❌ checks failed" || exit 1; #abort if PROD
-    clog bc-log-divider
+    clog bc-logs-hr
 
     ((++STEP));clog Should MAKE "golang" && clog build-golang "$doPROD" "$modeMSG"; ERR=$((ERR+$?))
 
@@ -230,7 +232,7 @@ snippets:
     clog Log -I "$(((++STEP))).  Check tools";     clog Check tools;     ERR=$((ERR+$?))
     clog Log -I "$(((++STEP))).  Check deploy";    clog Check deploy;    ERR=$((ERR+$?))
     clog Log -B "$ERR" "$doPROD" "✅ checks ok" "❌ checks failed" || exit 1; #abort if PROD
-    clog bc-log-divider
+    clog bc-logs-hr
 
     ((STEP++));clog Should MAKE "deploy" && clog deploy-s3 "$doPROD" "$modeMSG"; ERR=$((ERR+$?))
 
