@@ -29,7 +29,44 @@ clog:
 # -----------------------------------------------------------------------------
 snippets:
   # build control logic for this repo - all commands start with bc
+  # dev or prod rules:
+  #     default - always dev unless build: prod in bc-releases-yaml
+  #     rules
+  #       - prod deploy - main branch or empty(default) branch only
+  #       - prod deploy - main repo (not fork) only
+  #     override
+  #       - MAKE prod - forces production (and overrides MAKE dev)
+  #       - MAKE dev  - forces development
+  # clog bc-prod-logic-xx returns    "dev|prod"+"(reasonString)"
   bc-releases-yaml: yq -r '.clog."releases-path"' clogrc/clog.yaml
+  bc-main-repo: echo "<account>/<reponame>"
+  bc-prod-logic-build: |
+    do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
+    do="$do(from releases.yaml)"
+    # rules - none
+    # overrides always win - prod override strongest
+    clog Should MAKE "dev" && do="dev(forced by MAKE)"
+    clog Should MAKE "prod" && do="prod(forced by MAKE)"
+    echo "$do"
+  bc-prod-logic-deploy: |
+    do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
+    do="$do(from releases.yaml)"
+    # rules
+    [ -n "$(clog git branch)" ] && [[ "$(clog git branch)" != "main" ]] && do="dev(not main branch)"
+    [[ "$(clog bc-main-repo)" != "$(clog git repo)" ]] && do="dev(repo!=$(clog bc-main-repo))"
+    # overrides always win - prod override strongest
+    clog Should MAKE "dev" && do="dev(forced by MAKE)"
+    clog Should MAKE "prod" && do="prod(forced by MAKE)"
+    echo "$do"
+  bc-wants-stage-flow:  yq -r '.[0].flow|select(.=="stage")' "$(clog bc-releases-yaml)"
+  bc-wants-test-flow:  yq -r '.[0].flow|select(.=="test")' "$(clog bc-releases-yaml)"
+  bc-wants-schedule-flow:  yq -r '.[0].flow|select(.=="schedule")' "$(clog bc-releases-yaml)"
+  bc-log-divider: eval "$(clog Crayon)";for i in {1..8};do DIV="$DIV$cW▬▬▬▬▬▬▬▬▬$cE|";done;printf "$DIV$cX\n"
+
+  list-bucket: |
+    clog Log -I "\$CLOG_BUCKET=$CLOG_BUCKET/clogbin"
+    aws s3 ls --recursive ${CLOG_BUCKET}/clogbin
+  watch: hugo server --port=1313 --buildDrafts --buildFuture --buildExpired --cleanDestinationDir
   git:
     tag:
       ref: echo "v$(yq -r '.[0].version'"$(clog bc-releases-yaml)")" #add a v for golang
@@ -71,3 +108,8 @@ check:
           vgo="$(go version|cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+')" 
           [[ "$vgo" == "$(clog project needs golang)" ]]
         catch: clog Log -E "wrong go version. Need $(clog project needs golang)"
+  build:
+    blocks:
+      - try: echo "pending - go test"
+        ok: clog Log -W "go test needs fixing for full build"
+        catch: clog Log -E "go test failed"

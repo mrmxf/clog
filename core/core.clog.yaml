@@ -93,7 +93,7 @@ check:
       #     clog Log -W "($(clog git message latest)) != ($(clog git message ref))"
       - try: clog    git tree clean
         ok: clog Log -I "Ok working tree clean"
-        catch: clog Log -W "   working tree NOT clean"
+        catch: clog Log -E "   working tree NOT clean"; exit 1
       - try: clog    git tree ahead
         ok: clog Log -I "Ok working tree not ahead of origin"
         catch: clog Log -W "   working tree is ahead of origin"
@@ -156,6 +156,7 @@ snippets:
     # IMPORTANT YAML may parse logical expressions into arrays of strings e.g. [ -z "foo" ]
     # IMPORTANT use quotes carefully '[ -z "foo" ]' is a shell expression [ -z "foo" ] is an array of strings
     branch: git branch --show-current
+    repo:   git remote -v|grep 'fetch'|grep 'origin'|grep -oE ':([^\.]+)'|tail -c +2
     # --- git hash snippets:  clog git tag <snippet> -----------------------------
     hash:
       head: git rev-list -1 HEAD
@@ -171,7 +172,7 @@ snippets:
     tag:
       head: git tag --points-at HEAD
       latest: git tag --sort=committerdate | tail -1
-      origin: git ls-remote --tags --sort=-v:refname origin | head -1 | grep -oE 'v{0,1}[0-9]+\.[0-9]+\.[0-9]+'
+      origin: git ls-remote --tags --sort=-v:refname origin | head -1 | grep -oE 'v{0,1}[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-0]+){0,1}'
       # this is the default snippet to return the project's target tag
       # override in your project' clog.yaml
       # golang requires a 'v':

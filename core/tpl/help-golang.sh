@@ -97,10 +97,10 @@ fGoBuild(){
   if [ $err -gt 0 ]; then
     clog Log -E "$buildMsg ...  build failed"
     [ -n "$linkerDataSemverPath" ] &&  clog Log -UE "Linker data string was:$cC -ldflags \"$lds\""
-  else
-    size="$(du --apparent-size --block-size=M $gofile)"
-    clog Log -IU "$buildMsg ... $size"
+    return $err
   fi
+  size="$(du --apparent-size --block-size=M $gofile)"
+  clog Log -IU "$buildMsg ... $size"
 }
 
 # -----------------------------------------------------------------------------

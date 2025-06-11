@@ -18,12 +18,12 @@ fHugoBuild() {
   # tidy up before starting
     clog Log -I "purging old builds:  $ ${cC}rm ${cW}-rf$cF public/*$cX"
   rm -rf public/*
-  [ $? -gt 0 ] && fWarn "purging failed - continuing anyway"
+  [ $? -gt 0 ] && clog Log -W "purging failed - continuing anyway"
 
   clog Log -I "building hugo site with opts$cC $opts"
   hugo build $opts
-  [ $? -gt 0 ] && fError "hugo build failed" && exit 1
-  fOk   "static website (${cW}$(clog git tag ref)$cT) in$cF public/$cX"
+  [ $? -gt 0 ] && clog Log -E "hugo build failed" && exit 1
+  clog Log -I  "static website (${cW}$(clog git tag ref)$cT) in$cF public/$cX"
 }
 
 #      _              _

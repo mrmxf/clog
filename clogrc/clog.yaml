@@ -31,7 +31,43 @@ clog:
 # -----------------------------------------------------------------------------
 snippets:
   # build control logic for this repo - all commands start with bc
+  # dev or prod rules:
+  #     default - always dev unless build: prod in bc-releases-yaml
+  #     rules
+  #       - build+deploy- if github_event=="create" then checkout to main
+  #       - prod deploy - main branch or empty(default) branch only
+  #       - prod deploy - main repo (not fork) only
+  #     override
+  #       - MAKE prod - forces production (and overrides MAKE dev)
+  #       - MAKE dev  - forces development
+  # clog bc-prod-logic-xx returns    "dev|prod"+"(reasonString)"
   bc-releases-yaml: yq -r '.clog."releases-path"' clogrc/clog.yaml
+  bc-main-repo: echo "mrmxf/clog"
+  bc-prod-logic-build: |
+    do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
+    do="$do(from releases.yaml)"
+    # rules - ensure valid brach for workflow
+    [[ "create" == "$GITHUB_EVENT_NAME " ]] && git checkout main
+    # overrides always win - prod override strongest
+    clog Should MAKE "dev" && do="dev(forced by MAKE)"
+    clog Should MAKE "prod" && do="prod(forced by MAKE)"
+    echo "$do"
+  bc-prod-logic-deploy: |
+    do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
+    do="$do(from releases.yaml)"
+    # rules
+    [[ "create" == "$GITHUB_EVENT_NAME " ]] && git checkout main
+    [ -n "$(clog git branch)" ] && [[ "$(clog git branch)" != "main" ]] && do="dev(not main branch)"
+    [[ "$(clog bc-main-repo)" != "$(clog git repo)" ]] && do="dev(repo!=$(clog bc-main-repo))"
+    # overrides always win - prod override strongest
+    clog Should MAKE "dev" && do="dev(forced by MAKE)"
+    clog Should MAKE "prod" && do="prod(forced by MAKE)"
+    echo "$do"
+  bc-wants-stage-flow:  yq -r '.[0].flow|select(.=="stage")' "$(clog bc-releases-yaml)"
+  bc-wants-test-flow:  yq -r '.[0].flow|select(.=="test")' "$(clog bc-releases-yaml)"
+  bc-wants-schedule-flow:  yq -r '.[0].flow|select(.=="schedule")' "$(clog bc-releases-yaml)"
+  bc-log-divider: eval "$(clog Crayon)";for i in {1..8};do DIV="$DIV$cW▬▬▬▬▬▬▬▬▬$cE|";done;printf "$DIV$cX\n"
+  # ---------------------------------------------------------------------------------------------------------
   git:
     tag:
       ref: echo "v$(yq -r '.[0].version' "$(clog bc-releases-yaml)")" #add a v for golang
@@ -43,15 +79,166 @@ snippets:
     [[ "$b" == main ]] && echo "" || echo "$b"|tr -d '[:blank:]'
   project:
     config: |
-      # make some variables for standard build scripts -----------------------|
-      export PROJECT=$(basename $(pwd))               # project you're building
+      # make some variables for standard build scripts
+      export PROJECT=clog                            # project you're building
+    has:
+      # git-lfs: |
+      #   git lfs --version 2>/dev/null|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'|head -1
+      golang: |
+        go version|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
     needs:
+      # git-lfs: echo "3.6.1"
       # grab the golang version from go.mod
       golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'
   argstest: |
     echo "MAKE=($1) ($2) ($3) ($4)"
     echo "Another line"
     echo "$1 is still one"
+  #          _                  _             _   _      _ 
+  #     __  | |  ___   __ _    | |__   _  _  (_) | |  __| |
+  #    / _| | | / _ \ / _` |   | '_ \ | || | | | | | / _` |
+  #    \__| |_| \___/ \__, |   |_.__/  \_,_| |_| |_| \__,_|
+  #                   |___/                                
+  # clog build  - production build
+  # clog build MAKE "golang deploy" - do a full dev build & deploy
+  workflow-message-file: echo "tmp/workflow-message"
+  build-golang: |
+    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlights
+    doPROD="$1"
+    modeMSG="$2"
+
+    ERR=0
+    help="tpl/help-golang.sh"         # build embedded help
+    eval "$(clog Cat $help)"          # golang build helpers
+
+    clog Log -I "$STEP.$(((++s))). ⚒️ build-golang $modeMSG $cC$PROJECT $cX using clog's$cF $help"
+    # ------------------------------------------------------------------------------
+
+    # ensure tmp folder exists
+    mkdir -p tmp
+
+    branch="$(clog git branch)"
+    hash="$(clog git hash head)"                                # use the head hash as the build hash
+    suffix="" && [[ "$branch" != "main" ]] && suffix="$branch"  # use the branch name as the suffix
+    app=clog                                                    # command you type to run the build
+    title="Command Line Of Go"                                  # title of the software
+    linkerPath="github.com/mrmxf/clog/semver.SemVerInfo"        # go tool objdump -S clog-mrmxf|grep /semver.SemVerInfo
+
+      fGoBuild tmp/$app-amd-lnx     linux   amd64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
+    # fGoBuild tmp/$app-amd-win.exe windows amd64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
+      fGoBuild tmp/$app-amd-mac     darwin  amd64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
+      fGoBuild tmp/$app-arm-lnx     linux   arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
+    # fGoBuild tmp/$app-arm-win.exe windows arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
+      fGoBuild tmp/$app-arm-mac     darwin  arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
+
+    clog Log -B "$ERR" "$doPROD" "✅ build $modeMSG→$cS tmp/$cX ok" "❌ build →$cE tmp/$cX failed" || exit 1; #abort if PROD
+
+  deploy-s3: |
+    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlights
+    doPROD="$1"
+    modeMSG="$2"
+
+    ERR=0
+    vAws="$(aws --version|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'|head -1)"
+
+    # in github actions, the bucket env is S3_BUCKET unless overridden
+    [ -n "$GITHUB_ACTIONS" ] && [ -z "$CLOG_BUCKET" ] && CLOG_BUCKET="$S3_BUCKET"
+
+    # ------------------------------------------------------------------------------
+    fUpload() {
+      local tmp filename s3dst cOS cPU
+      tmp="$1"; shift
+      filename="$1"; shift
+      s3dst="$1"; shift
+      cOS="$1"; shift
+      cPU="$1"; shift
+
+      [ ! -f "$tmp/$filename" ] && clog Log -W "${cPU}  skip  $cOS$filename$cX - not found" && return
+
+      sz="$(du -sh $tmp/$filename|grep -oE '([0-9\.]+[KMGTP])')"
+      clog Log -I "$cPU↑↑($sz)$cOS $filename$cX → $s3dst/$filename"
+      aws s3 cp  --quiet "$tmp/$filename" "s3://$s3dst/$filename"
+      return $?
+    }
+
+    # handbrake off - ready to deploy
+    # ------------------------------------------------------------------------------
+    clog Log -I "$STEP.$(((++s))). 🚀 deploy-s3 $modeMSG $cC$PROJECT $cX using aws cli $cF $vAws"
+
+    # deploy a tagged release from main otherwise "clogdev"
+    ROOT="clogbin"
+    DST="dev"; [ -n "$doPROD" ] && DST="$(clog git tag ref)"
+    DEV="dev"; [ -n "$doPROD" ] && DEV=""
+
+    clog Log -I "$STEP.$(((++s))). install script$cF tmp/clog$DEV$cX for curl ${cF}<url>/get/${cU}clog$DEV"
+
+    # fix up the line URL=https://mrmxf.com/get/CLOG_BIN
+    clog Cat "tpl/install-clog.sh" | sed  -r "s/CLOG_BIN/$ROOT\/$DST/" > ./tmp/clog$DEV
+    fUpload "./tmp" "clog$DEV"         "$CLOG_BUCKET"
+
+    fUpload "./tmp" "clog-amd-lnx"     "$CLOG_BUCKET/$ROOT/$DST" "$cLnx" "$cAmd"; ERR=$((ERR+$?))
+    fUpload "./tmp" "clog-amd-mac"     "$CLOG_BUCKET/$ROOT/$DST" "$cMac" "$cAmd"; ERR=$((ERR+$?))
+    fUpload "./tmp" "clog-amd-win.exe" "$CLOG_BUCKET/$ROOT/$DST" "$cWin" "$cAmd"; ERR=$((ERR+$?))
+    fUpload "./tmp" "clog-arm-lnx"     "$CLOG_BUCKET/$ROOT/$DST" "$cLnx" "$cArm"; ERR=$((ERR+$?))
+    fUpload "./tmp" "clog-arm-mac"     "$CLOG_BUCKET/$ROOT/$DST" "$cMac" "$cArm"; ERR=$((ERR+$?))
+    fUpload "./tmp" "clog-arm-win.exe" "$CLOG_BUCKET/$ROOT/$DST" "$cWin" "$cArm"; ERR=$((ERR+$?))
+    
+    okMSG="✅deploy-s3 $modeMSG$cC curl$cF https://mrmxf.com/${cC}get$cF/${cW}clog$DEV$cX|${cC}bash$cS # test install"
+    errMSG="❌deploy-s3 $modeMSG failed with errors"
+    clog Log -B "$ERR" "$doPROD" "$okMSG" "$errMSG" || exit 1; #abort if PROD
+    exit 0
+
+  build: |
+    export MAKE="golang"; [[ "MAKE" == "$1" ]] && MAKE="$2"
+    modeMSG="$(clog bc-prod-logic-build)"
+    [[ "${modeMSG:0:4}" == "prod" ]] && doPROD="prod"
+
+    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlight
+    clog Log -I  "🤖 build $modeMSG$cS $PROJECT$cX MAKE:$cC $MAKE"
+
+    ERR=0; export STEP=0
+    clog Log -I "$(((++STEP))).  Check pre-build"; clog Check pre-build; ERR=$((ERR+$?))
+    clog Log -I "$(((++STEP))).  Check tools";     clog Check tools;     ERR=$((ERR+$?))
+    clog Log -I "$(((++STEP))).  Check build";     clog Check build;     ERR=$((ERR+$?))
+    clog Log -I "$(((++STEP))).  Check deploy";    clog Check deploy;    ERR=$((ERR+$?))
+    clog Log -B "$ERR" "$doPROD" "✅ checks ok" "❌ checks failed" || exit 1; #abort if PROD
+    clog bc-log-divider
+
+    ((++STEP));clog Should MAKE "golang" && clog build-golang "$doPROD" "$modeMSG"; ERR=$((ERR+$?))
+
+    icon="✅";[ $ERR -gt 0 ] && icon="❌"
+    printf -v MSG "$icon build $modeMSG complete with %d errors" $ERR
+    echo "$modeMSG" > "$(clog workflow-message-file)"
+    clog Log -B "$ERR" "$doPROD" "✅ golang build ok - $modeMSG" "❌ golang build failed - $modeMSG" || exit 1; #abort if PROD
+    exit 0
+    
+  deploy: |
+    export MAKE="nothing"; [[ "MAKE" == "$1" ]] && MAKE="$2"
+    modeMSG="$(clog bc-prod-logic-deploy)"
+    [[ "${modeMSG:0:4}" == "prod" ]] && doPROD="prod"
+    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlight
+
+    clog Log -I  "🤖 deploy $modeMSG$cS $PROJECT$cX MAKE:$cC $MAKE"
+    clog Log -I "git branch:\n$(git branch)\n$(clog git branch)"
+    clog Log -I "git repo:\n$(git remote -v)\n$(clog git repo)"
+    git checkout main
+    clog Log -I "git branch:\n$(git branch)\n$(clog git branch)"
+    clog Log -I "git repo:\n$(git remote -v)\n$(clog git repo)"
+
+    ERR=0; export STEP=0
+    clog Log -I "$(((++STEP))).  Check pre-build"; clog Check pre-build; ERR=$((ERR+$?))
+    clog Log -I "$(((++STEP))).  Check tools";     clog Check tools;     ERR=$((ERR+$?))
+    clog Log -I "$(((++STEP))).  Check deploy";    clog Check deploy;    ERR=$((ERR+$?))
+    clog Log -B "$ERR" "$doPROD" "✅ checks ok" "❌ checks failed" || exit 1; #abort if PROD
+    clog bc-log-divider
+
+    ((STEP++));clog Should MAKE "deploy" && clog deploy-s3 "$doPROD" "$modeMSG"; ERR=$((ERR+$?))
+
+    printf -v deployMSG "deploy $modeMSG complete with %d errors" $ERR
+    echo "$deployMSG" > "$(clog workflow-message-file)"
+    clog Log -B "$ERR" "$doPROD" "✅ s3 deploy ok - $deployMSG" "❌ deploy-s3 failed - $deployMSG" || exit 1; #abort if PROD
+    exit 0
+
 # #############################################################################
 #        _                   ___   _                 _
 #   __  | |  ___   __ _     / __| | |_    ___   __  | |__
@@ -71,18 +258,26 @@ check:
       - try: go test
         catch: clog Log -E "go test failed"
   # --- clog Check deploy -----------------------------------------------------
-  aws-deploy:
+  deploy:
     blocks:
       # beware the first block needs double quotes or it becomes an array!
-      - try: "[ -n \"$CLOG_BUCKET\" ]"
-        ok: clog Log -I "\$CLOG_BUCKET ok"
-        catch: clog Log -E "\$CLOG_BUCKET not set - cannot deploy"
+      - try: |  # in github actions, the bucket env is S3_BUCKET unless overridden
+          [ -n "$GITHUB_ACTIONS" ] && [ -z "$CLOG_BUCKET" ] && CLOG_BUCKET="$S3_BUCKET"
+          [ -n \"$CLOG_BUCKET\" ]
+        ok: |
+          [ -z "$GITHUB_ACTIONS" ] && clog Log -I "\$CLOG_BUCKET ok" && exit 0
+          [ -n "$CLOG_BUCKET" ]    && clog Log -I "\$CLOG_BUCKET ok" && exit 0
+          clog Log -W "\$CLOG_BUCKET is \"\", using \$S3_BUCKET \"$S3_BUCKET\""
+        catch: |
+          [ -z "$GITHUB_ACTIONS" ] && clog Log -E "\$CLOG_BUCKET not set - cannot deploy" && exit 1
+          [ -n "$CLOG_BUCKET" ]    && clog Log -I "\$CLOG_BUCKET invalid - cannot deploy" && exit 1
+          clog Log -W "\$CLOG_BUCKET is \"\", using \$S3_BUCKET \"$S3_BUCKET\"  - cannot deploy" && exit 1
       - try: aws --version 2>/dev/null| grep aws-cli/2. | head -c 10
         ok: clog Log -I "aws cli v2 ok"
         catch: clog Log -E "aws cli v2 not installed - try clog install aws"
-      - try: aws s3 cp --dryrun LICENSE $CLOG_BUCKET/LICENSE
+      - try: aws s3 cp --dryrun LICENSE s3://$CLOG_BUCKET/LICENSE
         ok: clog Log -I "aws s3 write access to bucket ok"
-        catch: clog Log -E "aws s3 cli - cannot write to \$CLOG_BUCKET/LICENSE"
+        catch: clog Log -E "aws s3 cli - cannot test-write to s3://\$CLOG_BUCKET/LICENSE (s3://$CLOG_BUCKET/LICENSE)"
       - try: go test
         ok: clog Log -I "go test passed"
         catch: clog Log -E "go test failed"
