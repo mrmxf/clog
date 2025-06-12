@@ -1,12 +1,12 @@
 ---
 # yamllint disable rule:colons
-#        _                                                                  __   _
-#   __  | |  ___   __ _       __   ___   _ _   ___       __   ___   _ _    / _| (_)  __ _
-#  / _| | | / _ \ / _` |  _  / _| / _ \ | '_| / -_)  _  / _| / _ \ | ' \  |  _| | | / _` |
-#  \__| |_| \___/ \__, | (_) \__| \___/ |_|   \___| (_) \__| \___/ |_||_| |_|   |_| \__, |
-#                 |___/                                                             |___/
+#                                   _                                          _ 
+#   __   ___   _ _   ___       __  | |  ___   __ _       _  _   __ _   _ __   | |
+#  / _| / _ \ | '_| / -_)  _  / _| | | / _ \ / _` |  _  | || | / _` | | '  \  | |
+#  \__| \___/ |_|   \___| (_) \__| |_| \___/ \__, | (_)  \_, | \__,_| |_|_|_| |_|
+#                                            |___/       |__/                    
 ### when clog starts it uses these config values. 
-###    1. clog searches for `clog.config.yaml` in each `clog.clogrc.search-order` folder
+###    1. clog searches for `clog.yaml` in each `clog.clogrc.search-order` folder
 ###    2. for every match, the config is overlaid on previous configs
 ###    3. recommended order: machine config, user config, project config
 
@@ -15,20 +15,23 @@
 #                        ⇑⇑⇑⇑⇑⇑⇑           ⇑⇑⇑⇑
 
 # #############################################################################
-#                      __   _
-#   __   ___   _ _    / _| (_)  __ _
-#  / _| / _ \ | ' \  |  _| | | / _` |
-#  \__| \___/ |_||_| |_|   |_| \__, |
-#                              |___/
+#        _              
+#   __  | |  ___   __ _ 
+#  / _| | | / _ \ / _` |
+#  \__| |_| \___/ \__, |
+#                 |___/ 
 # -----------------------------------------------------------------------------
 clog:
+  # path to the yaml file defining release history - see semver package
+  releases-path: "releases.yaml"  # release & build tracking
   clogrc:
     format: yaml
     # search & load config files. Search order reset with each new config file.
     search-order:
-      - /var/clogrc/clog.config.yaml
-      - $HOME/.config/clogrc/clog.config.yaml
-      - ./clogrc/clog.config.yaml
+      - /var/clogrc/clog.yaml
+      - /var/clogrc/clog.yaml
+      - $HOME/.config/clogrc/clog.yaml
+      - ./clogrc/clog.yaml
       - ./clogrc/clog.yaml
       - .clog.yaml
   # these are the ENV variables that are searched for by various tools
@@ -45,21 +48,14 @@ clog:
       access-token: GHAT
       gist-token: GHGIST
       user: GHUSR
-  # path to the yaml file defining release history - see semver package
-  history-file: "releases.yaml"
-  # detect home folder and make it available to clog
-  home-folder: set at runtime
-  # clog Jumbo --help to see the full font list
-  jumbo:
+  home-folder: set at runtime                      # detected & used internally
+  jumbo:                          # clog Jumbo --help for font & style commands
     font: small
     sample: www.mrmxf.com
-  log:
-    # logLevel: debug | info | warn | error - all go to stdErr
-    level: debug
-    # logHandler: plain | pretty | json - default pretty handler for humans
-    style: pretty
-  version:
-    # set at runtime from clog.history-file
+  log:           
+    level: debug               # debug | info | warn | error - all go to stdErr
+    style: pretty               # plain | pretty | json - this sets the default
+  version:                                  # set at runtime via semver package
     short: "0.0.0"
     long: 0.0.0-type-hash
 # #############################################################################
@@ -73,71 +69,42 @@ check:
   pre-build:
     before: eval "$(clog Inc)"
     blocks:
-      - finally: clog Log -I "        branch   $(clog git branch)"
-      - finally: clog Log -I "       tag-ref   $(clog git tag ref)"
-      - finally: clog Log -I "      tag-head   $(clog git tag head)"
-      - finally: clog Log -I "    tag-latest   $(clog git tag latest)"
-      - finally: clog Log -I "    tag-origin   $(clog git tag origin)"
+      - finally: clog Log -I "        branch    $(clog git branch)"
+      - finally: clog Log -I "       tag-ref    $(clog git tag ref)"
+      - finally: clog Log -I "      tag-head    $(clog git tag head)"
+      # - finally: clog Log -I "    tag-latest    $(clog git tag latest)"
+      - finally: clog Log -I "    tag-origin    $(clog git tag origin)"
       - try: '[[ "$(clog git tag head)" == "$(clog git tag ref)" ]]'
         ok: clog Log -I "Ok    tag-head == tag-ref"
         catch: clog Log -W "      tag-head != tag-ref"
-      - try: '[[ "$(clog git tag latest)" == "$(clog git tag ref)" ]]'
-        ok: clog Log -I "Ok  tag-latest == tag-ref"
-        catch: clog Log -W "    tag-latest != tag-ref"
+      # - try: '[[ "$(clog git tag latest)" == "$(clog git tag ref)" ]]'
+      #   ok: clog Log -I "Ok  tag-latest == tag-ref"
+      #   catch: clog Log -W "    tag-latest != tag-ref"
       - try: '[[ "$(clog git tag origin)" == "$(clog git tag ref)" ]]'
         ok: clog Log -I "Ok  tag-origin == tag-ref"
         catch: clog Log -W "    tag-origin != tag-ref"
       - try: '[[ "$(clog git hash head)" == "$(clog git hash origin)" ]]'
         ok: clog Log -I "Ok   hash-head == hash-origin"
         catch: clog Log -W "     hash-head != hash-origin"
-      - try: '[[ "$(clog git message latest)" != "$(clog git message ref)" ]]'
-        ok: clog Log -I "message latest == message-ref"
-        catch: |
-          clog Log -W "message latest != message-ref"
-          clog Log -W "($(clog git message latest)) != ($(clog git message ref))"
+      # - try: '[[ "$(clog git message latest)" != "$(clog git message ref)" ]]'
+      #   ok: clog Log -I "message latest == message-ref"
+      #   catch: |
+      #     clog Log -W "message latest != message-ref"
+      #     clog Log -W "($(clog git message latest)) != ($(clog git message ref))"
       - try: clog    git tree clean
         ok: clog Log -I "Ok working tree clean"
-        catch: clog Log -W "   working tree NOT clean"
+        catch: clog Log -E "   working tree NOT clean"; exit 1
       - try: clog    git tree ahead
-        ok: clog Log -I "Ok working tree up to date with origin"
+        ok: clog Log -I "Ok working tree not ahead of origin"
         catch: clog Log -W "   working tree is ahead of origin"
       - try: clog   git tree behind
-        ok: clog Log -I "Ok working tree up to date with origin"
+        ok: clog Log -I "Ok working tree not behind origin"
         catch: clog Log -W "   working tree is behind origin"
       - try: clog git unstaged
         ok: clog Log -I "Ok all changes staged"
         catch: clog Log -W "   unstaged changes in working tree"
-  # --- clog Check gitlab-env -------------------------------------------------
-  gitlab-env:
-    blocks:
-      - finally: clog Log -I "                 \$REPO   $(REPO)"
-      - finally: clog Log -I "        \$REPORT_FOLDER   $(REPORT_FOLDER)"
-      - finally: clog Log -I "       \$golang Version   $(vGO)"
-      - finally: clog Log -I "   need golang Version   $(clog project needs golang)"
-      # - PATH
-      # - CI_COMMIT_BRANCH
-      # - CI_COMMIT_REF_SLUG
-      # - CI_PIPELINE_SOURCE
-      # - CI_MERGE_REQUEST_APPROVED
-      # - CI_MERGE_REQUEST_ID
-      # - CI_MERGE_REQUEST_LABELS
-      # - CI_MERGE_REQUEST_REF_PATH
-      # - CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
-      # - CI_BUILDS_DIR
-      # - CI_COMMIT_DESCRIPTION
-      # - CI_COMMIT_TAG
-      # - CI_JOB_STAGE
-      # - CI_JOB_TOKEN
-      # - CI_PIPELINE_NAME
-      # - CI_PROJECT_DIR
-      # - CI_PROJECT_PATH
-      # - CI_RUNNER_VERSION
-      # - CI_SERVER
-      # - GITLAB_USER_EMAIL
-      # - GITLAB_USER_ID
-      # - GITLAB_USER_LOGIN
-      # - GITLAB_USER_NAME
-      # - KUBECONFIG
+  # --- clog Check github deprecated - use the clogwork/.github/workflows/dump-context -
+
   tools:
       - name: golang
         try: |
@@ -189,6 +156,11 @@ snippets:
     # IMPORTANT YAML may parse logical expressions into arrays of strings e.g. [ -z "foo" ]
     # IMPORTANT use quotes carefully '[ -z "foo" ]' is a shell expression [ -z "foo" ] is an array of strings
     branch: git branch --show-current
+    repo: |
+      url="$(git remote -v|grep 'fetch'|grep 'origin'|head -1|tail -c +7|head -c -8|xargs)"
+      [[ "git" == "${url:0:3}" ]] && echo $url|grep -oE ':([^\.]+)'|tail -c +2 && exit 0
+      [[ "http" == "${url:0:4}" ]] && echo $url|grep -oE '[^\/]\/[a-z].*'|tail -c +3 && exit 0
+      exit 1
     # --- git hash snippets:  clog git tag <snippet> -----------------------------
     hash:
       head: git rev-list -1 HEAD
@@ -197,16 +169,16 @@ snippets:
     message:
       latest: git log HEAD | head -5 | tail -1 | xargs
       # this is the default snippet to return the target commit message for
-      # your project override in your project' clog.config.yaml
+      # your project override in your project' clog.yaml
       ref: yq -r '.[0].note' releases.yaml
     origin: git config --get remote.origin.url
     # --- git tag snippets:  clog git tag <snippet> -----------------------------
     tag:
       head: git tag --points-at HEAD
       latest: git tag --sort=committerdate | tail -1
-      origin: git ls-remote --tags --sort=-v:refname origin | head -1 | grep -oE 'v{0,1}[0-9]+\.[0-9]+\.[0-9]+'
+      origin: git ls-remote --tags --sort=-v:refname origin | head -1 | grep -oE 'v{0,1}[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-0]+){0,1}'
       # this is the default snippet to return the project's target tag
-      # override in your project' clog.config.yaml
+      # override in your project' clog.yaml
       # golang requires a 'v':
       # ref: echo "v$(yq -r '.[0].version' releases.yaml)"
       ref: yq -r '.[0].version' releases.yaml
@@ -277,23 +249,26 @@ snippets:
       yq: "        yq --version >/dev/null 2>&1"
     # install snippets --------------------------------------------------------
     aws: |
-      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+      [[ "$(dpkg --print-architecture)" == "amd64" ]] && awsZFB="x86_64"
+      [[ "$(dpkg --print-architecture)" == "arm64" ]] && awsZFB="aarch64"
+      curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-$awsZFB.zip" -o "/tmp/awscliv2.zip"
       cd /tmp
-      unzip ./awscliv2.zip
-      sudo ./aws/install
+      unzip -q ./awscliv2.zip
+      sudo ./aws/install --update
+
     docker-engine: |
       # Add Docker's official GPG key:
-      sudo apt-get update
-      sudo apt-get install ca-certificates curl
-      sudo install -m 0755 -d /etc/apt/keyrings
+      sudo apt-get -qq update; sudo apt-get -qq upgrade
+      sudo apt-get install -yq ca-certificates curl
+      sudo install -q -m 0755 -d /etc/apt/keyrings
       sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
       sudo chmod a+r /etc/apt/keyrings/docker.asc
       # Add the repository to Apt sources:
       arch="$(dpkg --print-architecture)"
       DEBy=$(. /etc/os-release && echo "$VERSION_CODENAME")
       echo  "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian  $DEBy stable"|sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-      sudo apt-get update
-      sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo apt-get -qq update
+      sudo apt-get install -yq --autoremove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
       sudo usermod -aG docker $USER
       newgrp docker
       docker run hello-world
@@ -318,6 +293,10 @@ snippets:
       && sudo apt install gh -y
     gh-mac: brew install gh
     git: sudo apt-get install -y git-all
+    homebrew: |
+      [[ "$(uname -m)" == "arm64" ]] && clog Log -W "arm is badly supported!"
+      sudo apt-get install -y build-essential procps curl file git
+      curl -fSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
     hugo: |
       eval "$(clog Inc)"
       j="$(curl -sL https://api.github.com/repos/gohugoio/hugo/releases/latest)"
@@ -338,11 +317,25 @@ snippets:
       sudo apt-get install -y /tmp/hugo.deb
     jq: sudo apt-get install -y jq
     ko: |
-      VERSION=0.17.1
-      curl -sSfL "https://github.com/ko-build/ko/releases/download/v${VERSION}/ko_${VERSION}_${OS}_${ARCH}.tar.gz" > /tmp/ko.tar.gz
-      #curl -sSfL https://github.com/ko-build/ko/releases/download/v${VERSION}/multiple.intoto.jsonl > /tmp/multiple.intoto.jsonl
-      slsa-verifier verify-artifact --provenance-path /tmp/multiple.intoto.jsonl --source-uri github.com/ko-build/ko --source-tag "v${VERSION}" /tmp/ko.tar.gz
-      sudo tar -xzf /tmp/ko.tar.gz --directory /usr/local/bin/ &&  sudo chmod +x /usr/local/bin/ko
+      # check that slsa-verifier is installed
+      which slsa-verifier > /dev/null 2>&1 || clog install slsa-verifier
+      # process the releases of the ko repo
+      vURL=https://api.github.com/repos/ko-build/ko/releases/latest
+      j="$(curl -sL $vURL)"
+      pkg=".tar.gz"
+      arch="arm" ; [[ "$(uname -m)" == "x86_64" ]] && arch="x86_64"
+      os="$(uname -s)"
+      v="$(   echo $j | jq -r '.name   | ltrimstr("v")')"
+      urls="$(echo $j | jq -r '.assets | .[] | [.name, .browser_download_url] | .[1]')"
+      url="$(echo "$urls" | grep "$v" | grep "$pkg" | grep "$arch" | grep -i "$os" | head -1)"
+      # printf "from=%s\nurl=%s\npkg=%s\narch=%s\nos=%s\nv=%s\n" "$vURL" "$url" "$pkg" "$arch" "$os" "$v" && exit 0
+      TMP="/tmp/ko.tar.gz"
+      SIG="/tmp/multiple.intoto.jsonl"
+      DST="/usr/local/bin/ko"
+      curl -sSfL "$url" > "$TMP"
+      curl -sSfL https://github.com/ko-build/ko/releases/download/v$v/multiple.intoto.jsonl > "$SIG"
+      slsa-verifier verify-artifact --provenance-path "$SIG" --source-uri github.com/ko-build/ko --source-tag "v${v}" "$TMP"
+      sudo tar -xzf "$TMP" --directory /usr/local/bin/ &&  sudo chmod +x "$DST"
     kubectl: |
       sudo apt-get update
       # apt-transport-https may be a dummy package; if so, you can skip that package
@@ -360,8 +353,8 @@ snippets:
       curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 \
       && sudo install minikube-linux-amd64 /usr/local/bin/minikube
     nginx: |
-      sudo apt-get update;  sudo apt-get upgrade -y -q
-      sudo apt-get install -y -q nginx
+      sudo apt-get -qq update;  sudo apt-get -yq upgrade
+      sudo apt-get install -yq nginx
       if [ -n "$(which ufw)" ]; then
         sudo ufw allow "Nginx Full" > /dev/null   # Allow HTTP, HTTPS
         sudo ufw reload
@@ -378,7 +371,20 @@ snippets:
       fi
     node-red: docker run --detach -p 1880:1880 -v $HOME/.node-red:/data --name nodered --rm nodered/node-red
     nvm: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-    slsa-verifier: go install github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
+    slsa-verifier: |
+      vURL=https://api.github.com/repos/slsa-framework/slsa-verifier/releases/latest
+      j="$(curl -sL $vURL)"
+      pkg=""
+      arch="arm" ; [[ "$(uname -m)" == "x86_64" ]] && arch="amd64"
+      os="$(uname -s)"
+      v="$(   echo $j | jq -r '.name   | ltrimstr("v")')"
+      urls="$(echo $j | jq -r '.assets | .[] | [.name, .browser_download_url] | .[1]')"
+      url="$(echo "$urls" | grep "$v" | grep "$pkg" | grep "$arch" | grep -i "$os" | head -1)"
+      # printf "from=%s\nurl=%s\npkg=%s\narch=%s\nos=%s\nv=%s\n" "$vURL" "$url" "$pkg" "$arch" "$os" "$v" && exit 0
+      TMP="/tmp/slsa"
+      DST="/usr/local/bin/slsa-verifier"
+      curl -sSfL "$url" > "$TMP"
+      sudo mv "$TMP" "$DST" && sudo chmod +x "$DST"
     snap: sudo apt install -y snapd
     yarn: npm install --global yarn && echo "PATH=\"$PATH:$(yarn global bin)\"" >> ~/.bashrc
     yq: |
@@ -397,14 +403,6 @@ snippets:
     home: echo ~
     wslusr: echo "$(wslvar USERPROFILE)"
     wslhome: echo "$(wslpath "$(wslvar USERPROFILE)")" 
-#                        _
-#   ||_    _ _    __ _  (_)  _ _   __ __
-#  (_-<   | ' \  / _` | | | | ' \  \ \ /
-#  / _/   |_||_| \__, | |_| |_||_| /_\_\
-#   ||           |___/
-  nginx:
-    av: ls -al /etc/nginx/sites-enabled/
-    en: ls -al /etc/nginx/sites-available/
 #                               _              _
 #   ||_    _ __   _ _   ___    (_)  ___   __  | |_
 #  (_-<   | '_ \ | '_| / _ \   | | / -_) / _| |  _|

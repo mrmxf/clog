@@ -40,13 +40,13 @@ var RootCommand = &cobra.Command{
 Command Line Of Go (clog)
 =========================
 Clog aggregates:
-  - snippets: command lines in your porject's clog.config.yaml
+  - snippets: command lines in your porject's colg.yaml
 	-  scripts: files matching "clogrc/*.sh" - see below
 	- commands: embedded functions compiled into clog
 
-Create clog.config.yaml for a project
+Create clog.yaml for a project
 ==========================================
-clog Init  # run it twice to get a copy of the clog.core.config.yaml
+clog Init  # run it twice to get a copy of the core.clog.yaml
 
 Scripts in "clogrc/" must have the following 3 lines to be found by clog
 ==========================================
@@ -56,7 +56,7 @@ Scripts in "clogrc/" must have the following 3 lines to be found by clog
 
 Adding Snippets & macros
 ==========================================
-edit clogrc/clog.config.yaml  # after you've made one
+edit clogrc/clog.yaml  # after you've made one
 
 Running clog
 ==========================================
@@ -91,7 +91,7 @@ func init() {
 	slog.Debug("init " + file)
 
 	// Define persistent (global) flags and any flags for the root command
-	RootCommand.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "clog -c myClogfig.yaml   # clog Core Cat clogrc/core/clog.clConfig.yaml > myClogfig.yaml")
+	RootCommand.PersistentFlags().StringVarP(&ConfigFilePath, "config", "c", "", "clog -c myClogfig.yaml   # clog Cat core.clog.yaml > myClogfig.yaml")
 	RootCommand.PersistentFlags().BoolVar(&ShowVersion, "version", false, "clog --version           # shows the full version string")
 	RootCommand.PersistentFlags().BoolVarP(&ShowVersionShort, "v", "v", false, "clog -v                  # shows just the semantic version")
 	RootCommand.PersistentFlags().BoolVarP(&ShowVersionNote, "note", "n", false, "clog --note              # shows just the version note")

@@ -5,9 +5,9 @@
 //
 // It does 4 things:
 // 1. creates a clogrc folder if it doesn't exist
-// 2. copies core/sample/clog.config.yaml to clogrc/clog.config.yaml if missing
-// 3. copies core/clog.core.config.yaml to clogrc/tmp-clog.core.config.yaml
-// 4. copies all files in core/sample/init to clogrc if missing
+// 2. copies tpl/clog.yaml to clogrc/clog.yaml if missing
+// 3. copies core.clog.yaml to clogrc/tmp-core.clog.yaml
+// 4. copies all files in tpl/init to clogrc if missing
 
 package init
 
@@ -23,12 +23,12 @@ import (
 // Command define the cobra settings for this command
 var Command = &cobra.Command{
 	Use:   "Init",
-	Short: "create clogrc/clog.config.yaml if missing",
-	Long:  `create missing clogrc/clog.config.yaml and clogrc/tmp-clog.core.config.yaml.`,
+	Short: "create clogrc/clog.yaml if missing",
+	Long:  `create missing clogrc/clog.yaml and clogrc/tmp-core.clog.yaml.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		sample := "core/sample/clog.config.yaml"
-		core := "core/clog.core.config.yaml"
+		sample := "tpl/clog.yaml"
+		core := "core.clog.yaml"
 
 		// 1, create the clogrc folder if it doesn't exist
 		dstFolder := "clogrc"
@@ -42,16 +42,16 @@ var Command = &cobra.Command{
 			}
 		}
 
-		// 2. create clog.config.yaml if it doesn't exist
-		dst := dstFolder + "/clog.config.yaml"
+		// 2. create clog.yamldoesn't exist
+		dst := dstFolder + "/clog.yaml"
 		_, err = os.Stat(dst)
 		if err != nil {
 			// no config exists - try a copy and ignore any error
 			copy.Command.Run(cmd, []string{sample, dst})
 		}
 
-		// 3. create tmp-clog.core.config.yaml
-		dst = "clogrc/tmp-clog.core.config.yaml"
+		// 3. create tmp-core.clog.yaml
+		dst = "clogrc/tmp-core.clog.yaml"
 		copy.Command.Run(cmd, []string{core, dst})
 	},
 }

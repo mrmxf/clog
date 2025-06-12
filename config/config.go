@@ -12,7 +12,7 @@
 //  }
 //
 //
-// clogrc search order - see clogrc/core/clog.config.yaml
+// clogrc search order - see core/clog.yaml
 
 package config
 
@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// export the Fs with the `core/` folder
+// export the Fs with the `core/` folder - initialised by calling program
 var coreFs embed.FS
 
 // Config type embeds the Viper struct and extends it
@@ -48,7 +48,7 @@ var searchPaths []string
 // fsSlice is a slice of embed.FS objects that are searched search for configs
 // configFilename is the name of the config file to load
 //
-//	if nil or empty use `clog.config.yaml`
+//	if nil or empty use `clog.yaml`
 func New(fsSlice *[]embed.FS, configCLI *string) *Config {
 	//initialise viper with logger that can be uses throughout clog
 	cfg = &Config{

@@ -44,14 +44,15 @@ func CaptureShellSnippet(snippet string, env map[string]string) (string, int, er
 }
 
 // Execute a shell snippet and stream the result, stdError & return status
-func AwaitShellSnippet(snippet string, env map[string]string) (int, error) {
+func AwaitShellSnippet(snippet string, env map[string]string, cliArgs []string) (int, error) {
 	// figure out what shell we will run and log it for debugging
 	shell := GetShellPath()
 	// inContainer := docker.IsRunningInDockerContainer()
 
 	slog.Debug("Streaming shell snippet: ", "shell", shell, "command", snippet) //, "inContainer", inContainer)
 
-	args := []string{"-c", snippet}
+	//append a dummy executable and the arguments so that $1 in the script works.
+	args := append([]string{"-c", snippet, "clog(snippet)"}, cliArgs...)
 	exitStatus, err := Exec(shell, args, env)
 
 	//some DEBUG logging that will probably break workflows

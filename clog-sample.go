@@ -15,6 +15,7 @@ import (
 
 	"github.com/mrmxf/clog/cmd"
 	"github.com/mrmxf/clog/config"
+	"github.com/mrmxf/clog/core"
 	"github.com/mrmxf/clog/slogger"
 	slog "github.com/mrmxf/clog/slogger"
 )
@@ -22,8 +23,7 @@ import (
 //go:embed releases.yaml
 var AppFs embed.FS
 
-//go:embed core
-var CoreFs embed.FS
+var CoreFs embed.FS = core.CoreFs
 
 // The main program pulls in all the clog configs and `embed` file systems. All
 // config files will be loaded in the order they are found.

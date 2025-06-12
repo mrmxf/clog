@@ -34,13 +34,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const clogEmbeddedReleasesFile = "releases.yaml"
+
 func BootStrap(bootCmd *cobra.Command) error {
 	cfg := config.Cfg()
-	historyFilename := cfg.GetString("clog.history-file")
 
 	// find the embedded release history file in the embedded file systems
 	// last one found wins - this is usually the project's embedded fs
-	eFs, paths, err := config.FindEmbedded(historyFilename)
+	eFs, paths, err := config.FindEmbedded(clogEmbeddedReleasesFile)
 	if err != nil {
 		// warn on errors - this should not cause a panic
 		slog.Warn("cannot find embedded release history " + err.Error())

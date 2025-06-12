@@ -11,7 +11,7 @@ azuretools
 bashstr
 betterfountain
 binfmt
-bubbletea
+blinky
 buildx
 catppuccin
 certbot
@@ -38,6 +38,7 @@ darkmode
 dbaeumer
 dearmor
 dpkg
+dsec
 embeded
 environemnt
 erikgeiser
@@ -68,6 +69,7 @@ hange
 hashorigin
 headhash
 headmessage
+hookhandler
 hookprefix
 hugoversion
 Initialise
@@ -76,6 +78,7 @@ initialises
 initialising
 initx
 intoto
+keygen
 keymap
 keypress
 keyrings
@@ -96,11 +99,12 @@ ltrimstr
 messagelatest
 messageref
 metarex
-Mimimal
+middlehook
 mrmxf
 newgrp
 nodered
 normalise
+nsec
 objdump
 ommand
 opentsg
@@ -108,8 +112,11 @@ originhash
 originsemver
 overriden
 pdate
+Percpu
+pgman
 phsym
 piersdeseilligny
+postgresman
 rangav
 regexstr
 restream
@@ -121,6 +128,7 @@ semver
 shellsnippet
 shellsnippets
 skript
+slackpost
 Slicify
 slogchi
 slsa
@@ -131,6 +139,7 @@ sourcegraph
 stdcopy
 stkb
 subfolders
+sveltekit
 synthesised
 taghead
 taglatest
@@ -149,6 +158,7 @@ USERPROFILE
 ux
 vals
 vcode
+vhost
 visualise
 withdeploy
 Worktree

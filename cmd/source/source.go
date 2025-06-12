@@ -3,7 +3,7 @@
 //
 // package source copies a snippet or script file to stdout
 //
-// for example, a snippet in `clogrc/clog.config.yaml` or a script file like
+// for example, a snippet in `clogrc/clog.yaml` or a script file like
 //  `hello.sh` can be run in a new shell `clog hello`. To source it  in the
 //  current shell ENV values in the current context) then use `eval
 // "$(clog Source hello)"` which is more portable than `source <(clog Source

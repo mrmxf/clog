@@ -1,4 +1,17 @@
+#- {version: "0.8.0", date: 2025-06-04, target: "stage", build: "dev", note: new build pipeline}
+# v0.8.0 targets the new consistent Mr MXF infrastructure and build pipelines - new schema
+# -----------------------------------------------------------------------------
 # code names here: https://clutch.co/resources/software-development-glossary-88-essential-terms
+- {version: "0.7.20", date: 2025-06-11, codename: "alpha", note: release history now a const}
+- {version: "0.7.19", date: 2025-06-10, codename: "alpha", note: Log --build fix2}
+- {version: "0.7.18", date: 2025-06-09, codename: "alpha", note: Log --build fix}
+- {version: "0.7.17", date: 2025-06-09, codename: "alpha", note: Log --build logic}
+- {version: "0.7.16", date: 2025-06-07, codename: "alpha", note: removed legacy config}
+- {version: "0.7.15", date: 2025-06-07, codename: "alpha", note: removed core/ from embed}
+- {version: "0.7.14", date: 2025-06-05, codename: "alpha", note: json logger for gommi}
+- {version: "0.7.13", date: 2025-06-04, codename: "alpha", note: clog Check error status & help}
+- {version: "0.7.12", date: 2025-06-03, codename: "alpha", note: snippet error return}
+- {version: "0.7.11", date: 2025-06-03, codename: "alpha", note: add arguments to snippets}
 - {version: "0.7.10", date: 2025-05-23, codename: "alpha", note: remove gommi CLI}
 - {version: "0.7.9", date: 2025-05-12, codename: "alpha", note: Should command}
 - {version: "0.7.8", date: 2025-05-12, codename: "alpha", note: gommi.Bare alpha}
