@@ -16,7 +16,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var mountPath string
 var urlPrefix string
 
 func setContentType(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +78,7 @@ func (r *ChiMux) NewFileServer(prefix string, mountPath string) error {
 
 // NewEmbedFileServer sets up an http.FileServerFs handler to serve
 // static files from a http.FileSystem mounted on and embed.FS
-func (r *ChiMux) NewEmbedFileServer(embedFs embed.FS, prefix string) error {
+func (r *ChiMux) NewEmbedFileServer(embedFs embed.FS, prefix string, mountPath string) error {
 	// make a new fs at the mount point
 	fs, err := fs.Sub(embedFs, mountPath)
 	if err != nil {
