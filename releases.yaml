@@ -4,6 +4,7 @@
 # v0.8.0 targets the new consistent Mr MXF infrastructure and build pipelines - new schema
 # -----------------------------------------------------------------------------
 # code names here: https://clutch.co/resources/software-development-glossary-88-essential-terms
+- {version: "0.7.21", date: 2025-06-12, codename: "alpha", note: embed fileserve mountpath}
 - {version: "0.7.20", date: 2025-06-11, codename: "alpha", note: release history now a const}
 - {version: "0.7.19", date: 2025-06-10, codename: "alpha", note: Log --build fix2}
 - {version: "0.7.18", date: 2025-06-09, codename: "alpha", note: Log --build fix}
