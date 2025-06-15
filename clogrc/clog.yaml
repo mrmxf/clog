@@ -105,7 +105,7 @@ snippets:
   # clog build MAKE "golang deploy" - do a full dev build & deploy
   workflow-message-file: echo "tmp/workflow-message"
   build-golang: |
-    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlights
+    eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
     doPROD="$1"
     modeMSG="$2"
 
@@ -136,7 +136,7 @@ snippets:
     clog Log -B "$ERR" "$doPROD" "✅ build $modeMSG→$cS tmp/$cX ok" "❌ build →$cE tmp/$cX failed" || exit 1; #abort if PROD
 
   deploy-s3: |
-    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlights
+    eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
     doPROD="$1"
     modeMSG="$2"
 
@@ -195,7 +195,7 @@ snippets:
     modeMSG="$(clog bc-prod-logic-build)"
     [[ "${modeMSG:0:4}" == "prod" ]] && doPROD="prod"
 
-    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlight
+    eval "$(clog Source project config); $(clog Crayon)" # setting & highlight
     clog Log -I  "🤖 build $modeMSG$cS $PROJECT$cX MAKE:$cC $MAKE"
 
     ERR=0; export STEP=0
@@ -218,7 +218,7 @@ snippets:
     export MAKE="nothing"; [[ "MAKE" == "$1" ]] && MAKE="$2"
     modeMSG="$(clog bc-prod-logic-deploy)"
     [[ "${modeMSG:0:4}" == "prod" ]] && doPROD="prod"
-    eval "$(clog Source project config)\n $(clog Crayon)" # setting & highlight
+    eval "$(clog Source project config); $(clog Crayon)" # setting & highlight
 
     clog Log -I  "🤖 deploy $modeMSG$cS $PROJECT$cX MAKE:$cC $MAKE"
     clog Log -I "git branch:\n$(git branch)\n$(clog git branch)"
