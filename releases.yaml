@@ -1,6 +1,6 @@
 # flow:"stage",   build:"dev"  = auto-add to staging server
 # flow:"release", build:"prod" = to flag as a production release
-#- {version: "0.8.0", date: 2025-06-04, flow: "stage", build: "dev", note: new build pipeline}
+- {version: "0.8.0", date: 2025-06-04, flow: "stage", build: "dev", note: tweak gommi config}
 # v0.8.0 targets the new consistent Mr MXF infrastructure and build pipelines - new schema
 # -----------------------------------------------------------------------------
 # code names here: https://clutch.co/resources/software-development-glossary-88-essential-terms

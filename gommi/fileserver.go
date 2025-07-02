@@ -65,7 +65,7 @@ func (r *ChiMux) NewFileServer(prefix string, mountPath string) error {
 	if err != nil {
 		msg := "gommi.NewEmbedFileServer cannot find mountPath"
 		slog.Error(msg, "mountPath", mountPath)
-		if abortOnError {
+		if opt.AbortOnError {
 			os.Exit(1)
 		}
 		return errors.New(msg)
