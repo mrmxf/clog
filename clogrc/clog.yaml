@@ -96,150 +96,22 @@ snippets:
     echo "MAKE=($1) ($2) ($3) ($4)"
     echo "Another line"
     echo "$1 is still one"
-  #          _                  _             _   _      _ 
-  #     __  | |  ___   __ _    | |__   _  _  (_) | |  __| |
-  #    / _| | | / _ \ / _` |   | '_ \ | || | | | | | / _` |
-  #    \__| |_| \___/ \__, |   |_.__/  \_,_| |_| |_| \__,_|
-  #                   |___/                                
-  # clog build  - production build
-  # clog build MAKE "golang deploy" - do a full dev build & deploy
-  workflow-message-file: echo "tmp/workflow-message"
-  build-golang: |
-    eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
-    doPROD="$1"
-    modeMSG="$2"
-
-    ERR=0
-    help="tpl/help-golang.sh"         # build embedded help
-    eval "$(clog Cat $help)"          # golang build helpers
-
-    clog Log -I "$STEP.$(((++s))). ⚒️ build-golang $modeMSG $cC$PROJECT $cX using clog's$cF $help"
-    # ------------------------------------------------------------------------------
-
-    # ensure tmp folder exists
-    mkdir -p tmp
-
-    branch="$(clog git branch)"
-    hash="$(clog git hash head)"                                # use the head hash as the build hash
-    suffix="" && [[ "$branch" != "main" ]] && suffix="$branch"  # use the branch name as the suffix
-    app=clog                                                    # command you type to run the build
-    title="Command Line Of Go"                                  # title of the software
-    linkerPath="github.com/mrmxf/clog/semver.SemVerInfo"        # go tool objdump -S clog-mrmxf|grep /semver.SemVerInfo
-
-      fGoBuild tmp/$app-amd-lnx     linux   amd64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
-    # fGoBuild tmp/$app-amd-win.exe windows amd64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
-      fGoBuild tmp/$app-amd-mac     darwin  amd64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
-      fGoBuild tmp/$app-arm-lnx     linux   arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
-    # fGoBuild tmp/$app-arm-win.exe windows arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
-      fGoBuild tmp/$app-arm-mac     darwin  arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
-
-    clog Log -B "$ERR" "$doPROD" "✅ build $modeMSG→$cS tmp/$cX ok" "❌ build →$cE tmp/$cX failed" || exit 1; #abort if PROD
-
-  deploy-s3: |
-    eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
-    doPROD="$1"
-    modeMSG="$2"
-
-    ERR=0
-    vAws="$(aws --version|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'|head -1)"
-
-    # in github actions, the bucket env is S3_BUCKET unless overridden
-    [ -n "$GITHUB_ACTIONS" ] && [ -z "$CLOG_BUCKET" ] && CLOG_BUCKET="$S3_BUCKET"
-
-    # ------------------------------------------------------------------------------
-    fUpload() {
-      local tmp filename s3dst cOS cPU
-      tmp="$1"; shift
-      filename="$1"; shift
-      s3dst="$1"; shift
-      cOS="$1"; shift
-      cPU="$1"; shift
-
-      [ ! -f "$tmp/$filename" ] && clog Log -W "${cPU}  skip  $cOS$filename$cX - not found" && return
-
-      sz="$(du -sh $tmp/$filename|grep -oE '([0-9\.]+[KMGTP])')"
-      clog Log -I "$cPU↑↑($sz)$cOS $filename$cX → $s3dst/$filename"
-      aws s3 cp  --quiet "$tmp/$filename" "s3://$s3dst/$filename"
-      return $?
-    }
-
-    # handbrake off - ready to deploy
-    # ------------------------------------------------------------------------------
-    clog Log -I "$STEP.$(((++s))). 🚀 deploy-s3 $modeMSG $cC$PROJECT $cX using aws cli $cF $vAws"
-
-    # deploy a tagged release from main otherwise "clogdev"
-    ROOT="clogbin"
-    DST="dev"; [ -n "$doPROD" ] && DST="$(clog git tag ref)"
-    DEV="dev"; [ -n "$doPROD" ] && DEV=""
-
-    clog Log -I "$STEP.$(((++s))). install script$cF tmp/clog$DEV$cX for curl ${cF}<url>/get/${cU}clog$DEV"
-
-    # fix up the line URL=https://mrmxf.com/get/CLOG_BIN
-    clog Cat "tpl/install-clog.sh" | sed  -r "s/CLOG_BIN/$ROOT\/$DST/" > ./tmp/clog$DEV
-    fUpload "./tmp" "clog$DEV"         "$CLOG_BUCKET"
-
-    fUpload "./tmp" "clog-amd-lnx"     "$CLOG_BUCKET/$ROOT/$DST" "$cLnx" "$cAmd"; ERR=$((ERR+$?))
-    fUpload "./tmp" "clog-amd-mac"     "$CLOG_BUCKET/$ROOT/$DST" "$cMac" "$cAmd"; ERR=$((ERR+$?))
-    fUpload "./tmp" "clog-amd-win.exe" "$CLOG_BUCKET/$ROOT/$DST" "$cWin" "$cAmd"; ERR=$((ERR+$?))
-    fUpload "./tmp" "clog-arm-lnx"     "$CLOG_BUCKET/$ROOT/$DST" "$cLnx" "$cArm"; ERR=$((ERR+$?))
-    fUpload "./tmp" "clog-arm-mac"     "$CLOG_BUCKET/$ROOT/$DST" "$cMac" "$cArm"; ERR=$((ERR+$?))
-    fUpload "./tmp" "clog-arm-win.exe" "$CLOG_BUCKET/$ROOT/$DST" "$cWin" "$cArm"; ERR=$((ERR+$?))
-    
-    okMSG="✅deploy-s3 $modeMSG$cC curl$cF https://mrmxf.com/${cC}get$cF/${cW}clog$DEV$cX|${cC}bash$cS # test install"
-    errMSG="❌deploy-s3 $modeMSG failed with errors"
-    clog Log -B "$ERR" "$doPROD" "$okMSG" "$errMSG" || exit 1; #abort if PROD
-    exit 0
 
   build: |
+    export VERB="Build"
+    export CHK="pre-build build"
     export MAKE="golang"; [[ "MAKE" == "$1" ]] && MAKE="$2"
-    modeMSG="$(clog bc-prod-logic-build)"
-    [[ "${modeMSG:0:4}" == "prod" ]] && doPROD="prod"
-
-    eval "$(clog Source project config); $(clog Crayon)" # setting & highlight
-    clog Log -I  "🤖 build $modeMSG$cS $PROJECT$cX MAKE:$cC $MAKE"
-
-    ERR=0; export STEP=0
-    clog Log -I "$(((++STEP))).  Check pre-build"; clog Check pre-build; ERR=$((ERR+$?))
-    clog Log -I "$(((++STEP))).  Check tools";     clog Check tools;     ERR=$((ERR+$?))
-    clog Log -I "$(((++STEP))).  Check build";     clog Check build;     ERR=$((ERR+$?))
-    clog Log -I "$(((++STEP))).  Check deploy";    clog Check deploy;    ERR=$((ERR+$?))
-    clog Log -B "$ERR" "$doPROD" "✅ checks ok" "❌ checks failed" || exit 1; #abort if PROD
-    clog bc-logs-hr
-
-    ((++STEP));clog Should MAKE "golang" && clog build-golang "$doPROD" "$modeMSG"; ERR=$((ERR+$?))
-
-    icon="✅";[ $ERR -gt 0 ] && icon="❌"
-    printf -v MSG "$icon build $modeMSG complete with %d errors" $ERR
-    echo "$modeMSG" > "$(clog workflow-message-file)"
-    clog Log -B "$ERR" "$doPROD" "✅ golang build ok - $modeMSG" "❌ golang build failed - $modeMSG" || exit 1; #abort if PROD
-    exit 0
+    export EXE="clog"
+    export TITLE="Command Line Of Go"
+    clog bc-flowx                     # use the generic flow script
     
   deploy: |
-    export MAKE="nothing"; [[ "MAKE" == "$1" ]] && MAKE="$2"
-    modeMSG="$(clog bc-prod-logic-deploy)"
-    [[ "${modeMSG:0:4}" == "prod" ]] && doPROD="prod"
-    eval "$(clog Source project config); $(clog Crayon)" # setting & highlight
-
-    clog Log -I  "🤖 deploy $modeMSG$cS $PROJECT$cX MAKE:$cC $MAKE"
-    clog Log -I "git branch:\n$(git branch)\n$(clog git branch)"
-    clog Log -I "git repo:\n$(git remote -v)\n$(clog git repo)"
-    git checkout main
-    clog Log -I "git branch:\n$(git branch)\n$(clog git branch)"
-    clog Log -I "git repo:\n$(git remote -v)\n$(clog git repo)"
-
-    ERR=0; export STEP=0
-    clog Log -I "$(((++STEP))).  Check pre-build"; clog Check pre-build; ERR=$((ERR+$?))
-    clog Log -I "$(((++STEP))).  Check tools";     clog Check tools;     ERR=$((ERR+$?))
-    clog Log -I "$(((++STEP))).  Check deploy";    clog Check deploy;    ERR=$((ERR+$?))
-    clog Log -B "$ERR" "$doPROD" "✅ checks ok" "❌ checks failed" || exit 1; #abort if PROD
-    clog bc-logs-hr
-
-    ((STEP++));clog Should MAKE "deploy" && clog deploy-s3 "$doPROD" "$modeMSG"; ERR=$((ERR+$?))
-
-    printf -v deployMSG "deploy $modeMSG complete with %d errors" $ERR
-    echo "$deployMSG" > "$(clog workflow-message-file)"
-    clog Log -B "$ERR" "$doPROD" "✅ s3 deploy ok - $deployMSG" "❌ deploy-s3 failed - $deployMSG" || exit 1; #abort if PROD
-    exit 0
+    export VERB="Deploy"
+    export CHK="pre-build tools deploy"
+    export MAKE="deploy-github"; [[ "MAKE" == "$1" ]] && MAKE="$2"
+    export EXE="clog"
+    export TITLE="Command Line Of Go"
+    clog bc-flowx                     # use the generic flow script
 
 # #############################################################################
 #        _                   ___   _                 _

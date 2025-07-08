@@ -50,6 +50,17 @@
         "OK message",
         "ERR message"
       ]
+    },
+    {
+      "name": "aws",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}",
+      "args": [
+        "Aws",
+        "Dns"
+      ]
     }
   ]
 }

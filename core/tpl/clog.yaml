@@ -38,30 +38,8 @@ snippets:
   #       - MAKE prod - forces production (and overrides MAKE dev)
   #       - MAKE dev  - forces development
   # clog bc-prod-logic-xx returns    "dev|prod"+"(reasonString)"
-  bc-releases-yaml: yq -r '.clog."releases-path"' clogrc/clog.yaml
-  bc-main-repo: echo "<account>/<reponame>"
-  bc-prod-logic-build: |
-    do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
-    do="$do(from releases.yaml)"
-    # rules - none
-    # overrides always win - prod override strongest
-    clog Should MAKE "dev" && do="dev(forced by MAKE)"
-    clog Should MAKE "prod" && do="prod(forced by MAKE)"
-    echo "$do"
-  bc-prod-logic-deploy: |
-    do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
-    do="$do(from releases.yaml)"
-    # rules
-    [ -n "$(clog git branch)" ] && [[ "$(clog git branch)" != "main" ]] && do="dev(not main branch)"
-    [[ "$(clog bc-main-repo)" != "$(clog git repo)" ]] && do="dev(repo!=$(clog bc-main-repo))"
-    # overrides always win - prod override strongest
-    clog Should MAKE "dev" && do="dev(forced by MAKE)"
-    clog Should MAKE "prod" && do="prod(forced by MAKE)"
-    echo "$do"
-  bc-wants-stage-flow:  yq -r '.[0].flow|select(.=="stage")' "$(clog bc-releases-yaml)"
-  bc-wants-test-flow:  yq -r '.[0].flow|select(.=="test")' "$(clog bc-releases-yaml)"
-  bc-wants-schedule-flow:  yq -r '.[0].flow|select(.=="schedule")' "$(clog bc-releases-yaml)"
-  bc-logs-hr: eval "$(clog Crayon)";for i in {1..8};do DIV="$DIV$cW▬▬▬▬▬▬▬▬▬$cE|";done;printf "$DIV$cX\n"
+  #
+  # copy bc commands from clog.core.yaml to override them here
 
   list-bucket: |
     clog Log -I "\$CLOG_BUCKET=$CLOG_BUCKET/clogbin"
@@ -95,6 +73,13 @@ snippets:
           echo "hugo config not found"
         fi
 # #############################################################################
+# this is a sample build for most projects - just change CHK & MAKE and let the
+# core scripts do the rest
+  build: |
+    export CHK="pre-build build"
+    export MAKE="hugo podserver ko"; [[ "MAKE" == "$1" ]] && MAKE="$2"
+    clog bc build
+
 #        _                   ___   _                 _
 #   __  | |  ___   __ _     / __| | |_    ___   __  | |__
 #  / _| | | / _ \ / _` |   | (__  | ' \  / -_) / _| | / /

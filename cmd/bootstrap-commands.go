@@ -14,6 +14,7 @@ import (
 	"log/slog"
 	"runtime"
 
+	"github.com/mrmxf/clog/cmd/aws"
 	"github.com/mrmxf/clog/cmd/cat"
 	"github.com/mrmxf/clog/cmd/check"
 	"github.com/mrmxf/clog/cmd/copy"
@@ -53,6 +54,7 @@ func BootStrap(bootCmd *cobra.Command) error {
 	bootCmd.SetUsageTemplate(cfg.GetString("clog.version.long") + bootCmd.UsageTemplate())
 
 	// load all the public builtin commands first
+	bootCmd.AddCommand(aws.Command)        // aws day-to-day management commands
 	bootCmd.AddCommand(cat.Command)        // script helper include command
 	bootCmd.AddCommand(check.Command)      // copy an embedded file to a destination
 	bootCmd.AddCommand(copy.Command)       // copy an embedded file to a destination
