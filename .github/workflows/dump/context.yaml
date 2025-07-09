@@ -1,0 +1,100 @@
+---
+# Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+# BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#       _                                  __                         _                   _   
+#    __| |  _   _   _ __ ___    _ __      / /   ___    ___    _ __   | |_    ___  __  __ | |_ 
+#   / _` | | | | | | '_ ` _ \  | '_ \    / /   / __|  / _ \  | '_ \  | __|  / _ \ \ \/ / | __|
+#  | (_| | | |_| | | | | | | | | |_) |  / /   | (__  | (_) | | | | | | |_  |  __/  >  <  | |_ 
+#   \__,_|  \__,_| |_| |_| |_| | .__/  /_/     \___|  \___/  |_| |_|  \__|  \___| /_/\_\  \__|
+#                              |_|                                                            
+# callable GitHub workflow to dump the context of a job - for debug
+#
+# see on.workflow_call.inputs for params
+
+name: dump/context
+run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/dump/context)"
+env:
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/dump/context"
+
+on: [workflow_call]
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump env context
+        env:
+          ENV_CONTEXT: ${{ toJson(env) }}
+        run: echo "$ENV_CONTEXT"
+      - name: Dump vars context
+        env:
+          VARS_CONTEXT: ${{ toJson(vars) }}
+        run: echo "$VARS_CONTEXT"
+      - name: Dump secrets context
+        env:
+          ENV_CONTEXT: ${{ toJson(secrets) }}
+        run: echo "$SECRETS_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump needs context
+        env:
+          NEEDS_CONTEXT: ${{ toJson(needs) }}
+        run: echo "$NEEDS_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
+      - name: Show default environment variables
+        env:
+          DOCKER_NS: ${{ vars.DOCKER_NS }}
+        run: |
+          echo "job($GITHUB_JOB) with id($GITHUB_JOB) action ($GITHUB_ACTION) run($GITHUB_RUN_ID) by ($GITHUB_ACTOR) using ($DOCKER_NS)"
+          echo
+          echo "GitHub defaults:"
+          echo "GITHUB_WORKFLOW          $GITHUB_WORKFLOW"
+          echo "GITHUB_RUN_ID            $GITHUB_RUN_ID"
+          echo "GITHUB_RUN_NUMBER        $GITHUB_RUN_NUMBER"
+          echo "GITHUB_RUN_ATTEMPT       $GITHUB_RUN_ATTEMPT"
+          echo "GITHUB_JOB               $GITHUB_JOB"
+          echo "GITHUB_ACTION            $GITHUB_ACTION"
+          echo "GITHUB_ACTIONS           $GITHUB_ACTIONS"
+          echo "GITHUB_REPOSITORY        $GITHUB_REPOSITORY"
+          echo "GITHUB_REPOSITORY_OWNER  $GITHUB_REPOSITORY_OWNER"
+          echo "GITHUB_WORKSPACE         $GITHUB_WORKSPACE"
+          echo "GITHUB_SHA               $GITHUB_SHA"
+          echo "GITHUB_REF               $GITHUB_REF"
+          echo "GITHUB_REF_NAME          $GITHUB_REF_NAME"
+          echo "GITHUB_REF_TYPE          $GITHUB_REF_TYPE"
+          echo "GITHUB_EVENT_NAME        $GITHUB_EVENT_NAME"
+          echo "GITHUB_EVENT_PATH        $GITHUB_EVENT_PATH"
+          echo "GITHUB_ACTOR             $GITHUB_ACTOR"
+          echo "GITHUB_TRIGGERING_ACTOR  $GITHUB_TRIGGERING_ACTOR"
+          echo "GITHUB_TOKEN             $GITHUB_TOKEN"
+          echo "GITHUB_SERVER_URL        $GITHUB_SERVER_URL"
+          echo "GITHUB_API_URL           $GITHUB_API_URL"
+          echo "GITHUB_GRAPHQL_URL       $GITHUB_GRAPHQL_URL"
+          echo "RUNNER_OS                $RUNNER_OS"
+          echo "RUNNER_ARCH              $RUNNER_ARCH"
+          echo "RUNNER_NAME              $RUNNER_NAME"
+          echo "RUNNER_TEMP              $RUNNER_TEMP"
+          echo "RUNNER_TOOL_CACHE        $RUNNER_TOOL_CACHE"
+          printf "env:\n$(env)"

@@ -1,0 +1,117 @@
+---
+# Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+# BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#       _                  _                      __        _____ 
+#    __| |   ___   _ __   | |   ___    _   _     / /  ___  |___ / 
+#   / _` |  / _ \ | '_ \  | |  / _ \  | | | |   / /  / __|   |_ \ 
+#  | (_| | |  __/ | |_) | | | | (_) | | |_| |  / /   \__ \  ___) |
+#   \__,_|  \___| | .__/  |_|  \___/   \__, | /_/    |___/ |____/ 
+#                 |_|                  |___/                      
+#  GitHub Workflow to deploy to an s3 bucket
+#
+# see on.workflow_call.inputs for params
+
+name: deploy/s3
+run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/deploy/s3)"
+env:
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/deploy/s3"
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        required: true
+        type: string
+      make:
+        required: false
+        type: string
+    secrets:
+      aws_access_key_id:
+        required: false
+      aws_secret_access_key:
+        required: false
+      get_clog:
+        required: true
+      s3_bucket:
+        required: true
+      webhook_slack:
+        required: false
+    outputs:
+      message:
+        description: "Result of the deploy for announcing on slack"
+        value: ${{ jobs.deploy-s3.outputs.message }}
+
+jobs:
+  deploy-s3:
+    runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.deploy-s3.outputs.message }}
+
+    steps:
+      - # ---------------------------------------------------------------------
+        id: checkout
+        name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - # ---------------------------------------------------------------------
+        id: artifacts
+        name: artifact(${{ inputs.artifact-name }}) → tmp/
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: tmp
+      - # ---------------------------------------------------------------------
+        id: get-clog
+        name: get clog
+        env:
+          GET_CLOG: ${{ secrets.get_clog }}
+        run: |
+          eval "$GET_CLOG"
+          clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
+      - # ---------------------------------------------------------------------
+        id: deploy-s3
+        name: golang deploy artifacts to s3 with clog
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          S3_BUCKET: ${{ secrets.s3_bucket }}
+          MAKE: ${{ inputs.make }}
+        run: |
+          CACHE="$(clog workflow-message-file)"
+          rm -f $CACHE >/dev/null 2>&1  # delete any notify file
+
+          if [ -z "$MAKE" ]; then 
+            clog deploy
+          else
+            clog Log -I "deploy overide provided \$MAKE=\"$MAKE\""
+            clog deploy MAKE "$MAKE"
+          fi
+          if [ -f $CACHE ]; then
+            echo "message=$(cat $CACHE)" >> $GITHUB_OUTPUT
+          else
+            mImage="$DOCKER_NS/${{ github.event.repository.name }}:"
+            printf "message=deploy: $mImage, github action: $CLOG_FLOW" >> $GITHUB_OUTPUT
+          fi
+      - # ---------------------------------------------------------------------
+        id: notify
+        if: ${{ env.HOOK_SLACK != '' }}
+        name: notify-team
+        env:
+          MESSAGE: ${{ steps.deploy-s3.outputs.message }}
+          ACTOR: ${{ github.actor }}
+          EVENT: ${{ github.event_name }}
+          JOB: ${{ github.job }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.ref }}
+          REF_TYPE: ${{ github.ref_type }}
+          WORKFLOW: ${{ github.workflow }}
+          HOOK_SLACK:  ${{ secrets.webhook_slack }}
+        run: |
+          clog Log -I "Rx message:\n$MESSAGE"
+          MSG="msg: $MESSAGE by: $ACTOR, workflow: $WORKFLOW, repo: $REPO:$REF($REF_TYPE), job: $JOB, event: $EVENT"
+          clog Log -I "Tx message:\n$MSG"
+          # use clog to ping slack via the webhook
+          clog Slack "$MSG"
+          clog Log -I "done"

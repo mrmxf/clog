@@ -1,0 +1,161 @@
+---
+# Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+# BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#   _               _   _       _      __  _                             
+#  | |__    _   _  (_) | |   __| |    / / | |__    _   _    __ _    ___  
+#  | '_ \  | | | | | | | |  / _` |   / /  | '_ \  | | | |  / _` |  / _ \ 
+#  | |_) | | |_| | | | | | | (_| |  / /   | | | | | |_| | | (_| | | (_) |
+#  |_.__/   \__,_| |_| |_|  \__,_| /_/    |_| |_|  \__,_|  \__, |  \___/ 
+#                                                          |___/         
+# Build a hugo site to a docker image with hugo & ko
+#
+# see on.workflow_call.inputs for params
+
+name: build-hugo
+run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/build-hugo)"
+env:
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/build/hugo"
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        required: true
+        type: string
+      make:
+        required: false
+        type: string
+      docker_ns:
+        required: true
+        type: string
+    secrets:
+      docker_pat:
+        required: true
+      get_clog:
+        required: true
+      webhook_slack:
+        required: false
+    outputs:
+      message:
+        description: "Result of the build for announcing on slack"
+        value: ${{ jobs.build-hugo.outputs.message }}
+
+jobs:
+  build-hugo:
+    # don't let random strangers run the PR workflows.
+    if: ${{ contains(fromJSON('["mrmxf", "charlottesweb2"]'), github.event.sender.login) || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.clog-build.outputs.message }}
+
+    steps:
+      - # ---------------------------------------------------------------------
+        id: init-clog
+        name: init clog
+        run: |
+          # install clog & set up some of the funky build logic
+          eval "${{ secrets.get_clog }}"
+
+          case "${{ github.event_name }}" in
+
+          "pull_request_target")
+            verb="PR"
+            ref="${{ github.event.pull_request.head.sha }}"               # head of the PR commits
+            src="${{ github.event.pull_request.head.repo.full_name }}"    # head name
+            url="${{ github.event.pull_request.head.repo.html_url }}"     # head url
+            ;;
+
+          "push" | "workflow_dispatch")
+            verb="push"
+            ref="${{ github.ref }}"                            # event trigger
+            src="${{ github.repository }}"                     # event repo
+            url="${{ github.event.repository.html_url }}"      # event human url
+            ;;
+
+          "schedule")
+            verb="SCHED"
+            ref="ref/tags/$(clog bc-main-prod)"                # production tag
+            src="${{ github.repository }}"                     # production repo
+            url="${{ github.event.repository.html_url }}"      # production human url
+            ;;
+
+          esac
+
+          echo "verb=$verb" >> $GITHUB_ENV
+          echo "ref=$ref"   >> $GITHUB_ENV
+          echo "src=$src"   >> $GITHUB_ENV
+          echo "url=$url"   >> $GITHUB_ENV
+          
+          clog Log -I "Reusable workflow: ${{ env.clog_FLOW}}"
+      - # ---------------------------------------------------------------------
+        id: checkout
+        name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.src }}
+          ref:  ${{ env.ref }}
+          submodules: recursive
+      - # ---------------------------------------------------------------------
+        id: docker
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{  inputs.docker_ns }}
+          password: ${{ secrets.docker_pat }}
+      - # ---------------------------------------------------------------------
+        id: clog-setup
+        name: setup tools
+        run: |
+          # make the artifacts folder to propagate clog workflow internals
+          mkdir -p "$(dirname $(clog bc-artifacts))"
+
+          # install tools
+          clog install golang
+          clog install hugo
+          clog install ko
+      - # ---------------------------------------------------------------------
+        id: clog-build
+        name: hugo container with clog
+        env:
+          MAKE: ${{ inputs.make }}
+          DOCKER_NS: ${{ inputs.docker_ns }}
+        run: |
+          MSG_FILE="tmp/clog-notify"
+          rm -f $MSG_FILE >/dev/null 2>&1      # delete any notify file
+          
+          if [ -z "$MAKE" ]; then 
+            # use the standard build if no overrides
+            clog build
+          else
+            clog Log -W "build-hugo overide provided \$MAKE=\"$MAKE\""
+            clog build MAKE "$MAKE"
+          fi
+      - # ---------------------------------------------------------------------
+        name: kodata/ →  artifact(${{ inputs.artifact-name }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          retention-days: 2
+          path: |
+            kodata
+            tmp
+      - # ---------------------------------------------------------------------
+        id: notify
+        if: ${{ env.HOOK_SLACK != '' }}
+        name: notify-team
+        env:
+          HOOK_SLACK:  ${{ secrets.webhook_slack }}
+        run: |
+          eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
+
+          # pull in messages and status from build stage
+          eval "$(cat $(clog bc-artifacts))"
+          
+          # set the log level Success or Error
+          logLevel="-S"; [ $BUILDstatus -gt 0 ] && logLevel="-E"
+
+          toastMsg="$verb (github action ${{ github.actor }}) → $BUILDrepo:$BUILDtag1 ($BUILDtag2)"
+          fromMsg="$verb (${{ github.actor }}) $src ($ref)";
+
+          clog SlackLog $logLevel --from "$fromMsg" --toast "$toastMsg" --srcUrl "$url" --dstUrl "$dstUrl" "$BUILDmsg" 
+          clog Log -I "done"
