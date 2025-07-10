@@ -1,19 +1,20 @@
 ---
 # Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 # BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
-#                   _     _    __              __        _                  _    
-#   _ __     ___   | |_  (_)  / _|  _   _     / /  ___  | |   __ _    ___  | | __
-#  | '_ \   / _ \  | __| | | | |_  | | | |   / /  / __| | |  / _` |  / __| | |/ /
-#  | | | | | (_) | | |_  | | |  _| | |_| |  / /   \__ \ | | | (_| | | (__  |   < 
-#  |_| |_|  \___/   \__| |_| |_|    \__, | /_/    |___/ |_|  \__,_|  \___| |_|\_\
+#                   _     _    __                         _                  _    
+#   _ __     ___   | |_  (_)  / _|  _   _           ___  | |   __ _    ___  | | __
+#  | '_ \   / _ \  | __| | | | |_  | | | |  _____  / __| | |  / _` |  / __| | |/ /
+#  | | | | | (_) | | |_  | | |  _| | |_| | |_____| \__ \ | | | (_| | | (__  |   < 
+#  |_| |_|  \___/   \__| |_| |_|    \__, |         |___/ |_|  \__,_|  \___| |_|\_\
+#                                   |___/                                         
 #  GitHub Workflow to ping a slack channel on success / failure
 #
 # see on.workflow_call.inputs for params
 
-name: notify/slack
-run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/notify/slack)"
+name: notify-slack
+run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/notify-slack)"
 env:
-  CLOG_FLOW: "mrmxf/clog/.github/workflows/notify/slack"
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/notify-slack"
 
 on:
   workflow_call:

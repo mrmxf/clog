@@ -1,20 +1,20 @@
 ---
 # Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 # BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
-#       _                  _                      __        _____ 
-#    __| |   ___   _ __   | |   ___    _   _     / /  ___  |___ / 
-#   / _` |  / _ \ | '_ \  | |  / _ \  | | | |   / /  / __|   |_ \ 
-#  | (_| | |  __/ | |_) | | | | (_) | | |_| |  / /   \__ \  ___) |
-#   \__,_|  \___| | .__/  |_|  \___/   \__, | /_/    |___/ |____/ 
-#                 |_|                  |___/                      
+#       _                  _                                 _____ 
+#    __| |   ___   _ __   | |   ___    _   _           ___  |___ / 
+#   / _` |  / _ \ | '_ \  | |  / _ \  | | | |  _____  / __|   |_ \ 
+#  | (_| | |  __/ | |_) | | | | (_) | | |_| | |_____| \__ \  ___) |
+#   \__,_|  \___| | .__/  |_|  \___/   \__, |         |___/ |____/ 
+#                 |_|                  |___/                       
 #  GitHub Workflow to deploy to an s3 bucket
 #
 # see on.workflow_call.inputs for params
 
-name: deploy/s3
-run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/deploy/s3)"
+name: deploy-s3
+run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/deploy-s3)"
 env:
-  CLOG_FLOW: "mrmxf/clog/.github/workflows/deploy/s3"
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/deploy-s3"
 
 on:
   workflow_call:

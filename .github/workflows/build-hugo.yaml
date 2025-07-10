@@ -1,12 +1,12 @@
 ---
 # Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 # BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
-#   _               _   _       _      __  _                             
-#  | |__    _   _  (_) | |   __| |    / / | |__    _   _    __ _    ___  
-#  | '_ \  | | | | | | | |  / _` |   / /  | '_ \  | | | |  / _` |  / _ \ 
-#  | |_) | | |_| | | | | | | (_| |  / /   | | | | | |_| | | (_| | | (_) |
-#  |_.__/   \__,_| |_| |_|  \__,_| /_/    |_| |_|  \__,_|  \__, |  \___/ 
-#                                                          |___/         
+#   _               _   _       _           _                             
+#  | |__    _   _  (_) | |   __| |         | |__    _   _    __ _    ___  
+#  | '_ \  | | | | | | | |  / _` |  _____  | '_ \  | | | |  / _` |  / _ \ 
+#  | |_) | | |_| | | | | | | (_| | |_____| | | | | | |_| | | (_| | | (_) |
+#  |_.__/   \__,_| |_| |_|  \__,_|         |_| |_|  \__,_|  \__, |  \___/ 
+#                                                           |___/         
 # Build a hugo site to a docker image with hugo & ko
 #
 # see on.workflow_call.inputs for params
@@ -14,7 +14,7 @@
 name: build-hugo
 run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/build-hugo)"
 env:
-  CLOG_FLOW: "mrmxf/clog/.github/workflows/build/hugo"
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/build-hugo"
 
 on:
   workflow_call:
