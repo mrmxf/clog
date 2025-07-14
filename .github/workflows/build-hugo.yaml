@@ -22,33 +22,29 @@ on:
       docker_ns:
         required: true
         type: string
-      artifact-name:    # the name of the artifact file (absent = no artifacts)
+      artifact-name:     # the name of the artifact file (absent = no artifacts)
         type: string
-      make:
+      make:                  # MAKE-"hugo ko" the name of bc-xxx routines to run
         type: string
-      bc-from:
+      bc-from:               # slack notify: engine running the build e.g github
         type: string
-      bc-toast:
-          type: string
+      bc-toast:                         # slack notify: the pop up toast message
+        type: string
+      bc-trigger:                 # slack notify: repo/event triggering the flow
+        type: string
     secrets:
-      docker_pat:
+      docker_pat:                         # for logging into a docker $DOCKER_NS
         required: true
-      get_clog:
+      get_clog:                        # CLI to get the required version of clog
         required: true
-      webhook_slack:
+      webhook_slack:                           # webhook stub to a slack channel
         required: false
-    outputs:
-      message:
-        description: "Result of the build for announcing on slack"
-        value: ${{ jobs.build-hugo.outputs.message }}
 
 jobs:
   build-hugo:
     # don't let random strangers run the PR workflows.
     if: ${{ contains(fromJSON('["mrmxf", "charlottesweb2"]'), github.event.sender.login) || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
-    outputs:
-      message: ${{ steps.clog-build.outputs.message }}
 
     steps:
       - # ---------------------------------------------------------------------
@@ -165,6 +161,7 @@ jobs:
           HOOK_SLACK:  ${{ secrets.webhook_slack }}
           FORCE_FROM: ${{ inputs.bc-from }}
           FORCE_TOAST: ${{ inputs.bc-toast }}
+          FORCE_TRIGGER: ${{ inputs.bc-trigger }}
         run: |
           eval "$(clog Source project config); $(clog Crayon)"  # settings+color
           
@@ -176,18 +173,26 @@ jobs:
           #for VERB in ${NOTIFICATIONS[@]};do
 
             # generate the names/values of the env variables for this VERB
-            name=${VERB}_from      ;  vFrom="${!name}"
-            name=${VERB}_level     ; vLevel="${!name}"
-            name=${VERB}_msg       ;   vMsg="${!name}"
-            name=${VERB}_toast     ; vToast="${!name}"
-            name=${VERB}_src       ;   vSrc="${!name}"
-            name=${VERB}_dst       ;   vDst="${!name}"
-            name=${VERB}_err       ;   vErr="${!name}"
+            name=${VERB}_from   ;    vFrom="${!name}"
+            name=${VERB}_level  ;   vLevel="${!name}"
+            name=${VERB}_msg    ;     vMsg="${!name}"
+            name=${VERB}_toast  ;   vToast="${!name}"
+            name=${VERB}_trigger; vTrigger="${!name}"
+            name=${VERB}_dst    ;     vDst="${!name}"
+            name=${VERB}_err    ;     vErr="${!name}"
 
-            [ -n "$FORCE_FROM" ]  &&  vFrom="$FORCE_FROM"
-            [ -n "$FORCE_TOAST" ] && vToast="$FORCE_TOAST"
+            [ -n "$FORCE_FROM" ]    &&    vFrom="$FORCE_FROM"
+            [ -n "$FORCE_TOAST" ]   &&   vToast="$FORCE_TOAST"
+            [ -n "$FORCE_TRIGGER" ] && vTrigger="$FORCE_TRIGGER"
 
-            clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vSrc" --dst "$vDst" --errMsg "$vErr" "$vMsg" 
+            echo "from:   $vFrom"
+            echo "toast   $vToast"
+            echo "trigger $vSrc"
+            echo "dst     $vDst"
+            echo "errMsg  $vErr"
+            echo "msg:    $vMsg"
+
+            clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vTrigger" --dst "$vDst" --errMsg "$vErr" "$vMsg" 
 
           done
           clog Log -I "done"
