@@ -1,0 +1,76 @@
+---
+# Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+# BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#                   _     _    __                         _                  _    
+#   _ __     ___   | |_  (_)  / _|  _   _           ___  | |   __ _    ___  | | __
+#  | '_ \   / _ \  | __| | | | |_  | | | |  _____  / __| | |  / _` |  / __| | |/ /
+#  | | | | | (_) | | |_  | | |  _| | |_| | |_____| \__ \ | | | (_| | | (__  |   < 
+#  |_| |_|  \___/   \__| |_| |_|    \__, |         |___/ |_|  \__,_|  \___| |_|\_\
+#                                   |___/                                         
+#  GitHub Workflow to ping a slack channel on success / failure
+#
+# this actions:
+# 1. source "tmp/artifacts" - pick up definitions from previous steps
+# 2. iterate over NOTIFICATIONS="BUILD DEPLOY"
+#    2.1  toast=$BUILD=$BUILD_toast    # slack toast popup message
+#    2.2   from=$BUILD=$BUILD_from     # highlighted title - where did the notification come from
+#    2.3  level=$BUILD=$BUILD_level    # level e.g. -E for error, -S success, -W warning
+#    2.4    msg=$BUILD=$BUILD_msg      # message / description field of slack post
+#    2.5    src=$BUILD=$BUILD_src      # url of the source repo/trigger
+#    2.6    dst=$BUILD=$BUILD_dst      # url of the destintaion repo/trigger
+#    2.6 clog Log
+#    2.7 repeat for  $DEPLOY....
+# 
+
+name: action-notify-slack-log
+run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/notify-slack)"
+env:
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/action-notify-slack"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  notify-slack-channel:
+    runs-on: ubuntu-latest
+    steps:
+      - # ---------------------------------------------------------------------
+        name: get clog
+        env:
+          GET_CLOG:  ${{ secrets.get_clog }}
+        run: eval "$GET_CLOG"
+      - # ---------------------------------------------------------------------
+        id: notify
+        if: ${{ env.HOOK_SLACK != '' }}
+        name: notify-team
+        env:
+          HOOK_SLACK:  ${{ secrets.webhook_slack }}
+          VERB: BUILD
+          FORCE_FROM: ${{ inputs.bc-from }}
+          FORCE_TOAST: ${{ inputs.bc-toast }}
+        run: |
+          eval "$(clog Source project config); $(clog Crayon)"  # settings+color
+          
+          artifacts="$(clog bc-artifacts)"
+          cat "$artifacts"                              # log the artifacts file
+
+          eval "$(cat $artifacts)"                # create artifacts environment
+
+          #for GRP in ${NOTIFICATIONS[@]};do echo $GRP; done
+
+          //generate the names of the environments variables for this VERB
+          fromEnv=${VERB}_from
+          msgEnv=${VERB}_msg
+          statusEnv=${VERB}_status
+          toastEnv=${VERB}_toast
+          tag1Env=${VERB}tag1
+          tag2Env=${VERB}_tag2
+
+          # set the log level Success or Error
+          logLevel="-S"; [ ${!statusEnv} -gt 0 ] && logLevel="-E"
+
+          toastMsg="$verb (github action ${{ github.actor }}) → ${!repoEnv}:$BUILDtag1 ($BUILDtag2)"
+          fromMsg="$verb (${{ github.actor }}) $src ($ref)";
+
+          clog SlackLog $logLevel --from "$fromMsg" --toast "$toastMsg" --srcUrl "$url" --dstUrl "$dstUrl" "$BUILDmsg" 
+          clog Log -I "done"

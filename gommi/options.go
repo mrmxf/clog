@@ -28,8 +28,8 @@ type Options struct {
 var defaultOptions = Options{
 	AbortOnError: true,
 	Logger:       slog.New(slogger.NewPrettyHandler(os.Stdout, nil)),
-	Port:         8080,
-	portStr:      "8080",
+	Port:         8080,  // normally unused - the app does the ListenAndServe
+	portStr:      "8080",// normally unused - the app does the ListenAndServe
 }
 
 func processOptions(opts []Options) {

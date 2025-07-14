@@ -19,15 +19,17 @@ env:
 on:
   workflow_call:
     inputs:
-      artifact-name:
-        required: true
-        type: string
-      make:
-        required: false
-        type: string
       docker_ns:
         required: true
         type: string
+      artifact-name:    # the name of the artifact file (absent = no artifacts)
+        type: string
+      make:
+        type: string
+      bc-from:
+        type: string
+      bc-toast:
+          type: string
     secrets:
       docker_pat:
         required: true
@@ -132,6 +134,7 @@ jobs:
           fi
       - # ---------------------------------------------------------------------
         name: kodata/ →  artifact(${{ inputs.artifact-name }})
+        if: ${{ inputs.artifact-name }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifact-name }}
@@ -140,22 +143,51 @@ jobs:
             kodata
             tmp
       - # ---------------------------------------------------------------------
+        #  log to a slack channel on success / failure
+        #
+        # this actions:
+        # 1. source "tmp/artifacts" - pick up definitions from previous steps
+        # 2. iterate over NOTIFICATIONS="BUILD DEPLOY"
+        #    2.1  toast=$BUILD=$BUILD_toast    # slack toast popup message
+        #    2.2   from=$BUILD=$BUILD_from     # highlighted title - where did the notification come from
+        #    2.3  level=$BUILD=$BUILD_level    # level e.g. -E for error, -S success, -W warning
+        #    2.4    msg=$BUILD=$BUILD_msg      # message / description field of slack post
+        #    2.5    src=$BUILD=$BUILD_src      # url of the source repo/trigger
+        #    2.6    dst=$BUILD=$BUILD_dst      # url of the destintaion repo/trigger
+        #    2.6 clog Log
+        #    2.7 repeat for  $DEPLOY....
+        # 
+
         id: notify
         if: ${{ env.HOOK_SLACK != '' }}
         name: notify-team
         env:
           HOOK_SLACK:  ${{ secrets.webhook_slack }}
+          FORCE_FROM: ${{ inputs.bc-from }}
+          FORCE_TOAST: ${{ inputs.bc-toast }}
         run: |
-          eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
-
-          # pull in messages and status from build stage
-          eval "$(cat $(clog bc-artifacts))"
+          eval "$(clog Source project config); $(clog Crayon)"  # settings+color
           
-          # set the log level Success or Error
-          logLevel="-S"; [ $BUILDstatus -gt 0 ] && logLevel="-E"
+          artifacts="$(clog bc-artifacts)"
+          cat "$artifacts"                              # log the artifacts file
 
-          toastMsg="$verb (github action ${{ github.actor }}) → $BUILDrepo:$BUILDtag1 ($BUILDtag2)"
-          fromMsg="$verb (${{ github.actor }}) $src ($ref)";
+          eval "$(cat $artifacts)"                # create artifacts environment
 
-          clog SlackLog $logLevel --from "$fromMsg" --toast "$toastMsg" --srcUrl "$url" --dstUrl "$dstUrl" "$BUILDmsg" 
+          #for VERB in ${NOTIFICATIONS[@]};do
+
+            # generate the names/values of the env variables for this VERB
+            name=${VERB}_from      ;  vFrom="${!name}"
+            name=${VERB}_level     ; vLevel="${!name}"
+            name=${VERB}_msg       ;   vMsg="${!name}"
+            name=${VERB}_toast     ; vToast="${!name}"
+            name=${VERB}_src       ;   vSrc="${!name}"
+            name=${VERB}_dst       ;   vDst="${!name}"
+            name=${VERB}_err       ;   vErr="${!name}"
+
+            [ -n "$FORCE_FROM" ]  &&  vFrom="$FORCE_FROM"
+            [ -n "$FORCE_TOAST" ] && vToast="$FORCE_TOAST"
+
+            clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vSrc" --dst "$vDst" --errMsg "$vErr" "$vMsg" 
+
+          done
           clog Log -I "done"
