@@ -19,32 +19,36 @@ env:
 on:
   workflow_call:
     inputs:
-      artifact-name:
-        required: true
-        type: string
-      make:
-        required: false
-        type: string
       override:
         required: false
         type: string
       docker_ns:
         required: false
         type: string
+      artifact-name:     # the name of the artifact file (absent = no artifacts)
+        type: string
+      make:                  # MAKE-"hugo ko" the name of bc-xxx routines to run
+        type: string
+      bc-from:               # slack notify: engine running the build e.g github
+        type: string
+      bc-toast:                         # slack notify: the pop up toast message
+        type: string
+      bc-trigger:                 # slack notify: repo/event triggering the flow
+        type: string
     secrets:
+      get_clog:                        # CLI to get the required version of clog
+        required: true
       aws_access_key_id:
         required: false
       aws_secret_access_key:
         required: false
-      docker_pat:
+      docker_pat:                         # for logging into a docker $DOCKER_NS
         required: false
-      get_clog:
-        required: true
       clog_bucket:
         required: false
       s3_bucket:
         required: false
-      webhook_slack:
+      webhook_slack:                           # webhook stub to a slack channel
         required: false
     outputs:
       message:
@@ -113,6 +117,7 @@ jobs:
           fi
       - # ---------------------------------------------------------------------
         name: tmp/ → artifact(${{ inputs.artifact-name }})
+        if: ${{ inputs.artifact-name }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifact-name }}

@@ -17,7 +17,7 @@
 #    2.3  level=$BUILD=$BUILD_level    # level e.g. -E for error, -S success, -W warning
 #    2.4    msg=$BUILD=$BUILD_msg      # message / description field of slack post
 #    2.5    src=$BUILD=$BUILD_src      # url of the source repo/trigger
-#    2.6    dst=$BUILD=$BUILD_dst      # url of the destintaion repo/trigger
+#    2.6    dst=$BUILD=$BUILD_target      # url of the destintaion repo/trigger
 #    2.6 clog Log
 #    2.7 repeat for  $DEPLOY....
 # 

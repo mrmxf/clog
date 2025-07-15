@@ -33,9 +33,9 @@ on:
       bc-trigger:                 # slack notify: repo/event triggering the flow
         type: string
     secrets:
-      docker_pat:                         # for logging into a docker $DOCKER_NS
-        required: true
       get_clog:                        # CLI to get the required version of clog
+        required: true
+      docker_pat:                         # for logging into a docker $DOCKER_NS
         required: true
       webhook_slack:                           # webhook stub to a slack channel
         required: false
@@ -147,14 +147,14 @@ jobs:
         # this actions:
         # 1. source "tmp/artifacts" - pick up definitions from previous steps
         # 2. iterate over NOTIFICATIONS="BUILD DEPLOY"
-        #    2.1  toast=$BUILD=$BUILD_toast    # slack toast popup message
-        #    2.2   from=$BUILD=$BUILD_from     # highlighted title - where did the notification come from
-        #    2.3  level=$BUILD=$BUILD_level    # level e.g. -E for error, -S success, -W warning
-        #    2.4    msg=$BUILD=$BUILD_msg      # message / description field of slack post
-        #    2.5    src=$BUILD=$BUILD_src      # url of the source repo/trigger
-        #    2.6    dst=$BUILD=$BUILD_dst      # url of the destintaion repo/trigger
-        #    2.6 clog Log
-        #    2.7 repeat for  $DEPLOY....
+        #    2.1 $BUILD_toast    # slack toast popup message
+        #    2.2 $BUILD_from     # highlighted title - where did the notification come from
+        #    2.3 $BUILD_level    # level e.g. -E for error, -S success, -W warning
+        #    2.4 $BUILD_msg      # message / description field of slack post
+        #    2.5 $BUILD_trigger  # url of the source repo/trigger
+        #    2.6 $BUILD_target   # url of the destintaion repo/trigger
+        #    2.6 clog SlackLog <params>
+        #    2.7 repeat for  $DEPLOY_xxx etc.
         # 
 
         id: notify
@@ -173,15 +173,14 @@ jobs:
 
           eval "$(cat $artifacts)"                # create artifacts environment
 
-          #for VERB in ${NOTIFICATIONS[@]};do
-
+          for VERB in ${NOTIFICATIONS[@]};do
             # generate the names/values of the env variables for this VERB
             name=${VERB}_from   ;    vFrom="${!name}"
             name=${VERB}_level  ;   vLevel="${!name}"
             name=${VERB}_msg    ;     vMsg="${!name}"
             name=${VERB}_toast  ;   vToast="${!name}"
             name=${VERB}_trigger; vTrigger="${!name}"
-            name=${VERB}_dst    ;     vDst="${!name}"
+            name=${VERB}_target ;  vTarget="${!name}"
             name=${VERB}_err    ;     vErr="${!name}"
 
             [ -n "$FORCE_FROM" ]    &&    vFrom="$FORCE_FROM"
@@ -191,11 +190,11 @@ jobs:
             echo "from:   $vFrom"
             echo "toast   $vToast"
             echo "trigger $vSrc"
-            echo "dst     $vDst"
+            echo "dst     $vTarget"
             echo "errMsg  $vErr"
             echo "msg:    $vMsg"
 
-            clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vTrigger" --dst "$vDst" --errMsg "$vErr" "$vMsg" 
-
+            clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vTrigger" --dst "$vTarget" --errMsg "$vErr" "$vMsg" 
           done
+
           clog Log -I "done"
