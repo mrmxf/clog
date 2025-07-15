@@ -57,24 +57,27 @@ jobs:
           case "${{ github.event_name }}" in
 
           "pull_request_target")
+            # for a PR we checkout the latest pushed commit of the requesting repo
             verb="PR"
-            ref="${{ github.event.pull_request.head.sha }}"               # head of the PR commits
-            src="${{ github.event.pull_request.head.repo.full_name }}"    # head name
-            url="${{ github.event.pull_request.head.repo.html_url }}"     # head url
+            ref="${{ github.event.pull_request.head.sha }}"            # head of the PR commits
+            src="${{ github.event.pull_request.head.repo.full_name }}" # head name
+            url="${{ github.event.pull_request.head.repo.html_url }}"  # head url
             ;;
 
           "push" | "workflow_dispatch")
-            verb="push"
-            ref="${{ github.ref }}"                            # event trigger
-            src="${{ github.repository }}"                     # event repo
-            url="${{ github.event.repository.html_url }}"      # event human url
+            # for a PUSH we checkout the HEAD of main
+            verb="PUSH"
+            ref="${{ github.ref }}"                                    # event trigger
+            src="${{ github.repository }}"                             # event repo
+            url="${{ github.event.repository.html_url }}"              # event human url
             ;;
 
           "schedule")
-            verb="SCHED"
-            ref="ref/tags/$(clog bc-main-prod)"                # production tag
-            src="${{ github.repository }}"                     # production repo
-            url="${{ github.event.repository.html_url }}"      # production human url
+            # for a SCHEDULE we checkout the latest production tag on main branch
+            verb="SCHEDULE"
+            ref="ref/tags/$(clog bc-main-prod-tag)"                    # production tag
+            src="${{ github.repository }}"                             # production repo
+            url="${{ github.event.repository.html_url }}"              # production human url
             ;;
 
           esac
