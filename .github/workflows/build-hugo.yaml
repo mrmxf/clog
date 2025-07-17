@@ -98,6 +98,7 @@ jobs:
           submodules: recursive
       - # ---------------------------------------------------------------------
         id: docker
+        if:  inputs.docker_ns != '' # ignore if no namespace, fail if _pat empty
         name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -120,10 +121,7 @@ jobs:
         env:
           MAKE: ${{ inputs.make }}
           DOCKER_NS: ${{ inputs.docker_ns }}
-        run: |
-          MSG_FILE="tmp/clog-notify"
-          rm -f $MSG_FILE >/dev/null 2>&1      # delete any notify file
-          
+        run: |          
           if [ -z "$MAKE" ]; then 
             # use the standard build if no overrides
             clog build

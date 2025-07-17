@@ -50,45 +50,79 @@ on:
         required: false
       webhook_slack:                           # webhook stub to a slack channel
         required: false
-    outputs:
-      message:
-        description: "Result of the build for announcing on slack"
-        value: ${{ jobs.build-golang.outputs.message }}
 
 jobs:
-  build-golang:
+  build-hugo:
+    # don't let random strangers run the PR workflows.
+    if: ${{ contains(fromJSON('["mrmxf", "charlottesweb2"]'), github.event.sender.login) || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
-    outputs:
-      message: ${{ steps.clog-build.outputs.message }}
 
     steps:
       - # ---------------------------------------------------------------------
-        id: check
+        id: init-clog
+        name: init clog
+        run: |
+          # install clog & set up some of the funky build logic
+          eval "${{ secrets.get_clog }}"
+
+          case "${{ github.event_name }}" in
+
+          "pull_request_target")
+            # for a PR we checkout the latest pushed commit of the requesting repo
+            verb="PR"
+            ref="${{ github.event.pull_request.head.sha }}"            # head of the PR commits
+            src="${{ github.event.pull_request.head.repo.full_name }}" # head name
+            url="${{ github.event.pull_request.head.repo.html_url }}"  # head url
+            ;;
+
+          "push" | "workflow_dispatch")
+            # for a PUSH we checkout the HEAD of main
+            verb="PUSH"
+            ref="${{ github.ref }}"                                    # event trigger
+            src="${{ github.repository }}"                             # event repo
+            url="${{ github.event.repository.html_url }}"              # event human url
+            ;;
+
+          "schedule")
+            # for a SCHEDULE we checkout the latest production tag on main branch
+            verb="SCHEDULE"
+            ref="ref/tags/$(clog bc-main-prod-tag)"                    # production tag
+            src="${{ github.repository }}"                             # production repo
+            url="${{ github.event.repository.html_url }}"              # production human url
+            ;;
+
+          esac
+
+          echo "verb=$verb" >> $GITHUB_ENV
+          echo "ref=$ref"   >> $GITHUB_ENV
+          echo "src=$src"   >> $GITHUB_ENV
+          echo "url=$url"   >> $GITHUB_ENV
+          
+          clog Log -I "Reusable workflow: ${{ env.clog_FLOW}}"
+      - # ---------------------------------------------------------------------
+        id: checkout
         name: Checkout repo
         uses: actions/checkout@v4
         with:
+          repository: ${{ env.src }}
+          ref:  ${{ env.ref }}
           submodules: recursive
-          fetch-depth: 0
-      - # ---------------------------------------------------------------------{{
+      - # ---------------------------------------------------------------------
         id: docker
-        if:  inputs.docker_ns != '' # ignore this step if no namespace, fail if _pat empty
+        if:  inputs.docker_ns != '' # ignore if no namespace, fail if _pat empty
         name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{  inputs.docker_ns }}
           password: ${{ secrets.docker_pat }}
       - # ---------------------------------------------------------------------
-        id: get-clog
-        name: get clog
-        env:
-          GET_CLOG: ${{ secrets.get_clog }}
-        run: |
-          eval "$GET_CLOG"
-          clog Log -I "Reusable workflow: $${{env.CLOG_FLOW}}"
-      - # ---------------------------------------------------------------------
         id: clog-setup
         name: setup tools
         run: |
+          # make the artifacts folder to propagate clog workflow internals
+          mkdir -p "$(dirname $(clog bc-artifacts))"
+
+          # install tools
           clog install golang
           clog install hugo
           clog install ko
@@ -98,25 +132,16 @@ jobs:
         env:
           MAKE: ${{ inputs.make }}
           DOCKER_NS: ${{ inputs.docker_ns }}
-        run: |
-          CACHE="$(clog workflow-message-file)"
-          rm -f $CACHE >/dev/null 2>&1  # delete any notify file
-          
+        run: |          
           if [ -z "$MAKE" ]; then 
+            # use the standard build if no overrides
             clog build
           else
-            clog Log -I "build-golang overide provided \$MAKE=\"$MAKE\""
+            clog Log -W "build-hugo overide provided \$MAKE=\"$MAKE\""
             clog build MAKE "$MAKE"
           fi
-
-          if [ -f $CACHE ]; then
-            echo "message=$(cat $CACHE)" >> $GITHUB_OUTPUT
-          else
-            mImage="$DOCKER_NS/${{ github.event.repository.name }}:"
-            printf "message=build: $mImage, github action: ${{env.CLOG_FLOW}}" >> $GITHUB_OUTPUT
-          fi
       - # ---------------------------------------------------------------------
-        name: tmp/ → artifact(${{ inputs.artifact-name }})
+        name: tmp/ →  artifact(${{ inputs.artifact-name }})
         if: ${{ inputs.artifact-name }}
         uses: actions/upload-artifact@v4
         with:
@@ -124,23 +149,68 @@ jobs:
           retention-days: 2
           path: tmp
       - # ---------------------------------------------------------------------
+        #  log to a slack channel on success / failure
+        #
+        # this actions:
+        # 1. source "tmp/artifacts" - pick up definitions from previous steps
+        # 2. iterate over NOTIFICATIONS="BUILD DEPLOY"
+        #    2.1 $BUILD_toast    # slack toast popup message
+        #    2.2 $BUILD_from     # highlighted title - where did the notification come from
+        #    2.3 $BUILD_level    # level e.g. -E for error, -S success, -W warning
+        #    2.4 $BUILD_msg      # message / description field of slack post
+        #    2.5 $BUILD_trigger  # url of the source repo/trigger
+        #    2.6 $BUILD_target   # url of the destintaion repo/trigger
+        #    2.6 clog SlackLog <params>
+        #    2.7 repeat for  $DEPLOY_xxx etc.
+        # 
+
         id: notify
         if: ${{ env.HOOK_SLACK != '' }}
         name: notify-team
         env:
-          MESSAGE: ${{ steps.clog-build.outputs.message }}
-          ACTOR: ${{ github.actor }}
-          EVENT: ${{ github.event_name }}
-          JOB: ${{ github.job }}
-          REPO: ${{ github.repository }}
-          REF: ${{ github.ref }}
-          REF_TYPE: ${{ github.ref_type }}
-          WORKFLOW: ${{ github.workflow }}
           HOOK_SLACK:  ${{ secrets.webhook_slack }}
+          FORCE_FROM: ${{ inputs.bc-from }}
+          FORCE_TOAST: ${{ inputs.bc-toast }}
+          FORCE_TRIGGER: ${{ inputs.bc-trigger }}
         run: |
-          clog Log -I "Rx message:\n$MESSAGE"
-          MSG="msg: $MESSAGE by: $ACTOR, workflow: $WORKFLOW, repo: $REPO:$REF($REF_TYPE), job: $JOB, event: $EVENT"
-          clog Log -I "Tx message:\n$MSG"
-          # use clog to ping slack via the webhook
-          clog Slack "$MSG"
+          eval "$(clog Source project config); $(clog Crayon)"  # settings+color
+          
+          artifacts="$(clog bc-artifacts)"
+          cat "$artifacts"                              # log the artifacts file
+
+          eval "$(cat $artifacts)"                # create artifacts environment
+
+          for VERB in ${NOTIFICATIONS[@]};do
+            # generate the names/values of the env variables for this VERB
+            name=${VERB}_from   ;    vFrom="${!name}"
+            name=${VERB}_level  ;   vLevel="${!name}"
+            name=${VERB}_msg    ;     vMsg="${!name}"
+            name=${VERB}_toast  ;   vToast="${!name}"
+            name=${VERB}_trigger; vTrigger="${!name}"
+            name=${VERB}_target ;  vTarget="${!name}"
+            name=${VERB}_err    ;     vErr="${!name}"
+
+            [ -n "$FORCE_FROM" ]    &&    vFrom="$FORCE_FROM"
+            [ -n "$FORCE_TOAST" ]   &&   vToast="$FORCE_TOAST"
+            [ -n "$FORCE_TRIGGER" ] && vTrigger="$FORCE_TRIGGER"
+
+            case "${{ github.event_name }}" in
+            #"pull_request_target") ;;
+            #"push" | "workflow_dispatch") ;;
+            "schedule")
+              # append checkout tag and current time to Trigger text
+              vTrigger="$vTrigger:$(clog bc-main-prod-tag) @ $(date +'%Y-%m-%d %T')"
+              ;;
+            esac
+
+            echo "from:   $vFrom"
+            echo "toast   $vToast"
+            echo "trigger $vSrc"
+            echo "dst     $vTarget"
+            echo "errMsg  $vErr"
+            echo "msg:    $vMsg"
+
+            clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vTrigger" --dst "$vTarget" --errMsg "$vErr" "$vMsg" 
+          done
+
           clog Log -I "done"
