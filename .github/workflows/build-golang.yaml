@@ -19,9 +19,6 @@ env:
 on:
   workflow_call:
     inputs:
-      override:
-        required: false
-        type: string
       docker_ns:
         required: false
         type: string
@@ -38,15 +35,7 @@ on:
     secrets:
       get_clog:                        # CLI to get the required version of clog
         required: true
-      aws_access_key_id:
-        required: false
-      aws_secret_access_key:
-        required: false
       docker_pat:                         # for logging into a docker $DOCKER_NS
-        required: false
-      clog_bucket:
-        required: false
-      s3_bucket:
         required: false
       webhook_slack:                           # webhook stub to a slack channel
         required: false
