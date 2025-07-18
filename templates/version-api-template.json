@@ -1,0 +1,16 @@
+{
+  "args": [
+    {
+      "name": "format",
+      "description": "Version format (short, note, or full)",
+      "required": false,
+      "type": "string"
+    }
+  ],
+  "command": "version",
+  "example": {
+    "format": "example_format"
+  },
+  "method": "POST",
+  "path": "/clog/version"
+}

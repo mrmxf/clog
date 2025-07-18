@@ -1,0 +1,410 @@
+openapi: 3.0.0
+info:
+    title: Clog API
+    description: Command Line Of Go API
+    version: 1.0.0
+paths:
+    /clog:
+        get:
+            summary: Command Line Of Go - interactive helper
+            description: |4
+                Command Line Of Go (clog)
+                =========================
+                Clog aggregates:
+                  - snippets: command lines in your porject's colg.yaml
+                	-  scripts: files matching "clogrc/*.sh" - see below
+                	- commands: embedded functions compiled into clog
+
+                Create clog.yaml for a project
+                ==========================================
+                clog Init  # run it twice to get a copy of the core.clog.yaml
+
+                Scripts in "clogrc/" must have the following 3 lines to be found by clog
+                ==========================================
+                #  clog> commandName
+                # short> short help text
+                # extra> scripts need these 3 lines to be found by clog
+
+                Adding Snippets & macros
+                ==========================================
+                edit clogrc/clog.yaml  # after you've made one
+
+                Running clog
+                ==========================================
+                interactively: clog
+                as a web ui:   clog Svc && open localhost:8765
+                as api:      	 curl -H "Authorization: OAuth <ACCESS_TOKEN>" http://localhost:8765/api/version/command
+            operationId: getClog
+            tags:
+                - commands
+            parameters:
+                - name: config
+                  in: query
+                  description: 'clog -c myClogfig.yaml   # clog Cat core.clog.yaml > myClogfig.yaml'
+                  required: false
+                  schema:
+                    type: string
+                - name: loglevel
+                  in: query
+                  description: 'clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR'
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    default: 0
+                - name: note
+                  in: query
+                  description: 'clog --note              # shows just the version note'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: v
+                  in: query
+                  description: 'clog -v                  # shows just the semantic version'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: version
+                  in: query
+                  description: 'clog --version           # shows the full version string'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+            responses:
+                "200":
+                    description: Command executed successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    duration:
+                                        type: number
+                                        description: Execution duration in milliseconds
+                                    exitCode:
+                                        type: integer
+                                        description: Exit code
+                                    output:
+                                        type: string
+                                        description: Command output
+                                required:
+                                    - output
+                                    - exitCode
+                "400":
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error
+    /clog/test:
+        get:
+            summary: Test command
+            description: A test command with arguments
+            operationId: getTest
+            tags:
+                - commands
+            parameters:
+                - name: config
+                  in: query
+                  description: 'clog -c myClogfig.yaml   # clog Cat core.clog.yaml > myClogfig.yaml'
+                  required: false
+                  schema:
+                    type: string
+                - name: loglevel
+                  in: query
+                  description: 'clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR'
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    default: 0
+                - name: note
+                  in: query
+                  description: 'clog --note              # shows just the version note'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: v
+                  in: query
+                  description: 'clog -v                  # shows just the semantic version'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: version
+                  in: query
+                  description: 'clog --version           # shows the full version string'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+            responses:
+                "200":
+                    description: Command executed successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    duration:
+                                        type: number
+                                        description: Execution duration in milliseconds
+                                    exitCode:
+                                        type: integer
+                                        description: Exit code
+                                    output:
+                                        type: string
+                                        description: Command output
+                                required:
+                                    - output
+                                    - exitCode
+                "400":
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error
+    /clog/version:
+        get:
+            summary: Print the version string
+            description: use clog -v to display the short semantic version string.
+            operationId: getVersion
+            tags:
+                - commands
+            parameters:
+                - name: config
+                  in: query
+                  description: 'clog -c myClogfig.yaml   # clog Cat core.clog.yaml > myClogfig.yaml'
+                  required: false
+                  schema:
+                    type: string
+                - name: loglevel
+                  in: query
+                  description: 'clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR'
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    default: 0
+                - name: note
+                  in: query
+                  description: 'clog --note              # shows just the version note'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: v
+                  in: query
+                  description: 'clog -v                  # shows just the semantic version'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: version
+                  in: query
+                  description: 'clog --version           # shows the full version string'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+            responses:
+                "200":
+                    description: Command executed successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    duration:
+                                        type: number
+                                        description: Execution duration in milliseconds
+                                    exitCode:
+                                        type: integer
+                                        description: Exit code
+                                    output:
+                                        type: string
+                                        description: Command output
+                                required:
+                                    - output
+                                    - exitCode
+                "400":
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error
+        post:
+            summary: Print the version string (with arguments)
+            description: use clog -v to display the short semantic version string.
+            operationId: postVersion
+            tags:
+                - commands
+            parameters:
+                - name: config
+                  in: query
+                  description: 'clog -c myClogfig.yaml   # clog Cat core.clog.yaml > myClogfig.yaml'
+                  required: false
+                  schema:
+                    type: string
+                - name: loglevel
+                  in: query
+                  description: 'clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR'
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    default: 0
+                - name: note
+                  in: query
+                  description: 'clog --note              # shows just the version note'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: v
+                  in: query
+                  description: 'clog -v                  # shows just the semantic version'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+                - name: version
+                  in: query
+                  description: 'clog --version           # shows the full version string'
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+            requestBody:
+                description: Command arguments
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+            responses:
+                "200":
+                    description: Command executed successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    duration:
+                                        type: number
+                                        description: Execution duration in milliseconds
+                                    exitCode:
+                                        type: integer
+                                        description: Exit code
+                                    output:
+                                        type: string
+                                        description: Command output
+                                required:
+                                    - output
+                                    - exitCode
+                "400":
+                    description: Bad request
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error
+                "500":
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code:
+                                        type: integer
+                                        description: Error code
+                                    error:
+                                        type: string
+                                        description: Error message
+                                required:
+                                    - error

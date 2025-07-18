@@ -1,0 +1,99 @@
+{
+  "use": "clog",
+  "short": "Command Line Of Go - interactive helper",
+  "long": "\nCommand Line Of Go (clog)\n=========================\nClog aggregates:\n  - snippets: command lines in your porject's colg.yaml\n\t-  scripts: files matching \"clogrc/*.sh\" - see below\n\t- commands: embedded functions compiled into clog\n\nCreate clog.yaml for a project\n==========================================\nclog Init  # run it twice to get a copy of the core.clog.yaml\n\nScripts in \"clogrc/\" must have the following 3 lines to be found by clog\n==========================================\n#  clog\u003e commandName\n# short\u003e short help text\n# extra\u003e scripts need these 3 lines to be found by clog\n\nAdding Snippets \u0026 macros\n==========================================\nedit clogrc/clog.yaml  # after you've made one\n\nRunning clog\n==========================================\ninteractively: clog\nas a web ui:   clog Svc \u0026\u0026 open localhost:8765\nas api:      \t curl -H \"Authorization: OAuth \u003cACCESS_TOKEN\u003e\" http://localhost:8765/api/version/command\n",
+  "flags": [
+    {
+      "name": "config",
+      "shorthand": "c",
+      "datatype": "string",
+      "usage": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+      "required": false
+    },
+    {
+      "name": "loglevel",
+      "shorthand": "l",
+      "datatype": "int",
+      "usage": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+      "required": false,
+      "default": "0"
+    },
+    {
+      "name": "note",
+      "shorthand": "n",
+      "datatype": "bool",
+      "usage": "clog --note              # shows just the version note",
+      "required": false,
+      "default": "false"
+    },
+    {
+      "name": "v",
+      "shorthand": "v",
+      "datatype": "bool",
+      "usage": "clog -v                  # shows just the semantic version",
+      "required": false,
+      "default": "false"
+    },
+    {
+      "name": "version",
+      "datatype": "bool",
+      "usage": "clog --version           # shows the full version string",
+      "required": false,
+      "default": "false"
+    }
+  ],
+  "subcommands": [
+    {
+      "use": "version",
+      "short": "Print the version string",
+      "long": "use clog -v to display the short semantic version string.",
+      "flags": [
+        {
+          "name": "config",
+          "shorthand": "c",
+          "datatype": "string",
+          "usage": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+          "required": false
+        },
+        {
+          "name": "loglevel",
+          "shorthand": "l",
+          "datatype": "int",
+          "usage": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "note",
+          "shorthand": "n",
+          "datatype": "bool",
+          "usage": "clog --note              # shows just the version note",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "v",
+          "shorthand": "v",
+          "datatype": "bool",
+          "usage": "clog -v                  # shows just the semantic version",
+          "required": false,
+          "default": "false"
+        },
+        {
+          "name": "version",
+          "datatype": "bool",
+          "usage": "clog --version           # shows the full version string",
+          "required": false,
+          "default": "false"
+        }
+      ],
+      "args": [
+        {
+          "name": "format",
+          "description": "Version format (short, note, or full)",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "args": [
+    {
+      "name": "file",
+      "description": "File to display",
+      "required": true,
+      "type": "string"
+    }
+  ],
+  "command": "Cat",
+  "example": {
+    "file": "example_file"
+  },
+  "method": "POST",
+  "path": "/clog/Cat"
+}

@@ -1,0 +1,2194 @@
+{
+  "root": {
+    "command": {
+      "use": "clog",
+      "short": "Command Line Of Go - interactive helper",
+      "long": "\nCommand Line Of Go (clog)\n=========================\nClog aggregates:\n  - snippets: command lines in your porject's colg.yaml\n\t-  scripts: files matching \"clogrc/*.sh\" - see below\n\t- commands: embedded functions compiled into clog\n\nCreate clog.yaml for a project\n==========================================\nclog Init  # run it twice to get a copy of the core.clog.yaml\n\nScripts in \"clogrc/\" must have the following 3 lines to be found by clog\n==========================================\n#  clog\u003e commandName\n# short\u003e short help text\n# extra\u003e scripts need these 3 lines to be found by clog\n\nAdding Snippets \u0026 macros\n==========================================\nedit clogrc/clog.yaml  # after you've made one\n\nRunning clog\n==========================================\ninteractively: clog\nas a web ui:   clog Svc \u0026\u0026 open localhost:8765\nas api:      \t curl -H \"Authorization: OAuth \u003cACCESS_TOKEN\u003e\" http://localhost:8765/api/version/command\n",
+      "path": "/clog",
+      "get": {
+        "summary": "Command Line Of Go - interactive helper",
+        "description": "\nCommand Line Of Go (clog)\n=========================\nClog aggregates:\n  - snippets: command lines in your porject's colg.yaml\n\t-  scripts: files matching \"clogrc/*.sh\" - see below\n\t- commands: embedded functions compiled into clog\n\nCreate clog.yaml for a project\n==========================================\nclog Init  # run it twice to get a copy of the core.clog.yaml\n\nScripts in \"clogrc/\" must have the following 3 lines to be found by clog\n==========================================\n#  clog\u003e commandName\n# short\u003e short help text\n# extra\u003e scripts need these 3 lines to be found by clog\n\nAdding Snippets \u0026 macros\n==========================================\nedit clogrc/clog.yaml  # after you've made one\n\nRunning clog\n==========================================\ninteractively: clog\nas a web ui:   clog Svc \u0026\u0026 open localhost:8765\nas api:      \t curl -H \"Authorization: OAuth \u003cACCESS_TOKEN\u003e\" http://localhost:8765/api/version/command\n",
+        "operationId": "getClog",
+        "tags": [
+          "commands"
+        ],
+        "parameters": [
+          {
+            "name": "config",
+            "in": "query",
+            "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loglevel",
+            "in": "query",
+            "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "description": "clog --note              # shows just the version note",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "description": "clog -v                  # shows just the semantic version",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "clog --version           # shows the full version string",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Command executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "description": "Execution duration in milliseconds"
+                    },
+                    "exitCode": {
+                      "type": "integer",
+                      "description": "Exit code"
+                    },
+                    "output": {
+                      "type": "string",
+                      "description": "Command output"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "exitCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "hasArgs": false,
+      "flags": [
+        {
+          "name": "config",
+          "in": "query",
+          "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "loglevel",
+          "in": "query",
+          "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        {
+          "name": "note",
+          "in": "query",
+          "description": "clog --note              # shows just the version note",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "v",
+          "in": "query",
+          "description": "clog -v                  # shows just the semantic version",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "description": "clog --version           # shows the full version string",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      ]
+    },
+    "children": [
+      {
+        "command": {
+          "use": "Cat",
+          "short": "copy an internal file to stdout",
+          "long": "returns error status 1 if file not found.",
+          "path": "/clog/Cat",
+          "get": {
+            "summary": "copy an internal file to stdout",
+            "description": "returns error status 1 if file not found.",
+            "operationId": "getCat",
+            "tags": [
+              "commands"
+            ],
+            "parameters": [
+              {
+                "name": "config",
+                "in": "query",
+                "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "loglevel",
+                "in": "query",
+                "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0
+                }
+              },
+              {
+                "name": "note",
+                "in": "query",
+                "description": "clog --note              # shows just the version note",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "v",
+                "in": "query",
+                "description": "clog -v                  # shows just the semantic version",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "version",
+                "in": "query",
+                "description": "clog --version           # shows the full version string",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Command executed successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "description": "Execution duration in milliseconds"
+                        },
+                        "exitCode": {
+                          "type": "integer",
+                          "description": "Exit code"
+                        },
+                        "output": {
+                          "type": "string",
+                          "description": "Command output"
+                        }
+                      },
+                      "required": [
+                        "output",
+                        "exitCode"
+                      ]
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Bad request",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              },
+              "500": {
+                "description": "Internal server error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "summary": "copy an internal file to stdout (with arguments)",
+            "description": "returns error status 1 if file not found.",
+            "operationId": "postCat",
+            "tags": [
+              "commands"
+            ],
+            "parameters": [
+              {
+                "name": "config",
+                "in": "query",
+                "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "loglevel",
+                "in": "query",
+                "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0
+                }
+              },
+              {
+                "name": "note",
+                "in": "query",
+                "description": "clog --note              # shows just the version note",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "v",
+                "in": "query",
+                "description": "clog -v                  # shows just the semantic version",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "version",
+                "in": "query",
+                "description": "clog --version           # shows the full version string",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            ],
+            "requestBody": {
+              "description": "Command arguments",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Command executed successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "description": "Execution duration in milliseconds"
+                        },
+                        "exitCode": {
+                          "type": "integer",
+                          "description": "Exit code"
+                        },
+                        "output": {
+                          "type": "string",
+                          "description": "Command output"
+                        }
+                      },
+                      "required": [
+                        "output",
+                        "exitCode"
+                      ]
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Bad request",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              },
+              "500": {
+                "description": "Internal server error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "hasArgs": true,
+          "flags": [
+            {
+              "name": "config",
+              "in": "query",
+              "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "loglevel",
+              "in": "query",
+              "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 0
+              }
+            },
+            {
+              "name": "note",
+              "in": "query",
+              "description": "clog --note              # shows just the version note",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "v",
+              "in": "query",
+              "description": "clog -v                  # shows just the semantic version",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "version",
+              "in": "query",
+              "description": "clog --version           # shows the full version string",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "args": [
+            {
+              "name": "file",
+              "description": "File to display",
+              "required": true,
+              "type": "string"
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "use": "List",
+          "short": "list all embedded files to  stdout",
+          "long": "errors logged to stderr with status 1.",
+          "path": "/clog/List",
+          "get": {
+            "summary": "list all embedded files to  stdout",
+            "description": "errors logged to stderr with status 1.",
+            "operationId": "getList",
+            "tags": [
+              "commands"
+            ],
+            "parameters": [
+              {
+                "name": "config",
+                "in": "query",
+                "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "loglevel",
+                "in": "query",
+                "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0
+                }
+              },
+              {
+                "name": "note",
+                "in": "query",
+                "description": "clog --note              # shows just the version note",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "v",
+                "in": "query",
+                "description": "clog -v                  # shows just the semantic version",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "version",
+                "in": "query",
+                "description": "clog --version           # shows the full version string",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Command executed successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "description": "Execution duration in milliseconds"
+                        },
+                        "exitCode": {
+                          "type": "integer",
+                          "description": "Exit code"
+                        },
+                        "output": {
+                          "type": "string",
+                          "description": "Command output"
+                        }
+                      },
+                      "required": [
+                        "output",
+                        "exitCode"
+                      ]
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Bad request",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              },
+              "500": {
+                "description": "Internal server error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "hasArgs": false,
+          "flags": [
+            {
+              "name": "config",
+              "in": "query",
+              "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "loglevel",
+              "in": "query",
+              "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 0
+              }
+            },
+            {
+              "name": "note",
+              "in": "query",
+              "description": "clog --note              # shows just the version note",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "v",
+              "in": "query",
+              "description": "clog -v                  # shows just the semantic version",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "version",
+              "in": "query",
+              "description": "clog --version           # shows the full version string",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "command": {
+          "use": "version",
+          "short": "Print the version string",
+          "long": "use clog -v to display the short semantic version string.",
+          "path": "/clog/version",
+          "get": {
+            "summary": "Print the version string",
+            "description": "use clog -v to display the short semantic version string.",
+            "operationId": "getVersion",
+            "tags": [
+              "commands"
+            ],
+            "parameters": [
+              {
+                "name": "config",
+                "in": "query",
+                "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "loglevel",
+                "in": "query",
+                "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0
+                }
+              },
+              {
+                "name": "note",
+                "in": "query",
+                "description": "clog --note              # shows just the version note",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "v",
+                "in": "query",
+                "description": "clog -v                  # shows just the semantic version",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "version",
+                "in": "query",
+                "description": "clog --version           # shows the full version string",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Command executed successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "description": "Execution duration in milliseconds"
+                        },
+                        "exitCode": {
+                          "type": "integer",
+                          "description": "Exit code"
+                        },
+                        "output": {
+                          "type": "string",
+                          "description": "Command output"
+                        }
+                      },
+                      "required": [
+                        "output",
+                        "exitCode"
+                      ]
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Bad request",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              },
+              "500": {
+                "description": "Internal server error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "summary": "Print the version string (with arguments)",
+            "description": "use clog -v to display the short semantic version string.",
+            "operationId": "postVersion",
+            "tags": [
+              "commands"
+            ],
+            "parameters": [
+              {
+                "name": "config",
+                "in": "query",
+                "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "loglevel",
+                "in": "query",
+                "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0
+                }
+              },
+              {
+                "name": "note",
+                "in": "query",
+                "description": "clog --note              # shows just the version note",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "v",
+                "in": "query",
+                "description": "clog -v                  # shows just the semantic version",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              {
+                "name": "version",
+                "in": "query",
+                "description": "clog --version           # shows the full version string",
+                "required": false,
+                "schema": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            ],
+            "requestBody": {
+              "description": "Command arguments",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Command executed successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "description": "Execution duration in milliseconds"
+                        },
+                        "exitCode": {
+                          "type": "integer",
+                          "description": "Exit code"
+                        },
+                        "output": {
+                          "type": "string",
+                          "description": "Command output"
+                        }
+                      },
+                      "required": [
+                        "output",
+                        "exitCode"
+                      ]
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Bad request",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              },
+              "500": {
+                "description": "Internal server error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Error message"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "hasArgs": true,
+          "flags": [
+            {
+              "name": "config",
+              "in": "query",
+              "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "loglevel",
+              "in": "query",
+              "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 0
+              }
+            },
+            {
+              "name": "note",
+              "in": "query",
+              "description": "clog --note              # shows just the version note",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "v",
+              "in": "query",
+              "description": "clog -v                  # shows just the semantic version",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            {
+              "name": "version",
+              "in": "query",
+              "description": "clog --version           # shows the full version string",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
+          "args": [
+            {
+              "name": "format",
+              "description": "Version format (short, note, or full)",
+              "required": false,
+              "type": "string"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "commands": [
+    {
+      "use": "clog",
+      "short": "Command Line Of Go - interactive helper",
+      "long": "\nCommand Line Of Go (clog)\n=========================\nClog aggregates:\n  - snippets: command lines in your porject's colg.yaml\n\t-  scripts: files matching \"clogrc/*.sh\" - see below\n\t- commands: embedded functions compiled into clog\n\nCreate clog.yaml for a project\n==========================================\nclog Init  # run it twice to get a copy of the core.clog.yaml\n\nScripts in \"clogrc/\" must have the following 3 lines to be found by clog\n==========================================\n#  clog\u003e commandName\n# short\u003e short help text\n# extra\u003e scripts need these 3 lines to be found by clog\n\nAdding Snippets \u0026 macros\n==========================================\nedit clogrc/clog.yaml  # after you've made one\n\nRunning clog\n==========================================\ninteractively: clog\nas a web ui:   clog Svc \u0026\u0026 open localhost:8765\nas api:      \t curl -H \"Authorization: OAuth \u003cACCESS_TOKEN\u003e\" http://localhost:8765/api/version/command\n",
+      "path": "/clog",
+      "get": {
+        "summary": "Command Line Of Go - interactive helper",
+        "description": "\nCommand Line Of Go (clog)\n=========================\nClog aggregates:\n  - snippets: command lines in your porject's colg.yaml\n\t-  scripts: files matching \"clogrc/*.sh\" - see below\n\t- commands: embedded functions compiled into clog\n\nCreate clog.yaml for a project\n==========================================\nclog Init  # run it twice to get a copy of the core.clog.yaml\n\nScripts in \"clogrc/\" must have the following 3 lines to be found by clog\n==========================================\n#  clog\u003e commandName\n# short\u003e short help text\n# extra\u003e scripts need these 3 lines to be found by clog\n\nAdding Snippets \u0026 macros\n==========================================\nedit clogrc/clog.yaml  # after you've made one\n\nRunning clog\n==========================================\ninteractively: clog\nas a web ui:   clog Svc \u0026\u0026 open localhost:8765\nas api:      \t curl -H \"Authorization: OAuth \u003cACCESS_TOKEN\u003e\" http://localhost:8765/api/version/command\n",
+        "operationId": "getClog",
+        "tags": [
+          "commands"
+        ],
+        "parameters": [
+          {
+            "name": "config",
+            "in": "query",
+            "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loglevel",
+            "in": "query",
+            "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "description": "clog --note              # shows just the version note",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "description": "clog -v                  # shows just the semantic version",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "clog --version           # shows the full version string",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Command executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "description": "Execution duration in milliseconds"
+                    },
+                    "exitCode": {
+                      "type": "integer",
+                      "description": "Exit code"
+                    },
+                    "output": {
+                      "type": "string",
+                      "description": "Command output"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "exitCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "hasArgs": false,
+      "flags": [
+        {
+          "name": "config",
+          "in": "query",
+          "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "loglevel",
+          "in": "query",
+          "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        {
+          "name": "note",
+          "in": "query",
+          "description": "clog --note              # shows just the version note",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "v",
+          "in": "query",
+          "description": "clog -v                  # shows just the semantic version",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "description": "clog --version           # shows the full version string",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      ]
+    },
+    {
+      "use": "Cat",
+      "short": "copy an internal file to stdout",
+      "long": "returns error status 1 if file not found.",
+      "path": "/clog/Cat",
+      "get": {
+        "summary": "copy an internal file to stdout",
+        "description": "returns error status 1 if file not found.",
+        "operationId": "getCat",
+        "tags": [
+          "commands"
+        ],
+        "parameters": [
+          {
+            "name": "config",
+            "in": "query",
+            "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loglevel",
+            "in": "query",
+            "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "description": "clog --note              # shows just the version note",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "description": "clog -v                  # shows just the semantic version",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "clog --version           # shows the full version string",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Command executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "description": "Execution duration in milliseconds"
+                    },
+                    "exitCode": {
+                      "type": "integer",
+                      "description": "Exit code"
+                    },
+                    "output": {
+                      "type": "string",
+                      "description": "Command output"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "exitCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "copy an internal file to stdout (with arguments)",
+        "description": "returns error status 1 if file not found.",
+        "operationId": "postCat",
+        "tags": [
+          "commands"
+        ],
+        "parameters": [
+          {
+            "name": "config",
+            "in": "query",
+            "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loglevel",
+            "in": "query",
+            "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "description": "clog --note              # shows just the version note",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "description": "clog -v                  # shows just the semantic version",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "clog --version           # shows the full version string",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Command arguments",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Command executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "description": "Execution duration in milliseconds"
+                    },
+                    "exitCode": {
+                      "type": "integer",
+                      "description": "Exit code"
+                    },
+                    "output": {
+                      "type": "string",
+                      "description": "Command output"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "exitCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "hasArgs": true,
+      "flags": [
+        {
+          "name": "config",
+          "in": "query",
+          "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "loglevel",
+          "in": "query",
+          "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        {
+          "name": "note",
+          "in": "query",
+          "description": "clog --note              # shows just the version note",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "v",
+          "in": "query",
+          "description": "clog -v                  # shows just the semantic version",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "description": "clog --version           # shows the full version string",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "file",
+          "description": "File to display",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "use": "List",
+      "short": "list all embedded files to  stdout",
+      "long": "errors logged to stderr with status 1.",
+      "path": "/clog/List",
+      "get": {
+        "summary": "list all embedded files to  stdout",
+        "description": "errors logged to stderr with status 1.",
+        "operationId": "getList",
+        "tags": [
+          "commands"
+        ],
+        "parameters": [
+          {
+            "name": "config",
+            "in": "query",
+            "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loglevel",
+            "in": "query",
+            "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "description": "clog --note              # shows just the version note",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "description": "clog -v                  # shows just the semantic version",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "clog --version           # shows the full version string",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Command executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "description": "Execution duration in milliseconds"
+                    },
+                    "exitCode": {
+                      "type": "integer",
+                      "description": "Exit code"
+                    },
+                    "output": {
+                      "type": "string",
+                      "description": "Command output"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "exitCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "hasArgs": false,
+      "flags": [
+        {
+          "name": "config",
+          "in": "query",
+          "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "loglevel",
+          "in": "query",
+          "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        {
+          "name": "note",
+          "in": "query",
+          "description": "clog --note              # shows just the version note",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "v",
+          "in": "query",
+          "description": "clog -v                  # shows just the semantic version",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "description": "clog --version           # shows the full version string",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      ]
+    },
+    {
+      "use": "version",
+      "short": "Print the version string",
+      "long": "use clog -v to display the short semantic version string.",
+      "path": "/clog/version",
+      "get": {
+        "summary": "Print the version string",
+        "description": "use clog -v to display the short semantic version string.",
+        "operationId": "getVersion",
+        "tags": [
+          "commands"
+        ],
+        "parameters": [
+          {
+            "name": "config",
+            "in": "query",
+            "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loglevel",
+            "in": "query",
+            "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "description": "clog --note              # shows just the version note",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "description": "clog -v                  # shows just the semantic version",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "clog --version           # shows the full version string",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Command executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "description": "Execution duration in milliseconds"
+                    },
+                    "exitCode": {
+                      "type": "integer",
+                      "description": "Exit code"
+                    },
+                    "output": {
+                      "type": "string",
+                      "description": "Command output"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "exitCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Print the version string (with arguments)",
+        "description": "use clog -v to display the short semantic version string.",
+        "operationId": "postVersion",
+        "tags": [
+          "commands"
+        ],
+        "parameters": [
+          {
+            "name": "config",
+            "in": "query",
+            "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loglevel",
+            "in": "query",
+            "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "note",
+            "in": "query",
+            "description": "clog --note              # shows just the version note",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "description": "clog -v                  # shows just the semantic version",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "clog --version           # shows the full version string",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Command arguments",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Command executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "description": "Execution duration in milliseconds"
+                    },
+                    "exitCode": {
+                      "type": "integer",
+                      "description": "Exit code"
+                    },
+                    "output": {
+                      "type": "string",
+                      "description": "Command output"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "exitCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Error code"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "hasArgs": true,
+      "flags": [
+        {
+          "name": "config",
+          "in": "query",
+          "description": "clog -c myClogfig.yaml   # clog Cat core.clog.yaml \u003e myClogfig.yaml",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "loglevel",
+          "in": "query",
+          "description": "clog --loglevel 1        # 0:OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        {
+          "name": "note",
+          "in": "query",
+          "description": "clog --note              # shows just the version note",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "v",
+          "in": "query",
+          "description": "clog -v                  # shows just the semantic version",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "description": "clog --version           # shows the full version string",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "format",
+          "description": "Version format (short, note, or full)",
+          "required": false,
+          "type": "string"
+        }
+      ]
+    }
+  ]
+}

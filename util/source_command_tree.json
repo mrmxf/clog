@@ -1,0 +1,27 @@
+{
+  "root": {
+    "command": {
+      "use": "root",
+      "short": "Root command",
+      "long": "Root command discovered from source analysis",
+      "path": "/",
+      "hasArgs": false
+    }
+  },
+  "commands": [
+    {
+      "use": "root",
+      "short": "Root command",
+      "long": "Root command discovered from source analysis",
+      "path": "/",
+      "hasArgs": false
+    },
+    {
+      "use": "clog",
+      "short": "Command Line Of Go - interactive helper",
+      "long": "`\nCommand Line Of Go (clog)\n=========================\nClog aggregates:\n  - snippets: command lines in your porject's colg.yaml\n\t-  scripts: files matching \"clogrc/*.sh\" - see below\n\t- commands: embedded functions compiled into clog\n\nCreate clog.yaml for a project\n==========================================\nclog Init  # run it twice to get a copy of the core.clog.yaml\n\nScripts in \"clogrc/\" must have the following 3 lines to be found by clog\n==========================================\n#  clog\u003e commandName\n# short\u003e short help text\n# extra\u003e scripts need these 3 lines to be found by clog\n\nAdding Snippets \u0026 macros\n==========================================\nedit clogrc/clog.yaml  # after you've made one\n\nRunning clog\n==========================================\ninteractively: clog\nas a web ui:   clog Svc \u0026\u0026 open localhost:8765\nas api:      \t curl -H \"Authorization: OAuth \u003cACCESS_TOKEN\u003e\" http://localhost:8765/api/version/command\n`",
+      "path": "/clog",
+      "hasArgs": false
+    }
+  ]
+}
