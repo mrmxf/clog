@@ -113,7 +113,7 @@ jobs:
 
           # install tools
           clog install golang
-          clog install hugo
+          # clog install hugo - need to check for hugo projects to do this
           clog install ko
       - # ---------------------------------------------------------------------
         id: clog-build
