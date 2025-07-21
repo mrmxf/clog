@@ -24,7 +24,7 @@ on:
         type: string
       artifact-name:     # the name of the artifact file (absent = no artifacts)
         type: string
-      make:                  # MAKE-"hugo ko" the name of bc-xxx routines to run
+      make:                # MAKE-"golang ko" the name of bc-xxx routines to run
         type: string
       bc-from:               # slack notify: engine running the build e.g github
         type: string
@@ -41,7 +41,7 @@ on:
         required: false
 
 jobs:
-  build-hugo:
+  build-golang:
     # don't let random strangers run the PR workflows.
     if: ${{ contains(fromJSON('["mrmxf", "charlottesweb2"]'), github.event.sender.login) || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
@@ -126,7 +126,7 @@ jobs:
             # use the standard build if no overrides
             clog build
           else
-            clog Log -W "build-hugo overide provided \$MAKE=\"$MAKE\""
+            clog Log -W "build-golang overide provided \$MAKE=\"$MAKE\""
             clog build MAKE "$MAKE"
           fi
       - # ---------------------------------------------------------------------
