@@ -29,6 +29,8 @@ jobs:
         name: eval-get-clog
         run: |
           echo "About to eval \$GET_CLOG"
+          mkdir -p clogrc
+          touch clogrc/clog.yaml
           
           # install clog & set up some of the funky build logic
           eval "${{ secrets.get_clog }}"
