@@ -1,0 +1,46 @@
+---
+# Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+# BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#    ____   _____   _____            ____   _        ___     ____ 
+#   / ___| | ____| |_   _|          / ___| | |      / _ \   / ___|
+#  | |  _  |  _|     | |           | |     | |     | | | | | |  _ 
+#  | |_| | | |___    | |           | |___  | |___  | |_| | | |_| |
+#   \____| |_____|   |_|    _____   \____| |_____|  \___/   \____|
+#                          |_____|                                
+#  Just a test to ensure the variable is set right
+#
+
+name: test-get-clog
+env:
+  CLOG_FLOW: "mrmxf/clog/.github/workflows/test-get-clog"
+
+on:
+  workflow_call:
+    secrets:
+      get_clog:                        # CLI to get the required version of clog
+        required: true
+
+jobs:
+  test-clog:
+    runs-on: ubuntu-latest
+    steps:
+      - # ---------------------------------------------------------------------
+        id: eval-get-clog
+        name: eval-get-clog
+        run: |
+          echo "About to eval \$GET_CLOG"
+          
+          # install clog & set up some of the funky build logic
+          eval "${{ secrets.get_clog }}"
+
+          echo "Done - success"
+      - # ---------------------------------------------------------------------
+        id: source-get-clog
+        name: source-get-clog
+        run: |
+          echo "About to source \$GET_CLOG"
+          
+          # install clog & set up some of the funky build logic
+          source <(echo "${{ secrets.get_clog }}")
+
+          echo "Done - success"
