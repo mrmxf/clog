@@ -68,6 +68,7 @@ jobs:
           DOCKER_NS: ${{ vars.DOCKER_NS }}
         run: |
           echo "job($GITHUB_JOB) with id($GITHUB_JOB) action ($GITHUB_ACTION) run($GITHUB_RUN_ID) by ($GITHUB_ACTOR) using ($DOCKER_NS)"
+          echo "reusable workflow ${{ env.CLOG_FLOW }}"
           echo
           echo "GitHub defaults:"
           echo "GITHUB_WORKFLOW          $GITHUB_WORKFLOW"

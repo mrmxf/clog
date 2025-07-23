@@ -88,7 +88,7 @@ jobs:
           echo "src=$src"   >> $GITHUB_ENV
           echo "url=$url"   >> $GITHUB_ENV
           
-          clog Log -I "Reusable workflow: ${{ env.clog_FLOW}}"
+          clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
       - # ---------------------------------------------------------------------
         id: checkout
         name: Checkout repo

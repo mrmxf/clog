@@ -38,7 +38,9 @@ jobs:
         name: get clog
         env:
           GET_CLOG:  ${{ secrets.get_clog }}
-        run: eval "$GET_CLOG"
+        run: |
+          eval "$GET_CLOG"
+          clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
       - # ---------------------------------------------------------------------
         id: notify
         if: ${{ env.HOOK_SLACK != '' }}
