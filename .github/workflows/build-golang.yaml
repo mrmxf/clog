@@ -93,8 +93,9 @@ jobs:
         name: Checkout repo
         uses: actions/checkout@v4
         with:
-          repository: ${{ env.src }}
+          lfs: true
           ref:  ${{ env.ref }}
+          repository: ${{ env.src }}
           submodules: recursive
       - # ---------------------------------------------------------------------
         id: docker
