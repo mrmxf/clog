@@ -47,7 +47,6 @@ func (cfg *Config) setDefaults(cfgPathOverride *string) {
 	}
 
 	//overlay various other configs with configCLI being the highest priority
-	slog.Info(cfg.GetString("clog.jumbo.font"))
 	searchPaths = cfg.GetStringSlice("clog.clogrc.search-paths")
 	if cfgPathOverride != nil && len(*cfgPathOverride) > 2 {
 		searchPaths = append(searchPaths, *cfgPathOverride)
