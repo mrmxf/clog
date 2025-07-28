@@ -72,7 +72,7 @@ func printSubcommands(commands []*CommandInfo, depth int) {
 
 	for _, cmd := range commands {
 		fmt.Printf("%s- %s: %s\n", indent, cmd.Use, cmd.Short)
-		
+
 		// Print flags for this subcommand
 		if len(cmd.Flags) > 0 {
 			fmt.Printf("%s  Flags:\n", indent)

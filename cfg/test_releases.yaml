@@ -1,0 +1,7 @@
+---
+# Test releases file for cfg package testing
+- version: "1.0.0"
+  type: main
+  build: prod
+  note: "Test release"
+  flow: test

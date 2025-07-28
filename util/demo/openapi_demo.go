@@ -20,12 +20,12 @@ func OpenAPIDemo() {
 
 	// Create a copy of the root command to avoid Execute() being called
 	rootCmd := cmd.RootCommand
-	
+
 	// Add some example subcommands to demonstrate
 	rootCmd.AddCommand(version.Command)
 	rootCmd.AddCommand(list.Command)
 	rootCmd.AddCommand(cat.Command)
-	
+
 	// Generate the command tree
 	tree := util.BuildCommandTree(rootCmd)
 
@@ -44,7 +44,7 @@ func OpenAPIDemo() {
 		fmt.Printf("    Flags: %d\n", len(cmd.Flags))
 		fmt.Printf("    Args: %d\n", len(cmd.Args))
 		fmt.Printf("    Has Args: %t\n", cmd.HasArgs)
-		
+
 		// Show available endpoints
 		if cmd.Get != nil {
 			fmt.Printf("    GET endpoint: %s\n", cmd.Path)
@@ -52,7 +52,7 @@ func OpenAPIDemo() {
 		if cmd.Post != nil {
 			fmt.Printf("    POST endpoint: %s (for args)\n", cmd.Path)
 		}
-		
+
 		// Show some flags as query parameters
 		if len(cmd.Flags) > 0 {
 			fmt.Printf("    Query Parameters:\n")
@@ -64,7 +64,7 @@ func OpenAPIDemo() {
 				fmt.Printf("      %s (%s): %s\n", flag.Name, flag.Schema.Type, flag.Description)
 			}
 		}
-		
+
 		// Show args
 		if len(cmd.Args) > 0 {
 			fmt.Printf("    Arguments:\n")
@@ -82,7 +82,7 @@ func OpenAPIDemo() {
 	// Generate OpenAPI 3.0 specification
 	fmt.Printf("Generating OpenAPI 3.0 specification...\n")
 	spec := tree.GenerateOpenAPISpec("Clog API", "Command Line Of Go REST API", "1.0.0")
-	
+
 	// Export specifications
 	err := spec.ExportToJSON("clog_openapi.json")
 	if err != nil {
@@ -90,7 +90,7 @@ func OpenAPIDemo() {
 	} else {
 		fmt.Printf("OpenAPI JSON exported to: clog_openapi.json\n")
 	}
-	
+
 	err = spec.ExportToYAML("clog_openapi.yaml")
 	if err != nil {
 		fmt.Printf("Error exporting OpenAPI YAML: %v\n", err)
@@ -105,7 +105,7 @@ func OpenAPIDemo() {
 	} else {
 		fmt.Printf("Command tree JSON exported to: clog_command_tree.json\n")
 	}
-	
+
 	err = tree.ExportToYAML("clog_command_tree.yaml")
 	if err != nil {
 		fmt.Printf("Error exporting command tree YAML: %v\n", err)

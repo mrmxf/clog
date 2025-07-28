@@ -1,9 +1,9 @@
 //  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
-//
-// clog's config package
 
-package config
+// clog's cfg package
+
+package cfg
 
 import (
 	"log/slog"
@@ -12,6 +12,9 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
 )
 
 // ExpandEnvVars will replace all elements like `$ENV_VAR` and `$THINGY` into
@@ -47,7 +50,7 @@ func ExpandEnvVars(input string) (expandedStr string, allValid bool) {
 // has been searched, it will then see if SearchPathList has changed. If so,
 // it will call itself again until there is no more change to SearchPathList.
 // Note that the max depth will be 4
-func (cfg *Config) mergeAllConfigs() {
+func (kfg *Config) mergeAllConfigs() {
 	slog.Debug("Merging user defined configs", "SearchPathList", searchPaths)
 
 	for _, rawPath := range searchPaths {
@@ -58,14 +61,14 @@ func (cfg *Config) mergeAllConfigs() {
 			slog.Debug("Error getting absolute path", "path", relPath, "error", err)
 			continue
 		}
-		ioReader, err := os.Open(path)
-		if err == nil {
+
+		// Check if file exists
+		if _, err := os.Stat(path); err == nil {
 			slog.Debug("Found config file", "path", path)
-			err := cfg.MergeConfig(ioReader)
+			err := kfg.Load(file.Provider(path), yaml.Parser())
 			if err != nil {
 				slog.Error("Error merging config file", "path", path, "error", err)
 			}
-			ioReader.Close()
 		} else {
 			slog.Debug("Did not find config file", "path", path)
 		}

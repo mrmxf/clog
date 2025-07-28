@@ -81,7 +81,7 @@ func parseDefaultValue(defaultVal, dataType string) interface{} {
 func buildArgsSchema(args []ArgProperty) Schema {
 	properties := make(map[string]Schema)
 	requiredFields := []string{}
-	
+
 	for _, arg := range args {
 		properties[arg.Name] = Schema{
 			Type: arg.Type,
@@ -90,11 +90,11 @@ func buildArgsSchema(args []ArgProperty) Schema {
 			requiredFields = append(requiredFields, arg.Name)
 		}
 	}
-	
+
 	schema := Schema{
 		Type: "object",
 	}
-	
+
 	// Note: OpenAPI schema properties and required fields would need to be added
 	// to the Schema struct to fully support this
 	return schema
@@ -103,11 +103,11 @@ func buildArgsSchema(args []ArgProperty) Schema {
 // extractAllCommands extracts all commands from a tree into a flat list
 func extractAllCommands(cmd *cobra.Command, parentPath string) []*CmdApiProps {
 	var commands []*CmdApiProps
-	
+
 	// Add current command
 	cmdApi := buildCmdApiProps(cmd, parentPath)
 	commands = append(commands, cmdApi)
-	
+
 	// Add all subcommands recursively
 	for _, subCmd := range cmd.Commands() {
 		if !subCmd.Hidden {
@@ -115,7 +115,7 @@ func extractAllCommands(cmd *cobra.Command, parentPath string) []*CmdApiProps {
 			commands = append(commands, subCommands...)
 		}
 	}
-	
+
 	return commands
 }
 
@@ -160,23 +160,23 @@ func (cmd *CmdApiProps) ExportToYAML(filename string) error {
 // GenerateOpenAPISpec generates a complete OpenAPI 3.0 specification
 func (ct *CommandTree) GenerateOpenAPISpec(title, description, version string) *OpenAPISpec {
 	paths := make(map[string]map[string]Operation)
-	
+
 	for _, cmd := range ct.Commands {
 		pathMethods := make(map[string]Operation)
-		
+
 		if cmd.Get != nil {
 			pathMethods["get"] = *cmd.Get
 		}
-		
+
 		if cmd.Post != nil {
 			pathMethods["post"] = *cmd.Post
 		}
-		
+
 		if len(pathMethods) > 0 {
 			paths[cmd.Path] = pathMethods
 		}
 	}
-	
+
 	return &OpenAPISpec{
 		OpenAPI: "3.0.0",
 		Info: OpenAPIInfo{
@@ -211,7 +211,7 @@ func (ct *CommandTree) GenerateCommandTemplates(outputDir string) error {
 		if cmd.HasArgs {
 			templateName := fmt.Sprintf("%s-api-template.json", strings.ToLower(cmd.Use))
 			templatePath := filepath.Join(outputDir, templateName)
-			
+
 			template := map[string]interface{}{
 				"command": cmd.Use,
 				"path":    cmd.Path,
@@ -219,12 +219,12 @@ func (ct *CommandTree) GenerateCommandTemplates(outputDir string) error {
 				"args":    cmd.Args,
 				"example": generateExamplePayload(cmd.Args),
 			}
-			
+
 			data, err := json.MarshalIndent(template, "", "  ")
 			if err != nil {
 				return err
 			}
-			
+
 			err = os.WriteFile(templatePath, data, 0644)
 			if err != nil {
 				return err
@@ -237,7 +237,7 @@ func (ct *CommandTree) GenerateCommandTemplates(outputDir string) error {
 // generateExamplePayload generates an example payload for command arguments
 func generateExamplePayload(args []ArgProperty) map[string]interface{} {
 	example := make(map[string]interface{})
-	
+
 	for _, arg := range args {
 		switch arg.Type {
 		case "string":
@@ -252,6 +252,6 @@ func generateExamplePayload(args []ArgProperty) map[string]interface{} {
 			example[arg.Name] = "example_value"
 		}
 	}
-	
+
 	return example
 }

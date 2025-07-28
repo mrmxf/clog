@@ -18,9 +18,7 @@
       "mode": "auto",
       "program": "${workspaceFolder}",
       "args": [
-        "git",
-        "tag",
-        "tidy"
+        "--debug"
       ]
     },
     {

@@ -9,9 +9,9 @@ import (
 	"os"
 
 	"github.com/mrmxf/clog/cmd"
-	"github.com/mrmxf/clog/cmd/version"
-	"github.com/mrmxf/clog/cmd/list"
 	"github.com/mrmxf/clog/cmd/cat"
+	"github.com/mrmxf/clog/cmd/list"
+	"github.com/mrmxf/clog/cmd/version"
 	"github.com/mrmxf/clog/util"
 )
 
@@ -21,12 +21,12 @@ func CommandTreeDemo() {
 
 	// Create a copy of the root command to avoid Execute() being called
 	rootCmd := cmd.RootCommand
-	
+
 	// Add some example subcommands to demonstrate
 	rootCmd.AddCommand(version.Command)
 	rootCmd.AddCommand(list.Command)
 	rootCmd.AddCommand(cat.Command)
-	
+
 	// Generate the command tree
 	tree := util.BuildCommandTree(rootCmd)
 

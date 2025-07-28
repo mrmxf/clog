@@ -25,15 +25,15 @@ type QueryParam struct {
 
 // Schema represents an OpenAPI schema
 type Schema struct {
-	Type        string                 `json:"type" yaml:"type"`
-	Format      string                 `json:"format,omitempty" yaml:"format,omitempty"`
-	Default     interface{}            `json:"default,omitempty" yaml:"default,omitempty"`
-	Enum        []string               `json:"enum,omitempty" yaml:"enum,omitempty"`
-	Items       *Schema                `json:"items,omitempty" yaml:"items,omitempty"`
-	Properties  map[string]Schema      `json:"properties,omitempty" yaml:"properties,omitempty"`
-	Required    []string               `json:"required,omitempty" yaml:"required,omitempty"`
-	Example     interface{}            `json:"example,omitempty" yaml:"example,omitempty"`
-	Description string                 `json:"description,omitempty" yaml:"description,omitempty"`
+	Type        string            `json:"type" yaml:"type"`
+	Format      string            `json:"format,omitempty" yaml:"format,omitempty"`
+	Default     interface{}       `json:"default,omitempty" yaml:"default,omitempty"`
+	Enum        []string          `json:"enum,omitempty" yaml:"enum,omitempty"`
+	Items       *Schema           `json:"items,omitempty" yaml:"items,omitempty"`
+	Properties  map[string]Schema `json:"properties,omitempty" yaml:"properties,omitempty"`
+	Required    []string          `json:"required,omitempty" yaml:"required,omitempty"`
+	Example     interface{}       `json:"example,omitempty" yaml:"example,omitempty"`
+	Description string            `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
 // RequestBody represents OpenAPI request body
@@ -45,10 +45,10 @@ type RequestBody struct {
 
 // ContentType represents OpenAPI content type
 type ContentType struct {
-	Schema   Schema                 `json:"schema,omitempty" yaml:"schema,omitempty"`
-	Example  interface{}            `json:"example,omitempty" yaml:"example,omitempty"`
-	Examples map[string]ExampleObj  `json:"examples,omitempty" yaml:"examples,omitempty"`
-	Encoding map[string]Encoding    `json:"encoding,omitempty" yaml:"encoding,omitempty"`
+	Schema   Schema                `json:"schema,omitempty" yaml:"schema,omitempty"`
+	Example  interface{}           `json:"example,omitempty" yaml:"example,omitempty"`
+	Examples map[string]ExampleObj `json:"examples,omitempty" yaml:"examples,omitempty"`
+	Encoding map[string]Encoding   `json:"encoding,omitempty" yaml:"encoding,omitempty"`
 }
 
 // ExampleObj represents OpenAPI example object
@@ -78,10 +78,10 @@ type Response struct {
 
 // Header represents OpenAPI header
 type Header struct {
-	Description string  `json:"description,omitempty" yaml:"description,omitempty"`
-	Required    bool    `json:"required,omitempty" yaml:"required,omitempty"`
-	Deprecated  bool    `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
-	Schema      Schema  `json:"schema,omitempty" yaml:"schema,omitempty"`
+	Description string      `json:"description,omitempty" yaml:"description,omitempty"`
+	Required    bool        `json:"required,omitempty" yaml:"required,omitempty"`
+	Deprecated  bool        `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
+	Schema      Schema      `json:"schema,omitempty" yaml:"schema,omitempty"`
 	Example     interface{} `json:"example,omitempty" yaml:"example,omitempty"`
 }
 
@@ -97,30 +97,30 @@ type Link struct {
 
 // Operation represents OpenAPI operation
 type Operation struct {
-	Summary     string                 `json:"summary,omitempty" yaml:"summary,omitempty"`
-	Description string                 `json:"description,omitempty" yaml:"description,omitempty"`
-	OperationId string                 `json:"operationId,omitempty" yaml:"operationId,omitempty"`
-	Tags        []string               `json:"tags,omitempty" yaml:"tags,omitempty"`
-	Parameters  []QueryParam           `json:"parameters,omitempty" yaml:"parameters,omitempty"`
-	RequestBody *RequestBody           `json:"requestBody,omitempty" yaml:"requestBody,omitempty"`
-	Responses   map[string]Response    `json:"responses" yaml:"responses"`
-	Deprecated  bool                   `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
-	Security    []map[string][]string  `json:"security,omitempty" yaml:"security,omitempty"`
-	Servers     []OpenAPIServer        `json:"servers,omitempty" yaml:"servers,omitempty"`
+	Summary     string                `json:"summary,omitempty" yaml:"summary,omitempty"`
+	Description string                `json:"description,omitempty" yaml:"description,omitempty"`
+	OperationId string                `json:"operationId,omitempty" yaml:"operationId,omitempty"`
+	Tags        []string              `json:"tags,omitempty" yaml:"tags,omitempty"`
+	Parameters  []QueryParam          `json:"parameters,omitempty" yaml:"parameters,omitempty"`
+	RequestBody *RequestBody          `json:"requestBody,omitempty" yaml:"requestBody,omitempty"`
+	Responses   map[string]Response   `json:"responses" yaml:"responses"`
+	Deprecated  bool                  `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
+	Security    []map[string][]string `json:"security,omitempty" yaml:"security,omitempty"`
+	Servers     []OpenAPIServer       `json:"servers,omitempty" yaml:"servers,omitempty"`
 }
 
 // CmdApiProps represents the API properties of a single command
 type CmdApiProps struct {
-	Use         string             `json:"use" yaml:"use"`
-	Short       string             `json:"short" yaml:"short"`
-	Long        string             `json:"long" yaml:"long"`
-	Aliases     []string           `json:"aliases,omitempty" yaml:"aliases,omitempty"`
-	Path        string             `json:"path" yaml:"path"`
-	Get         *Operation         `json:"get,omitempty" yaml:"get,omitempty"`
-	Post        *Operation         `json:"post,omitempty" yaml:"post,omitempty"`
-	HasArgs     bool               `json:"hasArgs" yaml:"hasArgs"`
-	Flags       []QueryParam       `json:"flags,omitempty" yaml:"flags,omitempty"`
-	Args        []ArgProperty      `json:"args,omitempty" yaml:"args,omitempty"`
+	Use     string        `json:"use" yaml:"use"`
+	Short   string        `json:"short" yaml:"short"`
+	Long    string        `json:"long" yaml:"long"`
+	Aliases []string      `json:"aliases,omitempty" yaml:"aliases,omitempty"`
+	Path    string        `json:"path" yaml:"path"`
+	Get     *Operation    `json:"get,omitempty" yaml:"get,omitempty"`
+	Post    *Operation    `json:"post,omitempty" yaml:"post,omitempty"`
+	HasArgs bool          `json:"hasArgs" yaml:"hasArgs"`
+	Flags   []QueryParam  `json:"flags,omitempty" yaml:"flags,omitempty"`
+	Args    []ArgProperty `json:"args,omitempty" yaml:"args,omitempty"`
 }
 
 // ArgProperty represents command argument properties
@@ -139,27 +139,27 @@ type CommandNode struct {
 
 // CommandTree represents the complete command tree
 type CommandTree struct {
-	Root     *CommandNode `json:"root" yaml:"root"`
+	Root     *CommandNode   `json:"root" yaml:"root"`
 	Commands []*CmdApiProps `json:"commands" yaml:"commands"`
 }
 
 // OpenAPISpec represents a complete OpenAPI 3.0 specification
 type OpenAPISpec struct {
-	OpenAPI    string                           `json:"openapi" yaml:"openapi"`
-	Info       OpenAPIInfo                      `json:"info" yaml:"info"`
-	Servers    []OpenAPIServer                  `json:"servers,omitempty" yaml:"servers,omitempty"`
-	Paths      map[string]map[string]Operation  `json:"paths" yaml:"paths"`
-	Components *OpenAPIComponents               `json:"components,omitempty" yaml:"components,omitempty"`
+	OpenAPI    string                          `json:"openapi" yaml:"openapi"`
+	Info       OpenAPIInfo                     `json:"info" yaml:"info"`
+	Servers    []OpenAPIServer                 `json:"servers,omitempty" yaml:"servers,omitempty"`
+	Paths      map[string]map[string]Operation `json:"paths" yaml:"paths"`
+	Components *OpenAPIComponents              `json:"components,omitempty" yaml:"components,omitempty"`
 }
 
 // OpenAPIInfo represents OpenAPI info section
 type OpenAPIInfo struct {
-	Title          string         `json:"title" yaml:"title"`
-	Description    string         `json:"description" yaml:"description"`
-	Version        string         `json:"version" yaml:"version"`
+	Title          string          `json:"title" yaml:"title"`
+	Description    string          `json:"description" yaml:"description"`
+	Version        string          `json:"version" yaml:"version"`
 	Contact        *OpenAPIContact `json:"contact,omitempty" yaml:"contact,omitempty"`
 	License        *OpenAPILicense `json:"license,omitempty" yaml:"license,omitempty"`
-	TermsOfService string         `json:"termsOfService,omitempty" yaml:"termsOfService,omitempty"`
+	TermsOfService string          `json:"termsOfService,omitempty" yaml:"termsOfService,omitempty"`
 }
 
 // OpenAPIServer represents OpenAPI server object
@@ -200,14 +200,14 @@ type OpenAPIComponents struct {
 
 // SecurityScheme represents OpenAPI security scheme
 type SecurityScheme struct {
-	Type             string            `json:"type" yaml:"type"`
-	Description      string            `json:"description,omitempty" yaml:"description,omitempty"`
-	Name             string            `json:"name,omitempty" yaml:"name,omitempty"`
-	In               string            `json:"in,omitempty" yaml:"in,omitempty"`
-	Scheme           string            `json:"scheme,omitempty" yaml:"scheme,omitempty"`
-	BearerFormat     string            `json:"bearerFormat,omitempty" yaml:"bearerFormat,omitempty"`
-	Flows            *OAuthFlows       `json:"flows,omitempty" yaml:"flows,omitempty"`
-	OpenIdConnectUrl string            `json:"openIdConnectUrl,omitempty" yaml:"openIdConnectUrl,omitempty"`
+	Type             string      `json:"type" yaml:"type"`
+	Description      string      `json:"description,omitempty" yaml:"description,omitempty"`
+	Name             string      `json:"name,omitempty" yaml:"name,omitempty"`
+	In               string      `json:"in,omitempty" yaml:"in,omitempty"`
+	Scheme           string      `json:"scheme,omitempty" yaml:"scheme,omitempty"`
+	BearerFormat     string      `json:"bearerFormat,omitempty" yaml:"bearerFormat,omitempty"`
+	Flows            *OAuthFlows `json:"flows,omitempty" yaml:"flows,omitempty"`
+	OpenIdConnectUrl string      `json:"openIdConnectUrl,omitempty" yaml:"openIdConnectUrl,omitempty"`
 }
 
 // OAuthFlows represents OpenAPI OAuth flows
@@ -230,7 +230,7 @@ type OAuthFlow struct {
 func BuildCommandTree(rootCmd *cobra.Command) *CommandTree {
 	root := buildCommandNode(rootCmd, "")
 	commands := extractAllCommands(rootCmd, "")
-	
+
 	return &CommandTree{
 		Root:     root,
 		Commands: commands,
@@ -467,11 +467,11 @@ func createQueryParam(flag *pflag.Flag) QueryParam {
 		Type:   paramType,
 		Format: format,
 	}
-	
+
 	if flag.DefValue != "" {
 		schema.Default = parseDefaultValue(flag.DefValue, paramType)
 	}
-	
+
 	// Handle array types
 	if paramType == "array" {
 		schema.Items = &Schema{
@@ -509,7 +509,7 @@ func analyzeArgsFromSource(cmd *cobra.Command) []ArgProperty {
 
 	// For now, we'll make educated guesses based on command patterns
 	use := strings.ToLower(cmd.Use)
-	
+
 	switch {
 	case strings.Contains(use, "copy"):
 		args = append(args, ArgProperty{
@@ -553,7 +553,7 @@ func analyzeArgsFromSource(cmd *cobra.Command) []ArgProperty {
 // BuildCommandTreeFromSource analyzes cobra commands from source files
 func BuildCommandTreeFromSource(rootDir string) (*CommandTree, error) {
 	fset := token.NewFileSet()
-	
+
 	// Parse all Go files in the cmd directory
 	cmdDir := filepath.Join(rootDir, "cmd")
 	packages, err := parser.ParseDir(fset, cmdDir, nil, parser.ParseComments)

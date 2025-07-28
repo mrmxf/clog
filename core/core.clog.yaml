@@ -27,13 +27,12 @@ clog:
   clogrc:
     format: yaml
     # search & load config files. Search order reset with each new config file.
-    search-order:
-      - /var/clogrc/clog.yaml
+    search-paths:
       - /var/clogrc/clog.yaml
       - $HOME/.config/clogrc/clog.yaml
+      - $HOME/.clog.yaml
       - ./clogrc/clog.yaml
-      - ./clogrc/clog.yaml
-      - .clog.yaml
+      - ./.clog.yaml
   # these are the ENV variables that are searched for by various tools
   # override these to change the actual ENV variables used
   env:
@@ -48,7 +47,6 @@ clog:
       access-token: GHAT
       gist-token: GHGIST
       user: GHUSR
-  home-folder: set at runtime                      # detected & used internally
   jumbo:                          # clog Jumbo --help for font & style commands
     font: small
     sample: www.mrmxf.com

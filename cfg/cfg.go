@@ -1,12 +1,12 @@
 //  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
-//  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
-//
-// clog's config package - wrap Viper for multi-project init
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+
+// Package cfg - wrap Koanf for multi-project init (koanf-based version of config package)
 //
 // usage:
-// Cfg := config.New( &[]embed.FS{CoreFs, AppFs, OtherFs} )
+// Kfg := cfg.New( &[]embed.FS{CoreFs, AppFs, OtherFs} )
 //
-//  if cfg := config.Cfg(); cfg==nil{
+//  if kfg := cfg.Kfg(); kfg==nil{
 //		os.ExplodeFrontPanel()
 //    os.Exit(255)
 //  }
@@ -14,7 +14,7 @@
 //
 // clogrc search order - see core/clog.yaml
 
-package config
+package cfg
 
 import (
 	"embed"
@@ -23,19 +23,19 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/spf13/viper"
+	"github.com/knadh/koanf/v2"
 )
 
 // export the Fs with the `core/` folder - initialised by calling program
 var coreFs embed.FS
 
-// Config type embeds the Viper struct and extends it
+// Config type embeds the Koanf struct and extends it
 type Config struct {
-	*viper.Viper
+	*koanf.Koanf
 }
 
 // the global config variable used by other packages
-var cfg *Config = nil
+var kfg *Config = nil
 
 // a cache of the Fs slice for future extension
 var fsCache []embed.FS = []embed.FS{}
@@ -50,46 +50,43 @@ var searchPaths []string
 //
 //	if nil or empty use `clog.yaml`
 func New(fsSlice *[]embed.FS, cfgPathOverride *string) *Config {
-	//initialise viper with logger that can be uses throughout clog
-	cfg = &Config{
-		viper.New(),
+	//initialise koanf with logger that can be uses throughout clog
+	kfg = &Config{
+		koanf.New("."),
 	}
 
 	//preserve fsCache for future use
 	if len(*fsSlice) > 0 {
 		fsCache = append(fsCache, *fsSlice...)
 	} else {
-		slog.Error("No embed.FS passed to config.New(), cannot bootstrap clog")
+		slog.Error("No embed.FS passed to cfg.New(), cannot bootstrap clog")
 		os.Exit(1)
 	}
 
 	// populate a new config object, load in the embedded config and set the
 	// initial search paths to find other configs to overlay
-	cfg.setDefaults(cfgPathOverride)
+	kfg.setDefaults(cfgPathOverride)
 
 	// Merge the config file with defaults - ignore errors
-	cfg.mergeAllConfigs()
+	kfg.mergeAllConfigs()
 
-	//enable auto-import of `env` variables declared in config
-	// e.g. AWS_ACCESS_KEY_ID becomes cfg.GetString("AWS_ACCESS_KEY_ID")
-	cfg.AutomaticEnv()
-	//iterate through the environment variables declared and bind them in cfg
-	for envIdentifier, envVariableName := range cfg.GetStringMapString("clogrc.env") {
-		if false {
-			fmt.Println(envIdentifier, envVariableName)
-		}
-		err := cfg.BindEnv(envVariableName)
-		if err != nil {
-			slog.Warn("Failed to bind environment variable: " + envVariableName + " Error: " + err.Error())
+	//iterate through the environment variables declared and bind them in kfg
+	if envMap := kfg.StringMap("clog.env"); envMap != nil {
+		for envIdentifier, envVariableName := range envMap {
+			if false {
+				fmt.Println(envIdentifier, envVariableName)
+			}
+			if envValue := os.Getenv(envVariableName); envValue != "" {
+				kfg.Set(envVariableName, envValue)
+			}
 		}
 	}
-	return cfg
+	return kfg
 }
 
 // get the config object
-func Cfg() *Config {
-
-	return cfg
+func Kfg() *Config {
+	return kfg
 }
 
 // get the coreFs

@@ -62,7 +62,7 @@ func parseArgs(args []string) (command string, showHelp bool) {
 	// Default command
 	command = "openapi"
 	showHelp = false
-	
+
 	for i, arg := range args {
 		switch arg {
 		case "-H", "--help":
@@ -75,23 +75,23 @@ func parseArgs(args []string) (command string, showHelp bool) {
 			}
 		}
 	}
-	
+
 	return
 }
 
 func main() {
 	// Get command line arguments (excluding program name)
 	args := os.Args[1:]
-	
+
 	// Parse arguments
 	command, showHelp := parseArgs(args)
-	
+
 	// Show help if requested
 	if showHelp {
 		printHelp()
 		return
 	}
-	
+
 	// Find and execute the command
 	cmd := findCommand(command)
 	if cmd == nil {
@@ -99,7 +99,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Use 'demo --help' to see available commands.\n")
 		os.Exit(1)
 	}
-	
+
 	// Execute the demo function
 	cmd.Function()
 }

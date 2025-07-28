@@ -1,30 +1,25 @@
 //  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License  https://opensource.org/license/bsd-3-clause/
-//
-// clog's config package
-//
 
-package config
+// clog's cfg package
+
+package cfg
 
 import (
-	"bytes"
 	"fmt"
 	"log/slog"
 	"os"
 	"runtime"
+
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/rawbytes"
 )
 
 var rootConfigFilename = "core.clog.yaml"
 var usrConfigBasename = "clog"
 var usrConfigType = "yaml"
 
-// root keys  using viper.setDefaults survive a config file merge
-// child keys using viper.setDefaults are lost
-
-func (cfg *Config) setDefaults(cfgPathOverride *string) {
-	cfg.SetConfigName(usrConfigBasename)
-	cfg.SetConfigType(usrConfigType)
-
+func (kfg *Config) setDefaults(cfgPathOverride *string) {
 	fs, configPaths, err := FindEmbedded(rootConfigFilename)
 	if err != nil {
 		slog.Error("embedded config (" + rootConfigFilename + ") " + err.Error())
@@ -36,27 +31,27 @@ func (cfg *Config) setDefaults(cfgPathOverride *string) {
 	//read the first root config found
 	rootConfig, err := fs.ReadFile(configPaths[0])
 	if err != nil {
-		msg := fmt.Sprintf("config.setDefaults() failed with clog's embedded file system: %s", err.Error())
+		msg := fmt.Sprintf("cfg.setDefaults() failed with clog's embedded file system: %s", err.Error())
 		panic(msg)
 	}
 	//parse & load the config
-	if err = cfg.ReadConfig(bytes.NewBuffer(rootConfig)); err != nil {
-		msg := fmt.Sprintf("config.setDefaults() failed reading clog's embedded file system: %s", err.Error())
+	if err = kfg.Load(rawbytes.Provider(rootConfig), yaml.Parser()); err != nil {
+		msg := fmt.Sprintf("cfg.setDefaults() failed reading clog's embedded file system: %s", err.Error())
 		panic(msg)
 	}
 
 	//overlay various other configs with configCLI being the highest priority
-	searchPaths = cfg.GetStringSlice("clog.clogrc.search-paths")
+	searchPaths = kfg.Strings("clog.clogrc.search-paths")
 	if cfgPathOverride != nil && len(*cfgPathOverride) > 2 {
 		searchPaths = append(searchPaths, *cfgPathOverride)
 	}
 
 	if homeFolder, err := os.UserHomeDir(); err == nil {
-		cfg.Set("clog.env.HOME", homeFolder)
+		kfg.Set("clog.env.HOME", homeFolder)
 	}
 
 	//store the startup defaults
-	cfg.SetDefault("isInteractive", false)
+	kfg.Set("isInteractive", false)
 }
 
 func init() {
