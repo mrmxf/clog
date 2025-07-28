@@ -9,9 +9,38 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 )
+
+// ExpandEnvVars will replace all elements like `$ENV_VAR` and `$THINGY` into
+// the values taken from the environment.
+// expandedStr will have all the valid environment variables expanded
+// allValid will be false if any of the variables are zero length
+func ExpandEnvVars(input string) (expandedStr string, allValid bool) {
+	// Regex to match $VARIABLE_NAME where VARIABLE_NAME is valid env var format
+	re := regexp.MustCompile(`\$([A-Z_][A-Z0-9_]*)`)
+
+	allValid = true
+
+	expandedStr = re.ReplaceAllStringFunc(input, func(match string) string {
+		// Extract variable name (remove the $ prefix)
+		varName := match[1:]
+
+		// Get the environment variable value
+		value := os.Getenv(varName)
+
+		// If any replacement is empty, set allValid to false
+		if value == "" {
+			allValid = false
+		}
+
+		return value
+	})
+
+	return expandedStr, allValid
+}
 
 // mergeAllConfigs will search for the default override config files once
 // the embedded config file has been loaded. When THE FINAL search location
@@ -21,28 +50,25 @@ import (
 func (cfg *Config) mergeAllConfigs() {
 	slog.Debug("Merging user defined configs", "SearchPathList", searchPaths)
 
-	fName := cfg.GetString("clog.clogrc.base") + "." + cfg.GetString("clog.clogrc.format")
-	for _, path := range searchPaths {
-		fPath := strings.Replace(path, "~", os.Getenv("HOME"), 1)
-		fPath = strings.Replace(fPath, "$HOME", os.Getenv("HOME"), 1)
-		if !(strings.HasSuffix(fPath, ".yaml") || strings.HasSuffix(fPath, ".json")) {
-			fPath = filepath.Join(fPath, fName)
-		}
-		fPathAbs, err := filepath.Abs(fPath)
+	for _, rawPath := range searchPaths {
+		relPath := strings.Replace(rawPath, "~", "$HOME", 1)
+		relPath, _ = ExpandEnvVars(relPath)
+		path, err := filepath.Abs(relPath)
 		if err != nil {
-			slog.Debug("Error getting absolute path", "path", fPath, "error", err)
+			slog.Debug("Error getting absolute path", "path", relPath, "error", err)
 			continue
 		}
-		ioReader, err := os.Open(fPathAbs)
+		ioReader, err := os.Open(path)
 		if err == nil {
-			slog.Debug("Found config file", "path", fPathAbs)
+			defer ioReader.Close()
+			slog.Debug("Found config file", "path", path)
 			err := cfg.MergeConfig(ioReader)
 			if err != nil {
-				slog.Error("Error merging config file", "path", fPathAbs, "error", err)
+				slog.Error("Error merging config file", "path", path, "error", err)
 			}
-			ioReader.Close()
+
 		} else {
-			slog.Debug("Did not find config file", "path", fPathAbs)
+			slog.Debug("Did not find config file", "path", path)
 		}
 	}
 }

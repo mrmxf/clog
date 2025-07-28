@@ -1,4 +1,3 @@
----
 # yamllint disable rule:colons
 #                                   _                                          _ 
 #   __   ___   _ _   ___       __  | |  ___   __ _       _  _   __ _   _ __   | |
@@ -26,14 +25,13 @@ clog:
   releases-path: "releases.yaml"  # release & build tracking
   clogrc:
     format: yaml
-    # search & load config files. Search order reset with each new config file.
-    search-order:
-      - /var/clogrc/clog.yaml
+    # load usr confg. list can be reset in any file. files only loaded once
+    search-paths:
       - /var/clogrc/clog.yaml
       - $HOME/.config/clogrc/clog.yaml
+      - $HOME/.clog.yaml
       - ./clogrc/clog.yaml
-      - ./clogrc/clog.yaml
-      - .clog.yaml
+      - ./.clog.yaml
   # these are the ENV variables that are searched for by various tools
   # override these to change the actual ENV variables used
   env:
@@ -48,7 +46,6 @@ clog:
       access-token: GHAT
       gist-token: GHGIST
       user: GHUSR
-  home-folder: set at runtime                      # detected & used internally
   jumbo:                          # clog Jumbo --help for font & style commands
     font: small
     sample: www.mrmxf.com
@@ -132,9 +129,12 @@ snippets:
   #  / _/ |_.__/ \__|
   #   ||             
   bc-releases-yaml: yq -r '.clog."releases-path"' clogrc/clog.yaml
+  bc-artifacts: echo "tmp/artifacts"
+  bc-main-prod-tag: yq -r 'first(.[] | select(.type=="main" and .build=="prod") | .version)' "$(clog bc-releases-yaml)"
   bc-main-repo: echo "metarex-media/www-metarex-media"
-  bc-prod-version: yq -r 'first(.[] | select(.build=="prod" and .type=="main") | .version)' "$(clog bc-releases-yaml)"
-  bc-prod-logic-build: |
+  bc-dev-prod-msg: |
+    # echo     dev(from releases.yaml)   || dev(forced by MAKE)
+    #          prod(from releases.yaml)  || prod(forced by MAKE)
     do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
     [ -z "$do" ] && do="dev(from releases.yaml)" || do="prod(from releases.yaml)" 
     # rules - ensure valid branch for workflow
@@ -143,43 +143,91 @@ snippets:
     clog Should MAKE "dev" && do="dev(forced by MAKE)"
     clog Should MAKE "prod" && do="prod(forced by MAKE)"
     echo "$do"
-  bc-prod-logic-deploy: |
-    do="$(yq -r '.[0].build|select(.=="prod")' "$(clog bc-releases-yaml)")"
-    [ -z "$do" ] && do="dev(from releases.yaml)" || do="prod(from releases.yaml)" 
-    # rules
-    [[ "create" == "$GITHUB_EVENT_NAME " ]] && git checkout main
-    [ -n "$(clog git branch)" ] && [[ "$(clog git branch)" != "main" ]] && do="dev(not main branch)"
-    [[ "$(clog bc-main-repo)" != "$(clog git repo)" ]] && do="dev(repo!=$(clog bc-main-repo))"
-    # overrides always win - prod override strongest
-    clog Should MAKE "dev" && do="dev(forced by MAKE)"
-    clog Should MAKE "prod" && do="prod(forced by MAKE)"
-    echo "$do"
-  bc-wants-stage-flow:  yq -r '.[0].flow|select(.=="stage")' "$(clog bc-releases-yaml)"
-  bc-wants-test-flow:  yq -r '.[0].flow|select(.=="test")' "$(clog bc-releases-yaml)"
-  bc-message-file: echo "tmp/workflow-message"
+  bc-flow-stage:  yq -r '.[0].flow|select(.=="stage")' "$(clog bc-releases-yaml)"
+  bc-flow-test:  yq -r '.[0].flow|select(.=="test")' "$(clog bc-releases-yaml)"
   bc-log-divider: eval "$(clog Crayon)";for i in {1..8};do HR="$HR\e[09${i}m▬▬▬▬▬▬▬▬▬$cE|";done;printf "$HR$cX\n"
-  # worker function instagram ----------------------------------------------------------------------------------------
+  # worker function instagram ------------------------------------------------------------------------------------------
   bc-instagram: |
     eval "$(clog Crayon)" # setting & highlights
-    clog Log -W  "    ✖️ $cC clog instagram$cI $*$cX not implemented yet - come back later"
+    clog Log -W  "    ✖️ $cC clog instagram$cW not implemented yet$cX - come back later"
     exit 0
-  # worker function main - for websites ------------------------------------------------------------------------------
-  bc-main: |
+  # WORKER v0.8.6 - checkout the main-prod version of a repo -----------------------------------------------------------
+  bc-main-prod-checkout: |
+    eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
+    TAG="$(clog bc-main-prod-tag)"
+
+    ERR=0
+    clog Log -I "$STEP.$(((++s))).⚒️  bc-main-prod-checkout  $modeMSG→$cF setup queries for daily build/"
+    [ -z "$TAG" ]&&clog Log -E "releases.yaml has no entry with type=main build=prod"&&exit (((++ERR)))
+    git checkout "$TAG"
+    [ $? -gt 0 ]&&clog Log -E "cannot checkout to tag $cE$TAG"&&exit (((++ERR)))
+
+    # we are now checked out to the production snapshot $TAG
+    # releases.yaml and scripts
+
+  # WORKER clog v0.8.6 - deploy a YAML list of files to s3 -------------------------------------------------------------
+  bc-deploy-s3: |
+    # $YAML=array with many lines like this
+    #     - {src:"tmp/clog-amd-lnx",    dst:"$BKT/clog-amd-lnx",    cHi:"$cLnx",cFn:"$cAmd"}
+    fAwsCp() {
+      # this function will perform aws cp on each file with cHighlight and cFilename
+      local src dst colHi colFn
+      src="$1";   shift
+      dst="$1";   shift
+      colHi="$1"; shift
+      colFn="$1"; shift
+
+      [ ! -f "$src" ] && clog Log -W "$colHi(skip) $colFn$src$cX - not found" && return
+
+      size="$(du -sh $src|grep -oE '([0-9\.]+[KMGTP])')"
+      clog Log -I "$colHi($size)$colFn  $src$cX → s3://$dst"
+      aws s3 cp --quiet "$src" "s3://$dst"
+      return $?
+    }
+    # --------------------------------------------------------------------------
     eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
     doPROD="$1"
     modeMSG="$2"
-    vMain="$(clog bc-prod-version)"
 
     ERR=0
-    clog Log -I "$STEP.$(((++s))).⚒️  bc-main-website  $modeMSG→$cF setup queries for daily build/"
-    [ -z "vMain" ]&&clog Log -E "releases.yaml has no entry with type=main build=prod"&&exit (((++ERR)))
-    git checkout "vMain"
-    [ $? -gt 0 ]&&clog Log -E "cannot checkout to tag $cE$vMain"&&exit (((++ERR)))
+    vAws="$(aws --version 2>/dev/null|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'|head -1)"
+    ((ERR+=$?)); [ $ERR -gt 0 ] && clog Log -E "bc-deploy-s3 cannot find aws cli"
 
-    # we are now checked out to the production snapshot $vMain
-    # releases.yaml and scripts
-    clog instagram fetch metarex latest tmp/insta-mrx
-  # worker function hugo ---------------------------------------------------------------------------------------------
+    #check YAML not empty
+    [ -z "$YAML" ] && clog Log -E "bc-deploy-s3 has no YAML entries to parse" && ((ERR++))
+
+    #check YAML parses and is an array with length
+    yLen="$(echo "$YAML"|yq 'length' 2>/dev/null)"
+    [ "$?" -gt 0    ] && clog Log -E "bc-deploy-s3 YAML cannot be parsed" && ((ERR++))
+    [ "$yLen" -eq 0 ] && clog Log -E "bc-deploy-s3 YAML array has zero length" && ((ERR++))
+
+    # in github actions, the bucket env is S3_BUCKET unless overridden
+    [ -n "$GITHUB_ACTIONS" ] && [ -z "$CLOG_BUCKET" ] && CLOG_BUCKET="$S3_BUCKET"
+
+    # --------------------------------------------------------------------------
+    clog Log -I "$STEP.$(((++s))). 🚀 deploy-s3 $modeMSG $cC$PROJECT $cX using aws cli $cF $vAws$cX for ${#SRC[@]} files"
+
+    n=0
+    while [ $n -lt $yLen ]; do
+      SRC="$(printf "%s" "$YAML"|yq -r ".[$n].src")"
+      DST="$(printf "%s" "$YAML"|yq -r ".[$n].dst")"
+      fAwsCp "$SRC" "$DST" "" ""; ERR=$((ERR+$?))
+      ((n++))
+    done
+    
+    if [ $ERR -gt 0 ]; then
+      msg="❌ failed with $ERR errors"
+      echo "DEPLOY_msg=\"$msg\"" >> "$(clog bc-artifacts)"
+      clog Log -E "$msg"
+      exit $(((ERR+=$?)))
+    fi
+    msg="✅ ok"
+    clog Log -S "deploy-s3 $msg"
+    echo "DEPLOY_msg=\"$msg\"" >> "$(clog bc-artifacts)"
+    # clog Log -B "$ERR" "$doPROD" "$okMSG" "$errMSG" || exit 1; #abort if PROD
+    exit 0
+
+  # WORKER clog v0.8.6 - hugo build a repo -----------------------------------------------------------------------------
   bc-hugo: |
     eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
     doPROD="$1"
@@ -195,7 +243,15 @@ snippets:
     opt="";[ -z "$doPROD" ]  && opt="$opt --buildDrafts --buildFuture --buildExpired"
     clog Log -I "$STEP.$(((++s))). build hugo $modeMSG→${cF}kodata/$cC $opt"
     hugo build --minify --logLevel info $opt
-  # worker function golang -------------------------------------------------------------------------------------------
+    ((ERR+=$?))
+    if [ $ERR -gt 0 ]; then
+      echo "HUGO_msg=\"❌ failed\"" >> "$(clog bc-artifacts)"
+      exit $ERR
+    fi
+    echo "${VERB}_trigger=\"$(clog git origin)\"" >> "$(clog bc-artifacts)"
+    echo "HUGO_msg=\"✅ ok\"" >> "$(clog bc-artifacts)"
+    
+  # WORKER clog v0.8.6 - golang ----------------------------------------------------------------------------------------
   #  $EXE   is the executable name - overrides the default of $PROJECT
   #  $TITLE is the title string for semver
   #  artifacts appear in tmp/
@@ -226,8 +282,14 @@ snippets:
       fGoBuild tmp/$app-arm-lnx     linux   arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
     # fGoBuild tmp/$app-arm-win.exe windows arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
       fGoBuild tmp/$app-arm-mac     darwin  arm64 $hash "$suffix" $app "$title" "$linkerPath"; ((ERR+=$?))
-    clog Log -B "$ERR" "$doPROD" "✅ bc-golang $modeMSG→$cS tmp/$cX ok" "❌ bc-golang  $modeMSG→$cE tmp/$cX failed" || exit 1; #abort if PROD
-  # worker function ko -----------------------------------------------------------------------------------------------
+
+    if [ $ERR -gt 0 ]; then
+      echo "GOLANG_msg=\"❌ failed with $ERR errors\"" >> "$(clog bc-artifacts)"
+      exit $ERR
+    fi
+    echo "GOLANG_msg=\"✅ ok\"" >> "$(clog bc-artifacts)"
+
+  # WORKER clog v0.8.6 - ko --------------------------------------------------------------------------------------------
   bc-ko: |
     eval "$(clog Source project config); $(clog Crayon)" # setting & highlights
     doPROD="$1"
@@ -237,7 +299,7 @@ snippets:
     clog Log -I "$STEP.$(((++s))).⚒️  build ko $modeMSG→$cU hub.docker.com/$DOCKER_NS$cX"
 
     [ -z "$doPROD" ] && devTAG="-dev"
-    [ -n "$(clog bc-wants-stage-flow)" ]&& stageTAG="-stage"
+    [ -n "$(clog bc-flow-stage)" ] && stageTAG="-stage"
     
     tag1="$(clog git tag ref)$devTAG" # 1.2.3 | 1.2.3-stage | 1.2.3-stage-dev
     tag2="latest$stageTAG$devTAG"     # latest | latest-stage | latest-dev | latest-stage-dev
@@ -249,17 +311,21 @@ snippets:
     export KO_CONFIG_PATH=".ko.yaml"                           # build options
     export KO_DATA_DATE_EPOCH=$(git log -1 --format='%ct')     # date on image
 
-    ko build --base-import-paths --tags "$tag1" --tags "$tag2" .
-    if [ $? -gt 0 ]; then
-      msg="ko build failed $cE $PROJECT$cX:$cW$tag1$cX and ${cW}$tag2"
+    echo "${VERB}_target=\"https://hub.docker.com/r/$KO_DOCKER_REPO/$PROJECT\"" >> "$(clog bc-artifacts)"
+
+    ko build --base-import-paths --sbom=none --tags "$tag1" --tags "$tag2" .
+    ((ERR+=$?))
+    if [ $ERR -gt 0 ]; then
+      msg="❌ failed $PROJECT:$tag1 and $tag2"
+      echo "KO_msg=\"$msg\"" >> "$(clog bc-artifacts)"
       clog Log -E "$msg"
-      printf "$msg" > /tmp/clog-notify
-      exit 1
+      exit $(((ERR+=$?)))
     fi
-    msg="multi-arch ko build$cF $PROJECT$cX:$cW$tag1$cX and ${cW}$tag2"
+    msg="✅ ok $PROJECT:$tag1 and $tag2"
     clog Log -S "$msg"
-    printf "$msg" > /tmp/clog-notify
-  # worker function flowx ----------------------------------------------------------------------------------------------
+    echo "KO_msg=\"$msg\"" >> "$(clog bc-artifacts)"
+
+  # WORKER clog v0.8.6 - flowx -----------------------------------------------------------------------------------------
   # this is the core, generic flow script - it never appears in MAKE
   # $VERB is the title for display
   # $CHK & $MAKE contain tokens that clog perform
@@ -269,7 +335,7 @@ snippets:
     cTOKs=($CHK)
     mTOKs=($MAKE)
 
-    modeMSG="$(clog bc-prod-logic-build)"
+    modeMSG="$(clog bc-dev-prod-msg)"
     [[ "${modeMSG:0:4}" == "prod" ]] && doPROD="prod"
 
     eval "$(clog Source project config); $(clog Crayon)"  # setting & highlight
@@ -278,19 +344,31 @@ snippets:
     ERR=0; export STEP=0
 
     for TOK in "${cTOKs[@]}"; do
-      clog Log -I "$(((++STEP))).  Check $TOK"; clog Check "$TOK"; ERR=$((ERR+$?))
+      clog Log -I "$(((++STEP))).  Check $TOK"
+      clog Check "$TOK"
+      ((ERR+=$?))
+      clog bc-log-divider
     done
 
-    clog bc-log-divider
-
+    flowMsg=""
     for TOK in "${mTOKs[@]}"; do
-      ((STEP++));clog bc-"$TOK" "$doPROD" "$modeMSG" && clog bc-log-divider
+      ((STEP++))
+      clog bc-"$TOK" "$doPROD" "$modeMSG"                         # run the flow
+      flowMsg="$flowMsg$TOK: \$$(echo $TOK|tr a-z A-Z)_msg, "  # msg accumulator
+      ((ERR+=$?))
+      clog bc-log-divider
     done
 
-    icon="✅";[ $ERR -gt 0 ] && icon="❌"
+    [ $ERR -eq 0 ] && icon="✅" && logFlag="-S"
+    [ $ERR -gt 0 ] && icon="❌" && logFlag="-E"
+
+    flowMsg="${flowMsg}errs: $ERR$icon."                               # msg end
     printf -v MSG "$icon $VERB $modeMSG complete with %d errors" $ERR
-    echo "$modeMSG" > "$(clog bc-message-file)"
-    clog Log -B "$ERR" "$doPROD" "✅ bc-flowx ok - $modeMSG" "❌ bc-flowx failed - $modeMSG" || exit 1; #abort if PROD
+
+    echo "${VERB}_level=\"$logFlag\"" >> "$(clog bc-artifacts)"
+    echo "${VERB}_msg=\"$flowMsg\"" >> "$(clog bc-artifacts)"      # summary msg
+
+    clog Log -B "$ERR" "$doPROD" "$MSG" "$MSG" || exit 1; #abort if PROD
     exit 0
   #             _
   #   ||_    __| |  ___  __ __
@@ -327,18 +405,22 @@ snippets:
       [[ "git" == "${url:0:3}" ]] && echo $url|grep -oE ':([^\.]+)'|tail -c +2 && exit 0
       [[ "http" == "${url:0:4}" ]] && echo $url|grep -oE '[^\/]\/[a-z].*'|tail -c +3 && exit 0
       exit 1
-    # --- git hash snippets:  clog git tag <snippet> -----------------------------
+    # --- git hash snippets:  clog git tag <snippet> -------------------------------------------------------------------
     hash:
       head: git rev-list -1 HEAD
       origin: git ls-remote --head --sort=-v:refname origin | grep $(clog git branch) | head -1 | head -c 40
-    # --- git message snippets:  clog git tag <snippet> -----------------------------
+    # --- git message snippets:  clog git tag <snippet> ----------------------------------------------------------------
     message:
       latest: git log HEAD | head -5 | tail -1 | xargs
       # this is the default snippet to return the target commit message for
       # your project override in your project' clog.yaml
-      ref: yq -r '.[0].note' releases.yaml
+      ref: yq -r '.[0].note' "$(clog bc-releases-yaml)"
     origin: git config --get remote.origin.url
-    # --- git tag snippets:  clog git tag <snippet> -----------------------------
+    # --- git suffix snippets:  clog git suffix - added to a release ---------------------------------------------------
+    suffix: |
+      b="$(git branch --show-current)"
+      [[ "$b" == main ]] && echo "" || echo "$b"|tr -d '[:blank:]'
+    # --- git tag snippets:  clog git tag <snippet> --------------------------------------------------------------------
     tag:
       head: git tag --points-at HEAD
       latest: git tag --sort=committerdate | tail -1
@@ -346,13 +428,13 @@ snippets:
       # this is the default snippet to return the project's target tag
       # override in your project' clog.yaml
       # golang requires a 'v':
-      # ref: echo "v$(yq -r '.[0].version' releases.yaml)"
-      ref: yq -r '.[0].version' releases.yaml
+      ref: yq -r '.[0].version' "$(clog bc-releases-yaml)"
       tidy: |
-        eval "$(clog Inc)"  # define display functions etc.
-        eval "$(clog Source project config)"
+        eval "$(clog Crayon --script && clog Source project config)"
         VV="$(clog git tag ref)"
         MM="$(clog git message ref)"
+        # append a -dev to the tag unless prod
+        dev="-dev";msg="$(clog bc-dev-prod-msg)";[[ "prod" == "${msg:0:4}" ]] && dev=""
         #
         clog Log -I "Retag to$cH    $VV$cX$cT $vCodeType ($cW $MM $cT)"
         # silently delete existing tag if it exists
@@ -365,7 +447,7 @@ snippets:
                     git push    --delete    origin "$VV"      >/dev/null 2>&1
         clog Log -I "${cC}git push$cE          origin$cS \"$cH$VV\""
                     git push    origin     "$VV"
-    # --- git tree snippets:  clog git tree <snippet> ---------------------------
+    # --- git tree snippets:  clog git tree <snippet> ------------------------------------------------------------------
     tree:
       ahead: if [ "$(git status|grep -oE '(branch is ahead)')" ];then echo "Branch ahead - do push ";exit 1;else echo "ok";fi
       behind: if [ "$(git status|grep -oE '(merge the remote)')" ];then echo "Branch behind - do pull";exit 1;else echo "ok";fi
@@ -378,15 +460,20 @@ snippets:
       eval "$(clog Inc)" # set color strings
       root=..
       [ -n "$GIT_WALK_REPOS_ROOT" ] && root="$GIT_WALK_REPOS_ROOT"
+      clean="  $cS clean✅$cX "
+      dirty="$cE unclean❌$cX "
       for i in $root/* ; do
-        status="  $cS clean✅$cT "
+        status="$clean"
+        xtra=""
         if [ ! -d "$i/.git" ]; then
           status="   $cI skip🧱 non-git folder$cT "
         else
           cd $i
-          [ -n "$(git status | grep "hange")" ] && status="$cE unclean❌$cT "
+          [ -n "$(git status | grep "hange")" ] && status="$dirty" && xtra="$xtra❌(${cW}commit changes${cX}) "
+          clog git tree ahead >/dev/null; [ $? -gt 0 ]  && status="$dirty" && xtra="$xtra❌(${cW}push changes${cX}) "
+          clog git tree behind >/dev/null; [ $? -gt 0 ] && status="$dirty" && xtra="$xtra❌(${cW}pull updates${cX}) "
         fi
-        printf "$status$i$cX\n"
+        printf "$status$i$cX $xtra\n"
       done
 #          _               _            _   _
 #   ||_   (_)  _ _    ___ | |_   __ _  | | | |
@@ -438,7 +525,14 @@ snippets:
       sudo usermod -aG docker $USER
       newgrp docker
       docker run hello-world
-    golang: 'echo download go1.23.0.linux-amd64.tar.gz and run: "rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz"'
+    golang: |
+      LATEST=$(curl -sL "https://golang.org/dl/?mode=json" | jq -r '.[0].version')
+      [ -z "$LATEST" ] || [ "$LATEST" = "null" ] && clog Log -E "could not fetch latest Go version" && exit 1
+      url="https://go.dev/dl/$LATEST.linux-amd64.tar.gz"
+      dst="/tmp/golang.tar.gz"
+      curl --location --silent "$url" --output "$dst"
+      sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf "$dst"
+      go version
     golang-mac: brew install go
     godoc: "go install golang.org/x/tools/cmd/godoc@latest"
     golangci-lint: "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.1"
@@ -459,6 +553,9 @@ snippets:
       && sudo apt install gh -y
     gh-mac: brew install gh
     git: sudo apt-get install -y git-all
+    git-lfs: |
+      curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+      sudo apt-get install git-lfs
     helm: |
       # tbd mac brew install helm
       curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
@@ -474,7 +571,7 @@ snippets:
       curl -fSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
     hugo: |
       eval "$(clog Inc)"
-      j="$(curl -sL https://api.github.com/repos/gohugoio/hugo/releases/latest)"
+      j="$(curl -L https://api.github.com/repos/gohugoio/hugo/releases/latest)"
       pkg=".deb"
       arch="arm" ; [[ "$(uname -m)" == "x86_64" ]] && arch="amd64"
       v="$(   echo $j | jq -r '.name   | ltrimstr("v")')"
@@ -546,6 +643,19 @@ snippets:
       fi
     node-red: docker run --detach -p 1880:1880 -v $HOME/.node-red:/data --name nodered --rm nodered/node-red
     nvm: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    op: |
+      clog Log -I "Installing 1password CLI for Debian"
+      curl -sS https://downloads.1password.com/linux/keys/1password.asc | \
+      sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg && \
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$(dpkg --print-architecture) stable main" | \
+      sudo tee /etc/apt/sources.list.d/1password.list && \
+      sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/ && \
+      curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | \
+      sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol && \
+      sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22 && \
+      curl -sS https://downloads.1password.com/linux/keys/1password.asc | \
+      sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg && \
+      sudo apt update && sudo apt install 1password-cli
     slsa-verifier: |
       vURL=https://api.github.com/repos/slsa-framework/slsa-verifier/releases/latest
       j="$(curl -sL $vURL)"

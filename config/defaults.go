@@ -14,18 +14,20 @@ import (
 	"runtime"
 )
 
-var defaultConfigFilename = "core.clog.yaml"
+var rootConfigFilename = "core.clog.yaml"
+
 
 // root keys  using viper.setDefaults survive a config file merge
 // child keys using viper.setDefaults are lost
 
-func (cfg *Config) setDefaults(configCLI *string) {
-	cfg.SetConfigName("clog.config")
+func (cfg *Config) setDefaults(cfgPathOverride *string) {
+	//tell viper that we're reading YAML otherwise it silently fails.
 	cfg.SetConfigType("yaml")
 
-	fs, configPaths, err := FindEmbedded(defaultConfigFilename)
+	//find the embedded config file
+	fs, configPaths, err := FindEmbedded(rootConfigFilename)
 	if err != nil {
-		slog.Error("embedded config (" + defaultConfigFilename + ") " + err.Error())
+		slog.Error("embedded config (" + rootConfigFilename + ") " + err.Error())
 		os.Exit(1)
 	}
 	//set the coreFs for other tasks to find the core files
@@ -38,20 +40,20 @@ func (cfg *Config) setDefaults(configCLI *string) {
 		panic(msg)
 	}
 	//parse & load the config
-	if err = cfg.ReadConfig(bytes.NewBuffer(rootConfig)); err != nil {
+	cfgReader := bytes.NewReader(rootConfig)
+	if err = cfg.ReadConfig(cfgReader); err != nil {
 		msg := fmt.Sprintf("config.setDefaults() failed reading clog's embedded file system: %s", err.Error())
 		panic(msg)
 	}
 
 	//overlay various other configs with configCLI being the highest priority
-	searchPaths = cfg.GetStringSlice("clog.clogrc.search-order")
-	if configCLI != nil && len(*configCLI) > 2 {
-		searchPaths = append(searchPaths, *configCLI)
+	slog.Info(cfg.GetString("clog.jumbo.font"))
+	searchPaths = cfg.GetStringSlice("clog.clogrc.search-paths")
+	if cfgPathOverride != nil && len(*cfgPathOverride) > 2 {
+		searchPaths = append(searchPaths, *cfgPathOverride)
 	}
 
-	if homeFolder, err := os.UserHomeDir(); err == nil {
-		cfg.Set("clog.home-folder", homeFolder)
-	}
+
 
 	//store the startup defaults
 	cfg.SetDefault("isInteractive", false)

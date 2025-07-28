@@ -46,10 +46,10 @@ var searchPaths []string
 // create a new config object
 //
 // fsSlice is a slice of embed.FS objects that are searched search for configs
-// configFilename is the name of the config file to load
+// cfgPathOverride is the name of the config file to load
 //
 //	if nil or empty use `clog.yaml`
-func New(fsSlice *[]embed.FS, configCLI *string) *Config {
+func New(fsSlice *[]embed.FS, cfgPathOverride *string) *Config {
 	//initialise viper with logger that can be uses throughout clog
 	cfg = &Config{
 		viper.New(),
@@ -65,7 +65,7 @@ func New(fsSlice *[]embed.FS, configCLI *string) *Config {
 
 	// populate a new config object, load in the embedded config and set the
 	// initial search paths to find other configs to overlay
-	cfg.setDefaults(configCLI)
+	cfg.setDefaults(cfgPathOverride)
 
 	// Merge the config file with defaults - ignore errors
 	cfg.mergeAllConfigs()
