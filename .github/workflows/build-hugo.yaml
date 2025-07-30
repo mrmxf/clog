@@ -59,6 +59,7 @@ jobs:
           "pull_request_target")
             # for a PR we checkout the latest pushed commit of the requesting repo
             verb="PR"
+            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
             ref="${{ github.event.pull_request.head.sha }}"            # head of the PR commits
             src="${{ github.event.pull_request.head.repo.full_name }}" # head name
             url="${{ github.event.pull_request.head.repo.html_url }}"  # head url
@@ -67,6 +68,7 @@ jobs:
           "push" | "workflow_dispatch")
             # for a PUSH we checkout the HEAD of main
             verb="PUSH"
+            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
             ref="${{ github.ref }}"                                    # event trigger
             src="${{ github.repository }}"                             # event repo
             url="${{ github.event.repository.html_url }}"              # event human url
@@ -75,7 +77,9 @@ jobs:
           "schedule")
             # for a SCHEDULE we checkout the latest production tag on main branch
             verb="SCHEDULE"
-            ref="ref/tags/$(clog bc-main-prod-tag)"                    # production tag
+            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            ref="main"               # cannot evaluate the production tag until after checkout
+            #ref="ref/tags/$(clog bc-main-prod-tag)"                   # production tag needed
             src="${{ github.repository }}"                             # production repo
             url="${{ github.event.repository.html_url }}"              # production human url
             ;;
