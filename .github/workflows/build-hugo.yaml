@@ -53,6 +53,7 @@ jobs:
         run: |
           # install clog & set up some of the funky build logic
           eval "${{ secrets.get_clog }}"
+          depth=1
 
           case "${{ github.event_name }}" in
 
@@ -82,14 +83,16 @@ jobs:
             #ref="ref/tags/$(clog bc-main-prod-tag)"                   # production tag needed
             src="${{ github.repository }}"                             # production repo
             url="${{ github.event.repository.html_url }}"              # production human url
+            depth=0
             ;;
 
           esac
 
-          echo "verb=$verb" >> $GITHUB_ENV
-          echo "ref=$ref"   >> $GITHUB_ENV
-          echo "src=$src"   >> $GITHUB_ENV
-          echo "url=$url"   >> $GITHUB_ENV
+          echo "verb=$verb"   >> $GITHUB_ENV
+          echo "depth=$depth" >> $GITHUB_ENV
+          echo "ref=$ref"     >> $GITHUB_ENV
+          echo "src=$src"     >> $GITHUB_ENV
+          echo "url=$url"     >> $GITHUB_ENV
           
           clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
       - # ---------------------------------------------------------------------
@@ -97,10 +100,11 @@ jobs:
         name: Checkout repo
         uses: actions/checkout@v4
         with:
-          lfs: true
-          ref:  ${{ env.ref }}
-          repository: ${{ env.src }}
-          submodules: recursive
+          fetch-depth: ${{ env.depth }}
+          lfs:         true
+          ref:         ${{ env.ref }}
+          repository:  ${{ env.src }}
+          submodules:  recursive
       - # ---------------------------------------------------------------------
         id: docker
         if:  inputs.docker_ns != '' # ignore if no namespace, fail if _pat empty
@@ -109,6 +113,14 @@ jobs:
         with:
           username: ${{  inputs.docker_ns }}
           password: ${{ secrets.docker_pat }}
+      - # ---------------------------------------------------------------------
+        id: schedule-ref
+        name: Checkout to recent production
+        run: |
+          if [[ "SCHEDULE" == "$verb" ]]; then
+            clog Log -I "$verb production tag checkout $(clog BC git checkout production --dryrun)"
+            clog BC git checkout production
+          fi
       - # ---------------------------------------------------------------------
         id: clog-setup
         name: setup tools
