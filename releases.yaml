@@ -1,5 +1,6 @@
 # flow:"stage",   build:"dev"  = auto-add to staging server
 # flow:"release", build:"prod" = to flag as a production release
+- {version: "0.9.0", date: 2025-08-07, flow: "stage", build: "dev", note: kfg configuration migration}
 - {version: "0.8.4", date: 2025-07-28, flow: "stage", build: "dev", note: fix logging error}
 - {version: "0.8.3", date: 2025-07-28, flow: "stage", build: "dev", note: config cannot find .yaml bug fix}
 - {version: "0.8.2", date: 2025-07-08, flow: "stage", build: "dev", note: clog workflow integration}
