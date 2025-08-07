@@ -1,33 +1,9 @@
 # flow:"stage",   build:"dev"  = auto-add to staging server
 # flow:"release", build:"prod" = to flag as a production release
-- {version: "0.9.0", date: 2025-08-07, flow: "stage", build: "dev", note: kfg configuration migration}
-- {version: "0.8.4", date: 2025-07-28, flow: "stage", build: "dev", note: fix logging error}
-- {version: "0.8.3", date: 2025-07-28, flow: "stage", build: "dev", note: config cannot find .yaml bug fix}
-- {version: "0.8.2", date: 2025-07-08, flow: "stage", build: "dev", note: clog workflow integration}
-- {version: "0.8.1", date: 2025-07-08, flow: "stage", build: "dev", note: clog Aws Dns}
-- {version: "0.8.0", date: 2025-06-04, flow: "stage", build: "dev", note: tweak gommi config}
-# v0.8.0 targets the new consistent Mr MXF infrastructure and build pipelines - new schema
-# -----------------------------------------------------------------------------
-# code names here: https://clutch.co/resources/software-development-glossary-88-essential-terms
-- {version: "0.7.21", date: 2025-06-12, codename: "alpha", note: embed fileserve mountpath}
-- {version: "0.7.20", date: 2025-06-11, codename: "alpha", note: release history now a const}
-- {version: "0.7.19", date: 2025-06-10, codename: "alpha", note: Log --build fix2}
-- {version: "0.7.18", date: 2025-06-09, codename: "alpha", note: Log --build fix}
-- {version: "0.7.17", date: 2025-06-09, codename: "alpha", note: Log --build logic}
-- {version: "0.7.16", date: 2025-06-07, codename: "alpha", note: removed legacy config}
-- {version: "0.7.15", date: 2025-06-07, codename: "alpha", note: removed core/ from embed}
-- {version: "0.7.14", date: 2025-06-05, codename: "alpha", note: json logger for gommi}
-- {version: "0.7.13", date: 2025-06-04, codename: "alpha", note: clog Check error status & help}
-- {version: "0.7.12", date: 2025-06-03, codename: "alpha", note: snippet error return}
-- {version: "0.7.11", date: 2025-06-03, codename: "alpha", note: add arguments to snippets}
-- {version: "0.7.10", date: 2025-05-23, codename: "alpha", note: remove gommi CLI}
-- {version: "0.7.9", date: 2025-05-12, codename: "alpha", note: Should command}
-- {version: "0.7.8", date: 2025-05-12, codename: "alpha", note: gommi.Bare alpha}
-- {version: "0.7.7", date: 2025-03-24, codename: "alpha", note: bugfix - 3line script functions}
-- {version: "0.7.6", date: 2025-03-22, codename: "alpha", note: more logging levels + better config paths}
-- {version: "0.7.5", date: 2025-03-20, codename: "alpha", note: added -U to clog Log}
-- {version: "0.7.4", date: 2025-02-10, codename: "alpha", note: fix clog Check + log inline colors}
-- {version: "0.7.3", date: 2025-02-10, codename: "alpha", note: fix slogger colors}
-- {version: "0.7.2", date: 2025-02-10, codename: "alpha", note: fix empty short help bug}
-- {version: "0.7.1", date: 2025-02-09, codename: "alpha", note: fix empty script bug}
-- {version: "0.7.0", date: 2025-02-07, codename: "alpha", note: first public alpha}
+- {version: "v0.9.1", date: 2025-08-07, flow: "stage", build: "dev", note: kfg tag fix}
+- {version: "v0.9.0", date: 2025-08-07, flow: "stage", build: "dev", note: kfg configuration migration}
+- {version: "v0.8.4", date: 2025-07-28, flow: "stage", build: "dev", note: fix logging error}
+- {version: "v0.8.3", date: 2025-07-28, flow: "stage", build: "dev", note: config cannot find .yaml bug fix}
+- {version: "v0.8.2", date: 2025-07-08, flow: "stage", build: "dev", note: clog workflow integration}
+- {version: "v0.8.1", date: 2025-07-08, flow: "stage", build: "dev", note: clog Aws Dns}
+- {version: "v0.8.0", date: 2025-06-04, flow: "stage", build: "dev", note: tweak gommi config}
