@@ -27,10 +27,49 @@ clog:
 #  / _/ |_||_| |_| | .__/ | .__/ \___|  \__| /__/
 #   ||             |_|    |_|
 # -----------------------------------------------------------------------------
+#
+# websites are built with the common clog bc (build control) commands
+#
+# env CHK & env MAKE hold tokens for clog build and clog deploy
+#  e.g. CHK="pre-build build"; MAKE="hugo podserver ko" - these are tokens
+#
+# check runs         clog Check TOKEN                 in the order within CHK
+# build runs snippet clog bc TOKEN $doProd $modeMSG   in the order within MAKE
+#
+# doProd is  "prod" for production builds
+# modeMSG is a display message for the reason we're doing "prod"
+# messages are appended to tmp/artifacts as env definitions e.g. BUILD_msg="yay it builded"
+
 snippets:
-  # build control logic for this repo - all commands start with bc
-  # dev or prod rules:
-  #     default - always dev unless build: prod in bc-releases-yaml
+  #        _         
+  #   ||_ | |__   __ 
+  #  (_-< | '_ \ / _|
+  #  / _/ |_.__/ \__|
+  #   ||             
+  # build control logic for this repo - all commands start with bc-
+  #  clog bc-releases-yaml    - path of releases.yaml
+  #  clog bc-main-prod-tag    - the latest line in releases.yaml with flow="release" build="prod"
+  #  clog Init                - creates a tmp-clog-core.yaml to inspect the available bc- primitive scripts
+  bc-main-repo: echo "account/reponame" # github repo override - ensures that forks build properly for a PR
+  # ui build function
+  build: |
+    mkdir -p "$(dirname $(clog bc-artifacts))"
+    export VERB="BUILD"
+    echo "NOTIFICATIONS=\"$VERB\"" > $(clog bc-artifacts)      # reset artifacts
+
+    export CHK="pre-build build"
+    export MAKE="hugo ko"; [[ "MAKE" == "$1" ]] && MAKE="$2"
+    export EXE="podserver"                 # force golang to make podserver exe
+    export TITLE="podserver"               # force semver to be called podserver
+    export DOCKER_NS="metarexmedia"        # force the repo to be metarexmedia
+    clog bc-flowx                          # use the generic flow script
+
+    # The toast message says what we were doing - override in github action script
+    echo "${VERB}_toast=\"😺🪝 build metarex.media\"" >> "$(clog bc-artifacts)"
+
+    # The from message says where it came from - override in github action script
+    echo "${VERB}_trigger=\"trigger: clog $VERB\""
+
   #     rules
   #       - prod deploy - main branch or empty(default) branch only
   #       - prod deploy - main repo (not fork) only
@@ -46,26 +85,33 @@ snippets:
     aws s3 ls --recursive ${CLOG_BUCKET}/clogbin
   watch: hugo server --port=1313 --buildDrafts --buildFuture --buildExpired --cleanDestinationDir
   git:
+    # get the target version for this project from releases.yaml
     tag:
-      ref: echo "v$(yq -r '.[0].version'"$(clog bc-releases-yaml)")" #add a v for golang
-      # a go package needs a preceding "v"
-      refgo: echo "v$(clog git tag ref)"
+      ref: echo "v$(yq -r '.[0].version'"$(clog bc-releases-yaml)")" #only prefix with v for golang projects
     message:
-      ref: yq -r '.[0].note'"$(clog bc-releases-yaml)"
-  suffix: |
-    b="$(git branch --show-current)"
-    [[ "$b" == main ]] && echo "" || echo "$b"|tr -d '[:blank:]'
+      ref: yq -r '.[0].note' "$(clog bc-releases-yaml)"
+    suffix: |
+      b="$(git branch --show-current)"
+      [[ "$b" == main ]] && echo "" || echo "$b"|tr -d '[:blank:]'
   project:
     config: |
       # make some variables for standard build scripts
-      export PROJECT="$(basename $(pwd))"           # project you're building
+      export PROJECT="$(basename $(pwd))"              # project you're building
+    has:
+      git-lfs: |
+        git lfs version 2>/dev/null|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'|head -1
+      golang: |
+        go version|grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+      hugo: |
+        hugo version|grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+'
     needs:
+      git-lfs: echo "3.7.0"
       # grab the golang version from go.mod
       golang: cat go.mod|grep '^go '|grep -oE '[0-9]\.[0-9]+\.[0-9]+'
       # hunt for the hugo version
       hugo: |
         # grab the version from configuration
-        if [ -f hugo .yaml ];then
+        if [ -f hugo.yaml ];then
           yq -r '.module.hugoVersion.min' hugo.yaml
         elif [ -f config/_default/module.yaml ];then
           yq -r '.hugoVersion.min' config/_default/module.yaml
@@ -80,11 +126,10 @@ snippets:
     export MAKE="hugo podserver ko"; [[ "MAKE" == "$1" ]] && MAKE="$2"
     clog bc build
 
-#        _                   ___   _                 _
-#   __  | |  ___   __ _     / __| | |_    ___   __  | |__
-#  / _| | | / _ \ / _` |   | (__  | ' \  / -_) / _| | / /
-#  \__| |_| \___/ \__, |    \___| |_||_| \___| \__| |_\_\
-#                 |___/
+#    ___   _                 _
+#   / __| | |_    ___   __  | |__
+#  | (__  | ' \  / -_) / _| | / /
+#   \___| |_||_| \___| \__| |_\_\
 # -----------------------------------------------------------------------------
 check:
   tools:
@@ -95,6 +140,47 @@ check:
         catch: clog Log -E "wrong go version. Need $(clog project needs golang)"
   build:
     blocks:
-      - try: echo "pending - go test"
-        ok: clog Log -W "go test needs fixing for full build"
-        catch: clog Log -E "go test failed"
+      - name: wsl Zone.Identifier files
+        try: |
+          [ -n "$(find . -name '*Zone.Identifier')"]
+        ok: clog Log -I "no Zone.Identifier present"
+        catch: |
+          eval "$(clog Crayon)"
+          n=$(find . -name '*Zone.Identifier'|wc -l)
+          clog Log -E "Delete $n Zone.Identifier files made by Windows"
+          while IFS= read -r line; do
+            fn="$(echo ${line:2}|cut  -d ":" -f "1")"
+            id="$(echo ${line:2}|cut  -d ":" -f "2")"
+            clog Log -E "      ❌$cF $fn$cX:$cW$id"
+          done < <(find . -name '*Zone.Identifier')
+      - name: golang version
+        try: |
+          [[ "$(clog project needs golang)" == "$(clog project has golang)" ]]
+        ok: clog Log -I "golang $(clog project has golang) is up to date"
+        catch: |
+          clog Log -W "golang: bad version. go.mod needs $(clog project needs golang), got $(clog project has golang)"
+      - name: hugo version
+        try: |
+          [[ "$(clog project needs hugo)" == "$(clog project has hugo)" ]]
+        ok: clog Log -I "hugo $(clog project has hugo) is up to date"
+        catch: |
+          clog Log -W "hugo: bad version. Need $(clog project needs hugo), got $(clog project has hugo)"
+      - name: git-lfs version
+        try: |
+          [[ "$(clog project has git-lfs)"  == "$(clog project needs git-lfs)" ]]
+        ok: clog Log -I "git-lfs $(clog project has git-lfs) good"
+        catch: |
+          lfs="$(clog prohect has git-lfs)"
+          [ -z "$lfs" ] && clog Log -W "git-lfs not installed"
+          [ -n "$lfs" ] && clog Log -W "git-lfs: bad version. Need $(clog project needs git-lfs), got $(clog project has git-lfs)"
+      - name: docker?
+        try: which docker 2>/dev/null
+        ok: clog Log -I "docker ok"
+        catch: clog Log -E "docker not on path"
+      - name: theme replacements
+        try: |
+          themeReplacements="$(yq -r '.replacements' config/_default/module.yaml)"
+          [[ "null" == "$themeReplacements" ]] && exit 0
+          exit 1
+        ok: clog Log -I "theme will be pulled from github"
+        catch: clog Log -E "local theme replacement kill github action ($(yq -r '.replacements' config/_default/module.yaml))"; exit 1
