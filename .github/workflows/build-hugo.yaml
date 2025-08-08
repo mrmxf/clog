@@ -80,7 +80,6 @@ jobs:
             verb="SCHEDULE"
             clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
             ref="main"               # cannot evaluate the production tag until after checkout
-            #ref="ref/tags/$(clog bc-main-prod-tag)"                   # production tag needed
             src="${{ github.repository }}"                             # production repo
             url="${{ github.event.repository.html_url }}"              # production human url
             depth=0
@@ -118,7 +117,8 @@ jobs:
         name: Checkout to recent production
         run: |
           if [[ "SCHEDULE" == "$verb" ]]; then
-            clog Log -I "$verb production tag checkout $(clog BC git checkout production --dryrun)"
+            clog Log -I "$verb checkout production tag: $(clog BC git checkout production --dryrun)"
+            clog Log -I "$verb checkout  possible refs:\n $(clog BC git checkout list)"
             clog BC git checkout production
           fi
       - # ---------------------------------------------------------------------
