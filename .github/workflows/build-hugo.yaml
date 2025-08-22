@@ -96,7 +96,7 @@ jobs:
           clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
       - # ---------------------------------------------------------------------
         id: checkout
-        name: Checkout repo
+        name: checkout repo @ ${{ env.ref }}"
         uses: actions/checkout@v4
         with:
           fetch-depth: ${{ env.depth }}
@@ -123,7 +123,7 @@ jobs:
           fi
       - # ---------------------------------------------------------------------
         id: clog-setup
-        name: setup tools
+        name: setup golang, hugo & ko
         run: |
           # make the artifacts folder to propagate clog workflow internals
           mkdir -p "$(dirname $(clog bc-artifacts))"
@@ -134,7 +134,7 @@ jobs:
           clog install ko
       - # ---------------------------------------------------------------------
         id: clog-build
-        name: hugo container with clog
+        name: build to tmp/ with clog BC stash in .action-stash
         env:
           MAKE: ${{ inputs.make }}
           DOCKER_NS: ${{ inputs.docker_ns }}
@@ -143,7 +143,7 @@ jobs:
             # use the standard build if no overrides
             clog build
           else
-            clog Log -W "build-hugo overide provided \$MAKE=\"$MAKE\""
+            clog Log -W "build-hugo override provided \$MAKE=\"$MAKE\""
             clog build MAKE "$MAKE"
           fi
       - # ---------------------------------------------------------------------
@@ -160,14 +160,14 @@ jobs:
         #  log to a slack channel on success / failure
         #
         # this actions:
-        # 1. source "tmp/artifacts" - pick up definitions from previous steps
+        # 1. source "$(clog BC stash --filepath)" - pick up definitions from previous steps
         # 2. iterate over NOTIFICATIONS="BUILD DEPLOY"
         #    2.1 $BUILD_toast    # slack toast popup message
         #    2.2 $BUILD_from     # highlighted title - where did the notification come from
         #    2.3 $BUILD_level    # level e.g. -E for error, -S success, -W warning
         #    2.4 $BUILD_msg      # message / description field of slack post
         #    2.5 $BUILD_trigger  # url of the source repo/trigger
-        #    2.6 $BUILD_target   # url of the destintaion repo/trigger
+        #    2.6 $BUILD_target   # url of the destination repo/trigger
         #    2.6 clog SlackLog <params>
         #    2.7 repeat for  $DEPLOY_xxx etc.
         # 
@@ -183,10 +183,12 @@ jobs:
         run: |
           eval "$(clog Source project config); $(clog Crayon)"  # settings+color
           
-          artifacts="$(clog bc-artifacts)"
-          cat "$artifacts"                              # log the artifacts file
+          stash="$(clog BC stash --filepath)"
+          echo "⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓"
+          cat "$stash"                        # log the stash file
+          echo "⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑"
 
-          eval "$(cat $artifacts)"                # create artifacts environment
+          eval "$(cat $stash)"                # create stash environment
 
           for VERB in ${NOTIFICATIONS[@]};do
             # generate the names/values of the env variables for this VERB

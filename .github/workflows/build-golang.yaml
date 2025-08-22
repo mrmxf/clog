@@ -53,12 +53,14 @@ jobs:
         run: |
           # install clog & set up some of the funky build logic
           eval "${{ secrets.get_clog }}"
+          depth=1
 
           case "${{ github.event_name }}" in
 
           "pull_request_target")
             # for a PR we checkout the latest pushed commit of the requesting repo
             verb="PR"
+            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
             ref="${{ github.event.pull_request.head.sha }}"            # head of the PR commits
             src="${{ github.event.pull_request.head.repo.full_name }}" # head name
             url="${{ github.event.pull_request.head.repo.html_url }}"  # head url
@@ -67,6 +69,7 @@ jobs:
           "push" | "workflow_dispatch")
             # for a PUSH we checkout the HEAD of main
             verb="PUSH"
+            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
             ref="${{ github.ref }}"                                    # event trigger
             src="${{ github.repository }}"                             # event repo
             url="${{ github.event.repository.html_url }}"              # event human url
@@ -75,28 +78,32 @@ jobs:
           "schedule")
             # for a SCHEDULE we checkout the latest production tag on main branch
             verb="SCHEDULE"
-            ref="ref/tags/$(clog bc-main-prod-tag)"                    # production tag
+            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            ref="main"               # cannot evaluate the production tag until after checkout
             src="${{ github.repository }}"                             # production repo
             url="${{ github.event.repository.html_url }}"              # production human url
+            depth=0
             ;;
 
           esac
 
-          echo "verb=$verb" >> $GITHUB_ENV
-          echo "ref=$ref"   >> $GITHUB_ENV
-          echo "src=$src"   >> $GITHUB_ENV
-          echo "url=$url"   >> $GITHUB_ENV
+          echo "verb=$verb"   >> $GITHUB_ENV
+          echo "depth=$depth" >> $GITHUB_ENV
+          echo "ref=$ref"     >> $GITHUB_ENV
+          echo "src=$src"     >> $GITHUB_ENV
+          echo "url=$url"     >> $GITHUB_ENV
           
-          clog Log -I "Reusable workflow: ${{ env.clog_FLOW}}"
+          clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
       - # ---------------------------------------------------------------------
         id: checkout
-        name: Checkout repo
+        name: checkout repo @ ${{ env.ref }}"
         uses: actions/checkout@v4
         with:
-          lfs: true
-          ref:  ${{ env.ref }}
-          repository: ${{ env.src }}
-          submodules: recursive
+          fetch-depth: ${{ env.depth }}
+          lfs:         true
+          ref:         ${{ env.ref }}
+          repository:  ${{ env.src }}
+          submodules:  recursive
       - # ---------------------------------------------------------------------
         id: docker
         if:  inputs.docker_ns != '' # ignore if no namespace, fail if _pat empty
@@ -106,19 +113,27 @@ jobs:
           username: ${{  inputs.docker_ns }}
           password: ${{ secrets.docker_pat }}
       - # ---------------------------------------------------------------------
+        id: schedule-ref
+        name: Checkout to recent production
+        run: |
+          if [[ "SCHEDULE" == "$verb" ]]; then
+            clog Log -I "$verb checkout production tag: $(clog BC git checkout production --dryrun)"
+            clog Log -I "$verb checkout  possible refs:\n $(clog BC git checkout list)"
+            clog BC git checkout production
+          fi
+      - # ---------------------------------------------------------------------
         id: clog-setup
-        name: setup tools
+        name: setup golang & ko
         run: |
           # make the artifacts folder to propagate clog workflow internals
           mkdir -p "$(dirname $(clog bc-artifacts))"
 
           # install tools
           clog install golang
-          # clog install hugo - need to check for hugo projects to do this
           clog install ko
       - # ---------------------------------------------------------------------
         id: clog-build
-        name: golang build artifacts with clog
+        name: build to tmp/ with clog BC stash in .action-stash
         env:
           MAKE: ${{ inputs.make }}
           DOCKER_NS: ${{ inputs.docker_ns }}
@@ -127,7 +142,7 @@ jobs:
             # use the standard build if no overrides
             clog build
           else
-            clog Log -W "build-golang overide provided \$MAKE=\"$MAKE\""
+            clog Log -W "build-golang override provided \$MAKE=\"$MAKE\""
             clog build MAKE "$MAKE"
           fi
       - # ---------------------------------------------------------------------
@@ -142,14 +157,14 @@ jobs:
         #  log to a slack channel on success / failure
         #
         # this actions:
-        # 1. source "tmp/artifacts" - pick up definitions from previous steps
+        # 1. source "$(clog BC stash --filepath)" - pick up definitions from previous steps
         # 2. iterate over NOTIFICATIONS="BUILD DEPLOY"
         #    2.1 $BUILD_toast    # slack toast popup message
         #    2.2 $BUILD_from     # highlighted title - where did the notification come from
         #    2.3 $BUILD_level    # level e.g. -E for error, -S success, -W warning
         #    2.4 $BUILD_msg      # message / description field of slack post
         #    2.5 $BUILD_trigger  # url of the source repo/trigger
-        #    2.6 $BUILD_target   # url of the destintaion repo/trigger
+        #    2.6 $BUILD_target   # url of the destination repo/trigger
         #    2.6 clog SlackLog <params>
         #    2.7 repeat for  $DEPLOY_xxx etc.
         # 
@@ -165,10 +180,12 @@ jobs:
         run: |
           eval "$(clog Source project config); $(clog Crayon)"  # settings+color
           
-          artifacts="$(clog bc-artifacts)"
-          cat "$artifacts"                              # log the artifacts file
+          stash="$(clog BC stash --filepath)"
+          echo "⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓"
+          cat "$stash"                        # log the stash file
+          echo "⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑"
 
-          eval "$(cat $artifacts)"                # create artifacts environment
+          eval "$(cat $stash)"                # create stash environment
 
           for VERB in ${NOTIFICATIONS[@]};do
             # generate the names/values of the env variables for this VERB
