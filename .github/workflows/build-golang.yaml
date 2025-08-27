@@ -173,6 +173,7 @@ jobs:
         if: ${{ env.HOOK_SLACK != '' }}
         name: notify-team
         env:
+          VERB: "BUILD"
           HOOK_SLACK:  ${{ secrets.webhook_slack }}
           FORCE_FROM: ${{ inputs.bc-from }}
           FORCE_TOAST: ${{ inputs.bc-toast }}
@@ -187,37 +188,35 @@ jobs:
 
           eval "$(cat $stash)"                # create stash environment
 
-          for VERB in ${NOTIFICATIONS[@]};do
-            # generate the names/values of the env variables for this VERB
-            name=${VERB}_from   ;    vFrom="${!name}"
-            name=${VERB}_level  ;   vLevel="${!name}"
-            name=${VERB}_msg    ;     vMsg="${!name}"
-            name=${VERB}_toast  ;   vToast="${!name}"
-            name=${VERB}_trigger; vTrigger="${!name}"
-            name=${VERB}_target ;  vTarget="${!name}"
-            name=${VERB}_err    ;     vErr="${!name}"
+          # unstash the names/values of the env variables for this VERB
+          name=${VERB}_from   ;    vFrom="${!name}"
+          name=${VERB}_level  ;   vLevel="${!name}"
+          name=${VERB}_msg    ;     vMsg="${!name}"
+          name=${VERB}_toast  ;   vToast="${!name}"
+          name=${VERB}_trigger; vTrigger="${!name}"
+          name=${VERB}_target ;  vTarget="${!name}"
+          name=${VERB}_err    ;     vErr="${!name}"
 
-            [ -n "$FORCE_FROM" ]    &&    vFrom="$FORCE_FROM"
-            [ -n "$FORCE_TOAST" ]   &&   vToast="$FORCE_TOAST"
-            [ -n "$FORCE_TRIGGER" ] && vTrigger="$FORCE_TRIGGER"
+          [ -n "$FORCE_FROM" ]    &&    vFrom="$FORCE_FROM"
+          [ -n "$FORCE_TOAST" ]   &&   vToast="$FORCE_TOAST"
+          [ -n "$FORCE_TRIGGER" ] && vTrigger="$FORCE_TRIGGER"
 
-            case "${{ github.event_name }}" in
-            #"pull_request_target") ;;
-            #"push" | "workflow_dispatch") ;;
-            "schedule")
-              # append checkout tag and current time to Trigger text
-              vTrigger="$vTrigger:$(clog bc-main-prod-tag) @ $(date +'%Y-%m-%d %T')"
-              ;;
-            esac
+          case "${{ github.event_name }}" in
+          #"pull_request_target") ;;
+          #"push" | "workflow_dispatch") ;;
+          "schedule")
+            # append checkout tag and current time to Trigger text
+            vTrigger="$vTrigger:$(clog bc-main-prod-tag) @ $(date +'%Y-%m-%d %T')"
+            ;;
+          esac
 
-            echo "from:   $vFrom"
-            echo "toast   $vToast"
-            echo "trigger $vSrc"
-            echo "dst     $vTarget"
-            echo "errMsg  $vErr"
-            echo "msg:    $vMsg"
+          echo "from:   $vFrom"
+          echo "toast   $vToast"
+          echo "trigger $vSrc"
+          echo "dst     $vTarget"
+          echo "errMsg  $vErr"
+          echo "msg:    $vMsg"
 
-            clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vTrigger" --dst "$vTarget" --errMsg "$vErr" "$vMsg" 
-          done
+          clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vTrigger" --dst "$vTarget" --errMsg "$vErr" "$vMsg" 
 
           clog Log -I "done"

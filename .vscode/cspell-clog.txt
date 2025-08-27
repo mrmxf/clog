@@ -42,6 +42,7 @@ dsec
 embeded
 environemnt
 erikgeiser
+esac
 ESTRPIPE
 fatih
 fontobject
