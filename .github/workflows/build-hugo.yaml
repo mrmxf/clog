@@ -68,6 +68,11 @@ jobs:
             ;;
 
           "push" | "workflow_dispatch")
+            # if the push ref_type is `tag` then ignore
+            if [[ "tag" == "${{ github.ref_type }}" ]]; then
+              clog Log -E "Cancelling push job when a tag is pushed"
+              exit 1
+            fi
             # for a PUSH we checkout the HEAD of main
             verb="PUSH"
             clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
