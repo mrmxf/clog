@@ -53,6 +53,7 @@ jobs:
         name: init clog
         run: |
           # install clog & set up some of the funky build logic
+          [ -z "${{ secrets.get_clog }}" ] && echo "GET_CLOG" secret not set && exit 1
           eval "${{ secrets.get_clog }}"
           depth=1
 
