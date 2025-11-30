@@ -24,20 +24,20 @@ on:
         type: string
       artifact-name:     # the name of the artifact file (absent = no artifacts)
         type: string
-      make:                # MAKE-"golang ko" the name of bc-xxx routines to run
+      make:              # MAKE-"golang ko" the name of bc-xxx routines to run
         type: string
-      bc-from:               # slack notify: engine running the build e.g github
+      bc-from:           # slack notify: engine running the build e.g github
         type: string
-      bc-toast:                         # slack notify: the pop up toast message
+      bc-toast:          # slack notify: the pop up toast message
         type: string
-      bc-trigger:                 # slack notify: repo/event triggering the flow
+      bc-trigger:        # slack notify: repo/event triggering the flow
         type: string
     secrets:
-      get_clog:                        # CLI to get the required version of clog
+      get_clog:          # CLI to get the required version of clog
         required: true
-      docker_pat:                         # for logging into a docker $DOCKER_NS
+      docker_pat:        # for logging into a docker $DOCKER_NS
         required: false
-      webhook_slack:                           # webhook stub to a slack channel
+      webhook_slack:     # webhook stub to a slack channel
         required: false
 
 jobs:
@@ -134,7 +134,7 @@ jobs:
           clog install ko
       - # ---------------------------------------------------------------------
         id: clog-build
-        name: build to tmp/ with clog BC stash in .action-stash
+        name: build to tmp/ with clog BC stash
         env:
           MAKE: ${{ inputs.make }}
           DOCKER_NS: ${{ inputs.docker_ns }}
