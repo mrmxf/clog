@@ -188,9 +188,7 @@ jobs:
           FORCE_TOAST:   ${{ inputs.bc-toast }}
           FORCE_TRIGGER: ${{ inputs.bc-trigger }}
         run: |
-          eval "$(clog Source project config); $(clog Crayon)"  # settings+color
-          
-          stash="$(clog BC stash --filepath)"
+          stash="$(BC stash get path)"
           echo "⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓"
           cat "$stash"                        # log the stash file
           echo "⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑"

@@ -129,9 +129,10 @@ jobs:
           # make the artifacts folder to propagate clog workflow internals
           mkdir -p "$(dirname $(clog bc-artifacts))"
 
-          # install tools
-          clog install golang
-          clog install ko
+          # install scripts are in github.com/mrmxf.clog/embedfilesystem/konfig.yaml
+          clog install slsa-verifier  # clog.snippets.install.slsa-verifier
+          clog install golang         # clog.snippets.install.golang
+          clog install ko             # clog.snippets.install.ko
       - # ---------------------------------------------------------------------
         id: clog-build
         name: build to tmp/ with clog BC stash
@@ -180,44 +181,11 @@ jobs:
           FORCE_TOAST: ${{ inputs.bc-toast }}
           FORCE_TRIGGER: ${{ inputs.bc-trigger }}
         run: |
-          eval "$(clog Source project config); $(clog Crayon)"  # settings+color
-          
-          stash="$(clog BC stash --filepath)"
+          stash="$(BC stash get path)"
           echo "⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓"
           cat "$stash"                        # log the stash file
           echo "⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑"
 
-          eval "$(cat $stash)"                # create stash environment
-
-          # unstash the names/values of the env variables for this VERB
-          name=${VERB}_from   ;    vFrom="${!name}"
-          name=${VERB}_level  ;   vLevel="${!name}"
-          name=${VERB}_msg    ;     vMsg="${!name}"
-          name=${VERB}_toast  ;   vToast="${!name}"
-          name=${VERB}_trigger; vTrigger="${!name}"
-          name=${VERB}_target ;  vTarget="${!name}"
-          name=${VERB}_err    ;     vErr="${!name}"
-
-          [ -n "$FORCE_FROM" ]    &&    vFrom="$FORCE_FROM"
-          [ -n "$FORCE_TOAST" ]   &&   vToast="$FORCE_TOAST"
-          [ -n "$FORCE_TRIGGER" ] && vTrigger="$FORCE_TRIGGER"
-
-          case "${{ github.event_name }}" in
-          #"pull_request_target") ;;
-          #"push" | "workflow_dispatch") ;;
-          "schedule")
-            # append checkout tag and current time to Trigger text
-            vTrigger="$vTrigger:$(clog bc-main-prod-tag) @ $(date +'%Y-%m-%d %T')"
-            ;;
-          esac
-
-          echo "from:   $vFrom"
-          echo "toast   $vToast"
-          echo "trigger $vSrc"
-          echo "dst     $vTarget"
-          echo "errMsg  $vErr"
-          echo "msg:    $vMsg"
-
-          clog SlackLog $vLevel --from "$vFrom" --toast "$vToast" --trigger "$vTrigger" --dst "$vTarget" --errMsg "$vErr" "$vMsg" 
-
+          # parse the Stash Yaml and make a pretty Slack message
+          clog SlackStash
           clog Log -I "done"
