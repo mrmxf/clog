@@ -12,36 +12,41 @@
 # see on.workflow_call.inputs for params
 
 name: deploy-s3
-run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/deploy-s3)"
+run-name: ${{ github.workflow }}(${{ github.event_name }}) 🥷${{ github.actor }} 
+
+# default env
 env:
-  CLOG_FLOW: "mrmxf/clog/.github/workflows/deploy-s3"
+  depth:      1                         # default checkout depth 1
+  ref:        ${{ github.ref }}         # default checkout ref
+  repo:       ${{ github.repository }}  # repo to checkout from
+  url:        ""                        # url of the repo for logging
 
 on:
   workflow_call:
     inputs:
-      artifact-name:
+      artifact-name:     # artifact filename (absent = no artifacts)
         required: true
         type: string
-      make:
+      make:              # MAKE-"deploy-s3" override the clog deploy settings
         required: false
         type: string
-      bc-from:               # slack notify: engine running the build e.g github
+      bcTitle:          # slack notify: the pop up toast message
+        required: false
         type: string
-      bc-toast:                         # slack notify: the pop up toast message
-        type: string
-      bc-trigger:                 # slack notify: repo/event triggering the flow
+      bcMd:             # slack notify: extra markdown for message
+        required: false
         type: string
     secrets:
-      aws_access_key_id:
-        required: false
-      aws_secret_access_key:
-        required: false
-      get_clog:
+      get_clog:          # CLI to get the required version of clog
         required: true
+      webhook_slack:     # webhook stub to a slack channel
+        required: false
+      aws_access_key_id: # aws key identifier
+        required: false
+      aws_secret_access_key: # aws key value
+        required: false
       s3_bucket:
         required: true
-      webhook_slack:
-        required: false
 
 jobs:
   deploy-s3:
@@ -62,27 +67,27 @@ jobs:
           "pull_request_target")
             # for a PR we checkout the latest pushed commit of the requesting repo
             verb="PR"
-            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -I "$verb workflow from event ${{ github.event_name }}"
             ref="${{ github.event.pull_request.head.sha }}"            # head of the PR commits
-            src="${{ github.event.pull_request.head.repo.full_name }}" # head name
+            repo="${{ github.event.pull_request.head.repo.full_name }}" # head name
             url="${{ github.event.pull_request.head.repo.html_url }}"  # head url
             ;;
 
           "push" | "workflow_dispatch")
             # for a PUSH we checkout the HEAD of main
             verb="PUSH"
-            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -I "$verb workflow from event ${{ github.event_name }}"
             ref="${{ github.ref }}"                                    # event trigger
-            src="${{ github.repository }}"                             # event repo
+            repo="${{ github.repository }}"                             # event repo
             url="${{ github.event.repository.html_url }}"              # event human url
             ;;
 
           "schedule")
             # for a SCHEDULE we checkout the latest production tag on main branch
             verb="SCHEDULE"
-            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -I "$verb $verb workflow from event ${{ github.event_name }}"
             ref="main"               # cannot evaluate the production tag until after checkout
-            src="${{ github.repository }}"                             # production repo
+            repo="${{ github.repository }}"                             # production repo
             url="${{ github.event.repository.html_url }}"              # production human url
             depth=0
             ;;
@@ -92,10 +97,10 @@ jobs:
           echo "verb=$verb"   >> $GITHUB_ENV
           echo "depth=$depth" >> $GITHUB_ENV
           echo "ref=$ref"     >> $GITHUB_ENV
-          echo "src=$src"     >> $GITHUB_ENV
+          echo "repo=$repo"   >> $GITHUB_ENV
           echo "url=$url"     >> $GITHUB_ENV
           
-          clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
+          clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 status -I "verb=$verb, fetch-depth=$depth, checkout=$ref, repo=$repo, url=$url" 
       - # ---------------------------------------------------------------------
         id: checkout
         name: checkout repo @ ${{ env.ref }}"
@@ -104,7 +109,7 @@ jobs:
           fetch-depth: ${{ env.depth }}
           lfs:         true
           ref:         ${{ env.ref }}
-          repository:  ${{ env.src }}
+          repository:  ${{ env.repo }}
           submodules:  recursive
       - # ---------------------------------------------------------------------
         id: artifacts
@@ -134,25 +139,34 @@ jobs:
             # use the standard build if no overrides
             clog build
           else
-            clog Log -W "deploy overide provided \$MAKE=\"$MAKE\""
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -W "$verb deploy override provided \$MAKE=\"$MAKE\""
             clog deploy MAKE "$MAKE"
           fi
       - # ---------------------------------------------------------------------
         id: notify
-        if: ${{ env.HOOK_SLACK != '' }}
         name: notify-team
         env:
-          VERB:          "DEPLOY"
-          HOOK_SLACK:    ${{ secrets.webhook_slack }}
-          FORCE_FROM:    ${{ inputs.bc-from }}
-          FORCE_TOAST:   ${{ inputs.bc-toast }}
-          FORCE_TRIGGER: ${{ inputs.bc-trigger }}
+          # webhook_slack may be empty - no logging
+          bcTitle: ${{ inputs.bcTitle }}
+          HOOK_SLACK: ${{ secrets.webhook_slack }}
         run: |
-          stash="$(BC stash get path)"
+          if [ -z "$HOOK_SLACK" ]; then
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 no-hook -W "HOOK_SLACK is empty - skipping Slack notification"
+            exit 0
+          fi
+
+          stash="$(clog BC stash get path)"
           echo "⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓"
           cat "$stash"                        # log the stash file
           echo "⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑"
 
+          # append some extra info
+          md=""
+          md="$md• job ${{ github.job }}  from  $(basename ${{ github.workflow_ref }} | cut -d'@' -f1)\n"
+          md="$md• repo ${{ env.repo }} at ${{ env.url }}\n"
+          md="$md• checkout ref ${{ env.ref }} depth ${{ env.depth }}\n"
+          md="$md• workflow ref: ${{ github.workflow_ref }}\n"
+
           # parse the Stash Yaml and make a pretty Slack message
-          clog SlackStash
+          clog SlackStash "$bcTitle" --md "$md"
           clog Log -I "done"

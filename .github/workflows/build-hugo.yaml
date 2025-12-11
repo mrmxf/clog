@@ -7,14 +7,19 @@
 #  | |_) | | |_| | | | | | | (_| | |_____| | | | | | |_| | | (_| | | (_) |
 #  |_.__/   \__,_| |_| |_|  \__,_|         |_| |_|  \__,_|  \__, |  \___/ 
 #                                                           |___/         
-# Build a hugo site to a docker image with hugo & ko
+#  Callable GitHub action to build a hugo site to a docker image with hugo & ko
 #
 # see on.workflow_call.inputs for params
 
 name: build-hugo
-run-name: 🥷${{ github.actor }} 🏃‍➡️ ${{ github.workflow }}.${{ github.job }}(clog/…/build-hugo)"
+run-name: ${{ github.workflow }}(${{ github.event_name }}) 🥷${{ github.actor }} 
+
+# default env
 env:
-  CLOG_FLOW: "mrmxf/clog/.github/workflows/build-hugo"
+  depth:      1                         # default checkout depth 1
+  ref:        ${{ github.ref }}         # default checkout ref
+  repo:       ${{ github.repository }}  # repo to checkout from
+  url:        ""                        # url of the repo for logging
 
 on:
   workflow_call:
@@ -61,9 +66,9 @@ jobs:
           "pull_request_target")
             # for a PR we checkout the latest pushed commit of the requesting repo
             verb="PR"
-            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -I "$verb workflow from event ${{ github.event_name }}"
             ref="${{ github.event.pull_request.head.sha }}"            # head of the PR commits
-            src="${{ github.event.pull_request.head.repo.full_name }}" # head name
+            repo="${{ github.event.pull_request.head.repo.full_name }}" # head name
             url="${{ github.event.pull_request.head.repo.html_url }}"  # head url
             ;;
 
@@ -75,18 +80,18 @@ jobs:
             fi
             # for a PUSH we checkout the HEAD of main
             verb="PUSH"
-            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -I "$verb workflow from event ${{ github.event_name }}"
             ref="${{ github.ref }}"                                    # event trigger
-            src="${{ github.repository }}"                             # event repo
+            repo="${{ github.repository }}"                             # event repo
             url="${{ github.event.repository.html_url }}"              # event human url
             ;;
 
           "schedule")
             # for a SCHEDULE we checkout the latest production tag on main branch
             verb="SCHEDULE"
-            clog Log -I "Initialising $verb workflow from event ${{ github.event_name }}"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -I "$verb $verb workflow from event ${{ github.event_name }}"
             ref="main"               # cannot evaluate the production tag until after checkout
-            src="${{ github.repository }}"                             # production repo
+            repo="${{ github.repository }}"                             # production repo
             url="${{ github.event.repository.html_url }}"              # production human url
             depth=0
             ;;
@@ -96,10 +101,10 @@ jobs:
           echo "verb=$verb"   >> $GITHUB_ENV
           echo "depth=$depth" >> $GITHUB_ENV
           echo "ref=$ref"     >> $GITHUB_ENV
-          echo "src=$src"     >> $GITHUB_ENV
+          echo "repo=$repo"   >> $GITHUB_ENV
           echo "url=$url"     >> $GITHUB_ENV
           
-          clog Log -I "Reusable workflow: ${{ env.CLOG_FLOW}}"
+          clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 status -I "verb=$verb, fetch-depth=$depth, checkout=$ref, repo=$repo, url=$url" 
       - # ---------------------------------------------------------------------
         id: checkout
         name: checkout repo @ ${{ env.ref }}"
@@ -108,7 +113,7 @@ jobs:
           fetch-depth: ${{ env.depth }}
           lfs:         true
           ref:         ${{ env.ref }}
-          repository:  ${{ env.src }}
+          repository:  ${{ env.repo }}
           submodules:  recursive
       - # ---------------------------------------------------------------------
         id: docker
@@ -119,28 +124,28 @@ jobs:
           username: ${{  inputs.docker_ns }}
           password: ${{ secrets.docker_pat }}
       - # ---------------------------------------------------------------------
-        id: schedule-ref
-        name: Checkout to recent production
+        id: production-checkout
+        name: Production checkout
         run: |
           if [[ "SCHEDULE" == "$verb" ]]; then
-            clog Log -I "$verb checkout production tag: $(clog BC git checkout production --dryrun)"
-            clog Log -I "$verb checkout  possible refs:\n $(clog BC git checkout list)"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 isProduction -I "$verb checkout production tag: $(clog BC git checkout production --dryrun)"
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 isProduction -I "$verb checkout possible refs:\n $(clog BC git checkout list)"
             clog BC git checkout production
+          else
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 isDev        -I "$verb - not a production checkout"
           fi
       - # ---------------------------------------------------------------------
         id: clog-setup
         name: setup golang, hugo & ko
         run: |
-          # make the artifacts folder to propagate clog workflow internals
-          mkdir -p "$(dirname $(clog bc-artifacts))"
-
-          # install tools
-          clog install golang
-          clog install hugo
-          clog install ko
+          # install scripts are in github.com/mrmxf.clog/embedfilesystem/konfig.yaml
+          clog install slsa-verifier  # clog.snippets.install.slsa-verifier
+          clog install golang         # clog.snippets.install.golang
+          clog install hugo           # clog.snippets.install.hugo
+          clog install ko             # clog.snippets.install.ko
       - # ---------------------------------------------------------------------
         id: clog-build
-        name: build to tmp/ with clog BC stash in .action-stash
+        name: build to tmp/ and log to clog BC stash
         env:
           MAKE: ${{ inputs.make }}
           DOCKER_NS: ${{ inputs.docker_ns }}
@@ -149,7 +154,7 @@ jobs:
             # use the standard build if no overrides
             clog build
           else
-            clog Log -W "build-hugo override provided \$MAKE=\"$MAKE\""
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -W "$verb build override provided \$MAKE=\"$MAKE\""
             clog build MAKE "$MAKE"
           fi
       - # ---------------------------------------------------------------------
@@ -164,35 +169,32 @@ jobs:
             tmp
       - # ---------------------------------------------------------------------
         #  log to a slack channel on success / failure
-        #
-        # this actions:
-        # 1. source "$(clog BC stash --filepath)" - pick up definitions from previous steps
-        # 2. iterate over NOTIFICATIONS="BUILD DEPLOY"
-        #    2.1 $BUILD_toast    # slack toast popup message
-        #    2.2 $BUILD_from     # highlighted title - where did the notification come from
-        #    2.3 $BUILD_level    # level e.g. -E for error, -S success, -W warning
-        #    2.4 $BUILD_msg      # message / description field of slack post
-        #    2.5 $BUILD_trigger  # url of the source repo/trigger
-        #    2.6 $BUILD_target   # url of the destination repo/trigger
-        #    2.6 clog SlackLog <params>
-        #    2.7 repeat for  $DEPLOY_xxx etc.
         # 
 
         id: notify
-        if: ${{ env.HOOK_SLACK != '' }}
         name: notify-team
         env:
-          VERB:          "BUILD"
-          HOOK_SLACK:    ${{ secrets.webhook_slack }}
-          FORCE_FROM:    ${{ inputs.bc-from }}
-          FORCE_TOAST:   ${{ inputs.bc-toast }}
-          FORCE_TRIGGER: ${{ inputs.bc-trigger }}
+          # webhook_slack may be empty - no logging
+          bcTitle: ${{ inputs.bcTitle }}
+          HOOK_SLACK: ${{ secrets.webhook_slack }}
         run: |
-          stash="$(BC stash get path)"
+          if [ -z "$HOOK_SLACK" ]; then
+            clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 no-hook -W "HOOK_SLACK is empty - skipping Slack notification"
+            exit 0
+          fi
+
+          stash="$(clog BC stash get path)"
           echo "⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓⇓"
           cat "$stash"                        # log the stash file
           echo "⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑⇑"
 
+          # append some extra info
+          md=""
+          md="$md• job ${{ github.job }}  from  $(basename ${{ github.workflow_ref }} | cut -d'@' -f1)\n"
+          md="$md• repo ${{ env.repo }} at ${{ env.url }}\n"
+          md="$md• checkout ref ${{ env.ref }} depth ${{ env.depth }}\n"
+          md="$md• workflow ref: ${{ github.workflow_ref }}\n"
+
           # parse the Stash Yaml and make a pretty Slack message
-          clog SlackStash
+          clog SlackStash "$bcTitle" --md "$md"
           clog Log -I "done"
