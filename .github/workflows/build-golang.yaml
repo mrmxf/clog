@@ -136,8 +136,8 @@ jobs:
         name: setup golang & ko
         run: |
           # install scripts are in github.com/mrmxf.clog/embedfilesystem/konfig.yaml
-          clog install slsa-verifier  # clog.snippets.install.slsa-verifier
           clog install golang         # clog.snippets.install.golang
+          clog install slsa-verifier  # clog.snippets.install.slsa-verifier (needs golang)
           clog install ko             # clog.snippets.install.ko
       - # ---------------------------------------------------------------------
         id: clog-build
