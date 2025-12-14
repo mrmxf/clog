@@ -1,5 +1,6 @@
 # flow:"stage",   build:"dev"  = auto-add to staging server
 # flow:"release", build:"prod" = to flag as a production release
+- {version: "v0.9.3", date: 2025-12-14, flow: "main",  build: "dev", note: github action stability}
 - {version: "v0.9.2", date: 2025-12-09, flow: "main",  build: "dev", note: slackLog notify update}
 - {version: "v0.9.1", date: 2025-08-07, flow: "stage", build: "dev", note: kfg tag fix}
 - {version: "v0.9.0", date: 2025-08-07, flow: "stage", build: "dev", note: kfg configuration migration}

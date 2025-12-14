@@ -1,47 +1,47 @@
 ---
 # Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 # BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
-#       _                  _                                 _____ 
-#    __| |   ___   _ __   | |   ___    _   _           ___  |___ / 
-#   / _` |  / _ \ | '_ \  | |  / _ \  | | | |  _____  / __|   |_ \ 
+#       _                  _                                 _____
+#    __| |   ___   _ __   | |   ___    _   _           ___  |___ /
+#   / _` |  / _ \ | '_ \  | |  / _ \  | | | |  _____  / __|   |_ \
 #  | (_| | |  __/ | |_) | | | | (_) | | |_| | |_____| \__ \  ___) |
-#   \__,_|  \___| | .__/  |_|  \___/   \__, |         |___/ |____/ 
-#                 |_|                  |___/                       
-#  GitHub Workflow to deploy to an s3 bucket
+#   \__,_|  \___| | .__/  |_|  \___/   \__, |         |___/ |____/
+#                 |_|                  |___/
+#  Callable GitHub action to deploy to an s3 bucket
 #
 # see on.workflow_call.inputs for params
 
 name: deploy-s3
-run-name: ${{ github.workflow }}(${{ github.event_name }}) 🥷${{ github.actor }} 
+run-name: ${{ github.workflow }}(${{ github.event_name }}) 🥷${{ github.actor }}
 
 # default env
 env:
-  depth:      1                         # default checkout depth 1
-  ref:        ${{ github.ref }}         # default checkout ref
-  repo:       ${{ github.repository }}  # repo to checkout from
-  url:        ""                        # url of the repo for logging
+  depth: 1                       # default checkout depth 1
+  ref: ${{ github.ref }}         # default checkout ref
+  repo: ${{ github.repository }} # repo to checkout from
+  url: ""                        # url of the repo for logging
 
 on:
   workflow_call:
     inputs:
-      artifact-name:     # artifact filename (absent = no artifacts)
+      artifact-name:         # artifact filename (absent = no artifacts)
         required: true
         type: string
-      make:              # MAKE-"deploy-s3" override the clog deploy settings
+      make:                  # MAKE-"deploy-s3" override the clog deploy settings
         required: false
         type: string
-      bcTitle:          # slack notify: the pop up toast message
+      bcTitle:               # slack notify: the pop up toast message
         required: false
         type: string
-      bcMd:             # slack notify: extra markdown for message
+      bcMd:                  # slack notify: extra markdown for message
         required: false
         type: string
     secrets:
-      get_clog:          # CLI to get the required version of clog
+      get_clog:              # CLI to get the required version of clog
         required: true
-      webhook_slack:     # webhook stub to a slack channel
+      webhook_slack:         # webhook stub to a slack channel
         required: false
-      aws_access_key_id: # aws key identifier
+      aws_access_key_id:     # aws key identifier
         required: false
       aws_secret_access_key: # aws key value
         required: false
@@ -50,6 +50,8 @@ on:
 
 jobs:
   deploy-s3:
+    # don't let random strangers run the PR workflows.
+    if: ${{ contains(fromJSON('["mrmxf"]'), github.event.sender.login) || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -99,18 +101,18 @@ jobs:
           echo "ref=$ref"     >> $GITHUB_ENV
           echo "repo=$repo"   >> $GITHUB_ENV
           echo "url=$url"     >> $GITHUB_ENV
-          
-          clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 status -I "verb=$verb, fetch-depth=$depth, checkout=$ref, repo=$repo, url=$url" 
+
+          clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 status -I "verb=$verb, fetch-depth=$depth, checkout=$ref, repo=$repo, url=$url"
       - # ---------------------------------------------------------------------
         id: checkout
         name: checkout repo @ ${{ env.ref }}"
         uses: actions/checkout@v4
         with:
           fetch-depth: ${{ env.depth }}
-          lfs:         true
-          ref:         ${{ env.ref }}
-          repository:  ${{ env.repo }}
-          submodules:  recursive
+          lfs: true
+          ref: ${{ env.ref }}
+          repository: ${{ env.repo }}
+          submodules: recursive
       - # ---------------------------------------------------------------------
         id: artifacts
         name: artifact(${{ inputs.artifact-name }}) → tmp/
@@ -120,7 +122,7 @@ jobs:
           path: tmp
       - # ---------------------------------------------------------------------
         id: docker
-        if:  inputs.docker_ns != '' # ignore if no namespace, fail if _pat empty
+        if: inputs.docker_ns != '' # ignore if no namespace, fail if _pat empty
         name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -128,7 +130,7 @@ jobs:
           password: ${{ secrets.docker_pat }}
       - # ---------------------------------------------------------------------
         id: deploy-s3
-        name: golang deploy artifacts to s3 with clog
+        name: deploy artifacts to s3 with clog
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
@@ -137,7 +139,7 @@ jobs:
         run: |
           if [ -z "$MAKE" ]; then 
             # use the standard build if no overrides
-            clog build
+            clog deploy
           else
             clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -W "$verb deploy override provided \$MAKE=\"$MAKE\""
             clog deploy MAKE "$MAKE"
