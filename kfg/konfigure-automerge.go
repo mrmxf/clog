@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 package kfg
 
 import (
@@ -49,7 +53,7 @@ func AutoMerge() error {
 
 		// Use MergeKonfig with custom path
 		MergeKonfig(&KonfigureOpt{
-			ConfigFs:        os.DirFS("."), // Use OS filesystem for merge paths
+			AppFs:           os.DirFS("."), // Use OS filesystem for merge paths
 			FilePath:        path,
 			PreventAutoLoad: false,
 		})

@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 package kfg
 
 import (
@@ -37,7 +41,7 @@ func TestLoadReleases(t *testing.T) {
 
 			// Initialize configuration with test releases path
 			err = Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,
@@ -106,7 +110,7 @@ func TestLoadReleases(t *testing.T) {
 		Convey("When LoadReleases is called with nil destination", func() {
 			// Initialize configuration first
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,
@@ -124,7 +128,7 @@ func TestLoadReleases(t *testing.T) {
 		Convey("When LoadReleases is called with invalid releases-path", func() {
 			// Initialize configuration first
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,
@@ -146,7 +150,7 @@ func TestLoadReleases(t *testing.T) {
 		Convey("When LoadReleases is called with nonexistent file", func() {
 			// Initialize configuration first
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,

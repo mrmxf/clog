@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 // Package kfg provides configuration loading and parsing capabilities for the clog application.
 // It uses the koanf library to load YAML configuration from embedded files and unmarshal
 // them into Go structs. This package is designed to work with the konfig.yaml configuration
@@ -17,7 +21,7 @@ const RootConfig = "konfig.yaml"
 const KongifReleasesPathKey = "kfg.releases-path"
 
 // Efs is an embedded filesystem that contains the configuration files.
-// It references the the packages dumm konfig file. Override for your own app
+// It references the the packages dummy konfig file. Override for your own app
 //
 //go:embed konfig.yaml
 var Efs embed.FS
@@ -32,10 +36,10 @@ const KonfigDefaultAppTag = "yaml"
 // KonfigureOpt provides options for configuring how configuration files are loaded.
 // This allows customization of the filesystem source and file paths used for loading.
 type KonfigureOpt struct {
-	// ConfigFs specifies the filesystem to load configuration from.
+	// AppFs specifies the filesystem to load configuration from.
 	// For Konfigure: defaults to Efs (embedded filesystem)
 	// For MergeKonfig: defaults to OS filesystem
-	ConfigFs fs.FS
+	AppFs fs.FS
 
 	// FilePath is the path to the configuration file within the filesystem.
 	// For Konfigure: defaults to RootConfig ("konfig.yaml")
@@ -74,11 +78,15 @@ type KonfigureOpt struct {
 	// AutoReleaseSlice is the location for unmarshaling th releases file.
 	// If nil, no unmarshalling will take place.
 	AutoReleaseSlice *[]AppRelease
+
+	// a pointer to the application args so that a `--debug` flag will provide debug logging
+	// make this nil to prevent the functionality
+	AppArgs *[]string
 }
 
 // defaults according to the comments above
 var DefaultKonfigureOpts = KonfigureOpt{
-	ConfigFs:               Efs,
+	AppFs:                  Efs,
 	FilePath:               RootConfig,
 	PreventAutoLoad:        false,
 	PreventAutoMerge:       false,
@@ -88,6 +96,7 @@ var DefaultKonfigureOpts = KonfigureOpt{
 	AutoAppKey:             "clog",
 	AutoAppAnnotationLabel: "koanf",
 	AutoReleaseSlice:       nil,
+	AppArgs:                nil,
 }
 
 // KonfigPaths represents the structure for configuration paths that should be

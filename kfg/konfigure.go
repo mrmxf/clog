@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 package kfg
 
 import (
@@ -40,8 +44,9 @@ func Konfigure(opt ...*KonfigureOpt) error {
 	} else {
 		options = opt[0]
 	}
+	setSlogLevelDebugIfDebugFlag(options)
 
-	configFs := options.ConfigFs
+	configFs := options.AppFs
 	if configFs == nil {
 		configFs = Efs
 	}

@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 package kfg
 
 import (
@@ -10,7 +14,7 @@ func TestUnmarshal(t *testing.T) {
 	Convey("Given the kfg package with test configuration", t, func() {
 		Convey("When Konfigure is called with test YAML", func() {
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,
@@ -199,7 +203,7 @@ func TestKonfigureWithAutoMerge(t *testing.T) {
 	Convey("Given the kfg package", t, func() {
 		Convey("When Konfigure is called with PreventAutoMerge disabled", func() {
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    false,
 				PreventAutoApp:      true,
@@ -220,7 +224,7 @@ func TestKonfigureWithAutoMerge(t *testing.T) {
 
 		Convey("When Konfigure is called with PreventAutoMerge enabled", func() {
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,

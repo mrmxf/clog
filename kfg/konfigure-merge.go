@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 package kfg
 
 import (
@@ -42,7 +46,7 @@ func MergeKonfig(opt ...*KonfigureOpt) error {
 		options = opt[0]
 	}
 
-	configFs := options.ConfigFs
+	configFs := options.AppFs
 	if configFs == nil {
 		configFs = os.DirFS(".") // Default to OS filesystem at current directory
 	}
@@ -62,22 +66,22 @@ func MergeKonfig(opt ...*KonfigureOpt) error {
 	// Check for various file not found or access errors, which are acceptable for merge
 	switch {
 	case err == nil:
-		slog.Debug("AutoMerge: sucess", "path", filePath)
+		slog.Debug("AutoMerge: konfig search", "found", true, "path", filePath)
 		return nil
 	case os.IsNotExist(err):
-		slog.Debug("AutoMerge: konfig file does not exist", "path", filePath)
+		slog.Debug("AutoMerge: konfig search", "found", false, "path", filePath)
 		return nil
 	case strings.Contains(err.Error(), "file does not exist"):
-		slog.Debug("AutoMerge: konfig file does not exist", "path", filePath)
+		slog.Debug("AutoMerge: konfig search", "found", false, "path", filePath)
 		return nil
 	case strings.Contains(err.Error(), "no such file"):
-		slog.Debug("AutoMerge: konfig file does not exist", "path", filePath)
+		slog.Debug("AutoMerge: konfig search", "found", false, "path", filePath)
 		return nil
 	case strings.Contains(err.Error(), "invalid argument"):
-		slog.Debug("AutoMerge: konfig file does not exist", "path", filePath)
+		slog.Debug("AutoMerge: konfig search", "found", false, "path", filePath)
 		return nil
 	case strings.Contains(err.Error(), "not found"):
-		slog.Debug("AutoMerge: konfig file does not exist", "path", filePath)
+		slog.Debug("AutoMerge: konfig search", "found", false, "path", filePath)
 		return nil
 	default:
 		return err // Some other error occurred

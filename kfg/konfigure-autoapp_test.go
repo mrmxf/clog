@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 package kfg
 
 import (
@@ -72,7 +76,7 @@ func TestAutoAppUnmarshal(t *testing.T) {
 
 			// Configure with test-specific options
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:               testEfs, // Use test embedded filesystem
+				AppFs:                  testEfs, // Use test embedded filesystem
 				FilePath:               "konfigure-autoapp_test.yaml",
 				PreventAutoLoad:        false,
 				PreventAutoMerge:       true, // Disable auto-merge for cleaner testing
@@ -226,7 +230,7 @@ func TestAutoAppUnmarshal(t *testing.T) {
 		Convey("When AutoAppUnmarshal is called with nil AutoAppStruct", func() {
 			// Initialize configuration first
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,
@@ -248,7 +252,7 @@ func TestAutoAppUnmarshal(t *testing.T) {
 		Convey("When AutoAppUnmarshal is called with empty AutoAppKey", func() {
 			// Initialize configuration first
 			err := Konfigure(&KonfigureOpt{
-				ConfigFs:            testEfs,
+				AppFs:               testEfs,
 				FilePath:            "konfigure-autoapp_test.yaml",
 				PreventAutoMerge:    true,
 				PreventAutoApp:      true,

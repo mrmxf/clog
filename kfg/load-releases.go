@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 package kfg
 
 import (
@@ -50,29 +54,30 @@ func LoadReleases(destination *[]AppRelease) error {
 	}
 
 	// Check if the releases path has been initialized
-	if len(ReleasesPath()) < 6 {
+	path := ReleasesPath()
+	if len(path) < 6 {
 		slog.Debug("len(" + KongifReleasesPathKey + ") value in Konfig is too short")
 		return nil
 	}
 
-	slog.Debug("LoadReleases: attempting to load releases data", "file_path", ReleasesPath())
+	slog.Debug("LoadReleases: attempting to load releases data", "file_path", path)
 
 	// Read the releases.yaml file from the filesystem
-	data, err := os.ReadFile(ReleasesPath())
-	if err != nil {
-		slog.Debug("LoadReleases: failed to read releases file", "file_path", ReleasesPath(), "error", err)
+	var data []byte
+	var err error
+	if data, err = os.ReadFile(path); err != nil {
+		slog.Debug("LoadReleases: failed to read releases file", "file_path", path, "error", err)
 		return err
 	}
 
 	// Parse the YAML content into []AppRelease
-	err = yaml.Unmarshal(data, destination)
-	if err != nil {
-		slog.Debug("LoadReleases: failed to parse releases YAML", "file_path", ReleasesPath(), "error", err)
+	if err = yaml.Unmarshal(data, destination); err != nil {
+		slog.Debug("LoadReleases: failed to parse releases YAML", "file_path", path, "error", err)
 		return err
 	}
 
 	// we managed to load the releases so cache the latest one
 	releaseSliceCache = destination
-	slog.Debug("LoadReleases: successfully loaded releases", "file_path", ReleasesPath(), "count", len(*destination))
+	slog.Debug("LoadReleases: successfully loaded releases", "file_path", path, "count", len(*destination))
 	return nil
 }
