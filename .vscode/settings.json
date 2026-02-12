@@ -12,9 +12,9 @@
   "cSpell.dictionaries": [
     "cspell-clog"
   ],
-  "workbench.colorTheme": "Default Light Modern",
+  "workbench.colorTheme": "Cyan Light idea theme",
   "workbench.colorCustomizations": {
-    "[Default Light Modern]": {
+    "[Cyan Light idea theme]": {
       "activityBar.background": "#C2A649",
       "sideBar.background": "#c2a6490e",
       "activityBarBadge.foreground": "#ffffff",

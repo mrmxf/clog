@@ -60,7 +60,14 @@ jobs:
         run: |
           # install clog & set up some of the funky build logic
           [ -z "${{ secrets.get_clog }}" ] && echo "GET_CLOG" secret not set && exit 1
+          clogVer="production"
+          [[ "${{ secrets.get_clog }}" == *dev* ]] &&  clogVer="development"
+          clog Log -I "Installing $clogVer clog"
+          echo "-----------------------------------------------------"
+          echo "$(curl https://mrmxf.com/get/clog/)"
+          echo "-----------------------------------------------------"
           eval "${{ secrets.get_clog }}"
+          clog Log -I "Installed $(clog --version)"
           depth=1
 
           case "${{ github.event_name }}" in
