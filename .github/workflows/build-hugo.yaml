@@ -70,7 +70,7 @@ jobs:
           cf_zone_id: ${{ secrets.cf_zone_id }}
           cf_api_token: ${{ secrets.cf_api_token }}
           # disable bot fight mode or it will still fail
-          disable_bot_fight_mode: 'true'
+          # disable_bot_fight_mode: 'true'
 
       - id: init-clog
         name: init clog
