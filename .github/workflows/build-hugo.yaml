@@ -62,7 +62,7 @@ jobs:
           [ -z "${{ secrets.get_clog }}" ] && echo "GET_CLOG" secret not set && exit 1
           clogVer="production"
           [[ "${{ secrets.get_clog }}" == *dev* ]] &&  clogVer="development"
-          clog Log -I "Installing $clogVer clog"
+          echo "Installing $clogVer clog"
           echo "-----------------------------------------------------"
           echo "$(curl https://mrmxf.com/get/clog/)"
           echo "-----------------------------------------------------"
