@@ -81,8 +81,6 @@ jobs:
           [[ "${{ secrets.get_clog }}" == *dev* ]] &&  clogVer="development"
           echo "Installing $clogVer clog"
           echo "-----------------------------------------------------"
-          echo "$(curl https://mrmxf.com/get/clog/)"
-          echo "-----------------------------------------------------"
           eval "${{ secrets.get_clog }}"
           clog Log -I "Installed $(clog --version)"
           depth=1
