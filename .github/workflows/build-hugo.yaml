@@ -57,11 +57,13 @@ jobs:
     # don't let random strangers run the PR workflows.
     if: ${{ contains(fromJSON('["mrmxf", "charlottesweb2"]'), github.event.sender.login) || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
+    env:
+      HAS_CF: ${{ secrets.cf_account_id && secrets.cf_zone_id && secrets.cf_api_token }}
 
     steps:
       # ---------------------------------------------------------------------
       - name: Bypass Cloudflare for GitHub Action
-        if: "${{ secrets.cf_account_id && secrets.cf_zone_id && secrets.cf_api_token }}"
+        if: env.HAS_CF == 'true'
         uses: xiaotianxt/bypass-cloudflare-for-github-action@v2.1.0
         with:
           cf_account_id: ${{ secrets.cf_account_id }}
