@@ -63,7 +63,7 @@ jobs:
     steps:
       # ---------------------------------------------------------------------
       - name: Bypass Cloudflare for GitHub Action
-        if: env.HAS_CF
+        # if: env.HAS_CF
         uses: xiaotianxt/bypass-cloudflare-for-github-action@v2.1.0
         with:
           cf_account_id: ${{ secrets.cf_account_id }}
