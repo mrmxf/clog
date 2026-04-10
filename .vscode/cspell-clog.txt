@@ -16,6 +16,7 @@ buildx
 catppuccin
 certbot
 charmbracelet
+charlottesweb
 checkloglevel
 checkv
 cicd
@@ -83,6 +84,7 @@ keygen
 keymap
 keypress
 keyrings
+konfig
 KUBECONFIG
 labstack
 Lappname

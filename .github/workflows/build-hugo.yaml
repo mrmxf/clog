@@ -54,8 +54,18 @@ on:
         required: false
 jobs:
   build-hugo:
-    # don't let random strangers run the PR workflows.
-    if: ${{ contains(fromJSON('["mrmxf", "charlottesweb2"]'), github.event.sender.login) || github.event_name == 'schedule' }}
+    # Authorized actors (mrmxf, charlottesweb2) or scheduled runs only — skip everyone else.
+    # When a tag is pushed GitHub fires both a `push` event and a `create` event. Without the
+    # second condition the `push` trigger spawns this job only to exit 1, showing a false
+    # failure. Excluding push+tag here causes the job to be *skipped* (neutral) instead;
+    # any tag-specific work belongs in a separate workflow subscribed to the `create` event.
+    #
+    # Note: use `>-` (fold+strip) not `|` (literal) so YAML newlines become spaces before
+    #       GitHub parses the expression — literal newlines inside ${{ }} can break parsing.
+    if: >-
+      ${{ (contains(fromJSON('["mrmxf", "charlottesweb2"]'), github.event.sender.login) ||
+           github.event_name == 'schedule') &&
+          (github.event_name != 'push' || github.ref_type != 'tag') }}
     runs-on: ubuntu-latest
     env:
       HAS_CF: ${{ secrets.cf_account_id && secrets.cf_zone_id && secrets.cf_api_token && 'CF-bypass' || '' }}
@@ -96,11 +106,6 @@ jobs:
             ;;
 
           "push" | "workflow_dispatch")
-            # if the push ref_type is `tag` then ignore
-            if [[ "tag" == "${{ github.ref_type }}" ]]; then
-              clog Log -E "Cancelling push job when a tag is pushed"
-              exit 1
-            fi
             # for a PUSH we checkout the HEAD of main
             verb="PUSH"
             clog BC stashLog -1 ${{ github.job }} -2 ${{ github.action }} -3 verb -I "$verb workflow from event ${{ github.event_name }}"

@@ -49,8 +49,18 @@ on:
 
 jobs:
   build-golang:
-    # don't let random strangers run the PR workflows.
-    if: ${{ contains(fromJSON('["mrmxf"]'), github.event.sender.login) || github.event_name == 'schedule' }}
+    # Authorized actors (mrmxf) or scheduled runs only — skip everyone else.
+    # When a tag is pushed GitHub fires both a `push` event and a `create` event. Without the
+    # second condition the `push` trigger spawns this job only to exit 1, showing a false
+    # failure. Excluding push+tag here causes the job to be *skipped* (neutral) instead;
+    # any tag-specific work belongs in a separate workflow subscribed to the `create` event.
+    #
+    # Note: use `>-` (fold+strip) not `|` (literal) so YAML newlines become spaces before
+    #       GitHub parses the expression — literal newlines inside ${{ }} can break parsing.
+    if: >-
+      ${{ (contains(fromJSON('["mrmxf"]'), github.event.sender.login) ||
+           github.event_name == 'schedule') &&
+          (github.event_name != 'push' || github.ref_type != 'tag') }}
     runs-on: ubuntu-latest
 
     steps:

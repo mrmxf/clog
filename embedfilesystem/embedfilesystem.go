@@ -20,8 +20,6 @@ import (
 
 //variable CoreFs is the exported file system
 
-//go:embed all:deb
-//go:embed all:tpl
 //go:embed konfig.yaml
 var CoreFs embed.FS
 
