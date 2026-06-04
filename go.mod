@@ -1,6 +1,6 @@
 module github.com/mrmxf/clog
 
-go 1.26.2
+go 1.26.4
 
 require (
 	github.com/charmbracelet/huh v0.6.0
