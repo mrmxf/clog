@@ -654,7 +654,13 @@ snippets:
     golang: |
       [[ "$1" == "+logging" ]] && fnLog() { clog Log -I "$1 $2 $3"; } || fnLog() { :; }
       fnLog "Installing golang"
-      LATEST=$(curl -sL "https://golang.org/dl/?mode=json" | jq -r '.[0].version')
+      GOMOD_VER=$(cat go.mod 2>/dev/null | grep '^go ' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+      if [ -n "$GOMOD_VER" ]; then
+        LATEST="go${GOMOD_VER}"
+        fnLog "Using go version from go.mod: $LATEST"
+      else
+        LATEST=$(curl -sL "https://golang.org/dl/?mode=json" | jq -r '.[0].version')
+      fi
       [ -z "$LATEST" ] || [ "$LATEST" = "null" ] && clog Log -E "could not fetch latest Go version" && exit 1
       url="https://go.dev/dl/$LATEST.linux-amd64.tar.gz"
       fnLog "Fetching $url"
@@ -761,8 +767,14 @@ snippets:
       [[ "$1" == "+logging" ]] && fnLog() { clog Log -I "$1 $2 $3"; } || fnLog() { :; }
       eval "$(clog Crayon)"
       fnLog "installing hugo"
-      fnLog "fetching versions https://api.github.com/repos/gohugoio/hugo/releases/latest"
-      j="$(curl -L https://api.github.com/repos/gohugoio/hugo/releases/latest)"
+      HUGO_MIN=$(grep -iA3 'hugoVersion:' config/_default/module.yaml 2>/dev/null | grep -i 'min:' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+      if [ -n "$HUGO_MIN" ]; then
+        fnLog "Using hugo version from module.yaml: $HUGO_MIN"
+        j="$(curl -L "https://api.github.com/repos/gohugoio/hugo/releases/tags/v${HUGO_MIN}")"
+      else
+        fnLog "fetching versions https://api.github.com/repos/gohugoio/hugo/releases/latest"
+        j="$(curl -L https://api.github.com/repos/gohugoio/hugo/releases/latest)"
+      fi
       pkg=".deb"
       arch="arm" ; [[ "$(uname -m)" == "x86_64" ]] && arch="amd64"
       v="$(   echo $j | jq -r '.name   | ltrimstr("v")')"
