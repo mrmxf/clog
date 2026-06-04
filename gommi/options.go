@@ -1,5 +1,6 @@
-// Copyright ©2017-2025 Mr MXF   info@mrmxf.com
-// BSD-3-Clause License   https://opensource.org/license/bsd-3-clause/
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
 
 // gommi  - Golang Mimimal Modular InterWeb
 // - Option definitions

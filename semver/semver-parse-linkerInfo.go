@@ -1,3 +1,7 @@
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 //This simple package manages the version number and name.
 //
 // semver.Info struct is exported for use in an application
@@ -8,7 +12,7 @@ package semver
 
 import (
 	_ "embed"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"path/filepath"
@@ -18,124 +22,122 @@ import (
 	"time"
 )
 
-// dummy linker string
-const ( // iota is reset to 0
-	lHASH     = iota
-	lDATE     = iota
-	lSUFFIX   = iota
-	lAPPNAME  = iota
-	lAPPTITLE = iota
-)
+// ParseLinkerJSON is a pure function that parses version information from JSON
+// without mutating any global state. Returns parsed VersionInfo and whether it's a production build.
+func ParseLinkerJSON(semVerJSON string) (VersionInfo, bool, error) {
+	// Trim quotes that bash scripts sometimes leave around the JSON
+	ldString := strings.Trim(semVerJSON, "\"'")
+	slog.Debug("Linker string is (" + ldString + ")")
 
-// history is exported via a function
-var history []ReleaseHistory // read from releases.yaml
-var inf VersionInfo
+	// Parse JSON into local LinkerDataJSON struct
+	var data LinkerDataJSON
+	if err := json.Unmarshal([]byte(ldString), &data); err != nil {
+		return VersionInfo{}, false, fmt.Errorf("failed to parse semver JSON: %w", err)
+	}
+	slog.Debug("semver received", "SemVerJSON", string(ldString))
+	slog.Debug("semver parsed  ", "linkerData", data)
 
-// read the linker data and take appropriate cleaning actions
+	// Determine if production build
+	isProd := data.Build == "prod"
+
+	// Validate and fix hash
+	if len(data.Hash) != 40 {
+		if len(data.Hash) == 0 {
+			slog.Debug("WARNING semver Hash has zero length")
+		} else {
+			slog.Debug("WARNING semver Hash length is invalid", "length", len(data.Hash), "expected", 40)
+		}
+		data.Hash = dummyHash
+	}
+
+	// Validate and fix date
+	if _, err := time.Parse("2006-01-02", data.Date); err != nil {
+		data.Date = time.Now().Format("2006-01-02")
+	}
+
+	// Set app name if empty
+	if len(data.AppName) == 0 {
+		if bi, ok := debug.ReadBuildInfo(); ok {
+			data.AppName = filepath.Base(bi.Main.Path)
+		} else {
+			data.AppName = "App"
+		}
+	}
+
+	// Set app title if empty
+	if len(data.AppTitle) == 0 {
+		if bi, ok := debug.ReadBuildInfo(); ok {
+			data.AppTitle = filepath.Base(bi.Main.Path)
+		} else {
+			data.AppTitle = "AppTitle"
+		}
+	}
+
+	// Handle suffix for dev builds
+	if !isProd {
+		if len(data.Suffix) > 0 {
+			data.Suffix = fmt.Sprintf("dev-%s", data.Suffix)
+		} else {
+			data.Suffix = "dev"
+		}
+	}
+
+	// Build VersionInfo struct
+	info := VersionInfo{
+		CommitId: data.Hash,
+		AppName:  data.AppName,
+		AppTitle: strings.ReplaceAll(data.AppTitle, "_", " "),
+		Tag:      data.Tag,
+		ARCH:     runtime.GOARCH,
+		OS:       runtime.GOOS,
+		Date:     data.Date,
+	}
+
+	// Calculate suffix fields
+	if len(data.Suffix) > 0 {
+		info.SuffixShort = "-" + data.Suffix
+		info.SuffixLong = "-" + data.Suffix + "." + info.CommitId[:4]
+	} else {
+		info.SuffixShort = ""
+		info.SuffixLong = ""
+	}
+
+	// Calculate Short and Long version strings
+	info.Short = info.Tag + info.SuffixShort
+	info.Long = fmt.Sprintf("%s%s (%s:%s:%s)",
+		info.Tag,
+		info.SuffixLong,
+		info.Date,
+		info.OS,
+		info.ARCH)
+
+	return info, isProd, nil
+}
+
+// cleanLinkerData reads the global linker data and mutates global state
+// This is kept for backward compatibility with init() and existing code
 func cleanLinkerData() error {
-	slog.Debug("Linker string is (" + SemVerInfo + ")")
-
-	defaultInfo := strings.Split(LinkerDataDefault, "|")
-	linkerInfo := strings.Split(SemVerInfo, "|")
-	slog.Debug(fmt.Sprintf(" linkerInfo   [hash](%s)", linkerInfo[lHASH]))
-	slog.Debug(fmt.Sprintf(" linkerInfo   [date](%s)", linkerInfo[lDATE]))
-	slog.Debug(fmt.Sprintf(" linkerInfo [suffix](%s)", linkerInfo[lSUFFIX]))
-	slog.Debug(fmt.Sprintf(" linkerInfo    [app](%s)", linkerInfo[lAPPNAME]))
-	slog.Debug(fmt.Sprintf(" linkerInfo  [title](%s)", linkerInfo[lAPPTITLE]))
-	slog.Debug("defaultInfo is ", "array", defaultInfo)
-
-	if len(linkerInfo) != len(defaultInfo) {
-		msg := fmt.Sprintf("ldflags SemVerInfo string should have %v fragments,, %v found", len(defaultInfo), len(linkerInfo))
-		return errors.New(msg)
+	info, isProd, err := ParseLinkerJSON(SemVerJSON)
+	if err != nil {
+		return err
 	}
 
-	// ---commit hash -----------------------------------------------------------
-	bashHash := "$(git rev-list -1 HEAD)"
+	// Update global state (for backward compatibility)
+	IsProductionBuild = isProd
+	parsedInfo = info
 
-	if len(linkerInfo[lHASH]) == 0 {
-		msg := fmt.Sprintf("ldflags %s string fragment is empty - use %s", defaultInfo[lHASH], bashHash)
-		return errors.New(msg)
-	}
-
-	if linkerInfo[lHASH] == defaultInfo[lHASH] {
-		// emulate bad shell leaving some cruft to test filtering ...
-		inf.CommitId = "'XxXxxxx-XxxxxXxxxxX xxxxXxxxx.XxxxxXxxxxXxX\""
+	// Also update the global linkerData pointer for any code that might reference it
+	linkerData.Build = map[bool]string{true: "prod", false: "dev"}[isProd]
+	linkerData.Tag = info.Tag
+	linkerData.Hash = info.CommitId
+	linkerData.Date = info.Date
+	linkerData.AppName = info.AppName
+	linkerData.AppTitle = info.AppTitle
+	if len(info.SuffixShort) > 0 {
+		linkerData.Suffix = strings.TrimPrefix(info.SuffixShort, "-")
 	} else {
-		inf.CommitId = linkerInfo[lHASH]
-	}
-	//nuke any bash cruft that was not filtered during build
-	inf.CommitId = strings.ReplaceAll(inf.CommitId, "'", "")
-	inf.CommitId = strings.ReplaceAll(inf.CommitId, " ", "")
-	inf.CommitId = strings.ReplaceAll(inf.CommitId, "-", "")
-	inf.CommitId = strings.ReplaceAll(inf.CommitId, ".", "")
-	inf.CommitId = strings.ReplaceAll(inf.CommitId, "\"", "")
-	inf.CommitId = strings.ReplaceAll(inf.CommitId, "\t", "")
-	inf.CommitId = strings.ReplaceAll(inf.CommitId, "\n", "")
-
-	if len(inf.CommitId) < 40 {
-		msg := fmt.Sprintf("ldflags %s string fragment should be 40 chars - use %s", defaultInfo[lHASH], bashHash)
-		return errors.New(msg)
+		linkerData.Suffix = ""
 	}
 
-	// --- date --- create automatically if empty string ------------------------
-	now := time.Now().Format("2006-01-02")
-
-	if len(linkerInfo[lDATE]) == 0 || linkerInfo[lDATE] == defaultInfo[lDATE] {
-		inf.Date = now
-	} else {
-		inf.Date = linkerInfo[lDATE]
-	}
-
-	// --- app name -------------------------------------------------------------
-	if len(linkerInfo[lAPPNAME]) == 0 || linkerInfo[lAPPNAME] == defaultInfo[lAPPNAME] {
-		bi, ok := debug.ReadBuildInfo()
-		if ok {
-			inf.AppName = filepath.Base(bi.Main.Path) // name of the module
-		}
-	} else {
-		inf.AppName = linkerInfo[lAPPNAME]
-	}
-
-	// --- app title-------------------------------------------------------------
-	//nuke any bash cruft that was not filtered during build
-	title := strings.ReplaceAll(linkerInfo[lAPPTITLE], "'", "")
-	title = strings.Trim(title, " ")
-	// title = strings.ReplaceAll(title, " ", "")
-	title = strings.ReplaceAll(title, "\"", "")
-	title = strings.ReplaceAll(title, "\t", "")
-	title = strings.ReplaceAll(title, "\n", "")
-
-	if len(title) == 0 || title == defaultInfo[lAPPTITLE] {
-		bi, ok := debug.ReadBuildInfo()
-		if ok {
-			inf.AppTitle = filepath.Base(bi.Main.Path) // name of the module
-		}
-	} else {
-		inf.AppTitle = title
-	}
-
-	// --- suffix -------------------------------------------------------------
-	suffix := linkerInfo[lSUFFIX]
-	if linkerInfo[lSUFFIX] == defaultInfo[lSUFFIX] {
-		suffix = "dev"
-	}
-
-	//replace underscores with spaces and beautify
-	inf.AppTitle = strings.ReplaceAll(inf.AppTitle, "_", " ")
-	inf.ARCH = runtime.GOARCH
-	inf.OS = runtime.GOOS
-
-	inf.Version = history[0].Version
-	inf.CodeName = history[0].CodeName
-	inf.Note = history[0].Note
-
-	if len(suffix) > 0 {
-		inf.SuffixShort = "-" + suffix
-		inf.SuffixLong = "-" + suffix + "." + inf.CommitId[:4]
-	} else {
-		inf.SuffixShort = ""
-		inf.SuffixLong = "+" + inf.CommitId[:4]
-	}
-	slog.Debug("semver.Info is ", "struct", Info)
 	return nil
 }

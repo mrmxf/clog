@@ -1,50 +1,32 @@
 //  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
 //  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
+
 //
 // manage semantic versions for release.
 
 package semver
 
-import (
-	"embed"
-	"fmt"
-)
-
-// linker will override this variable. We parse it at run time
-// See the semver package readme for details.
-var SemVerInfo = LinkerDataDefault
-
-const LinkerDataDefault = "hash|date|suffix|app|title"
-
-// logic to valid the loading of the Info struct & linker data
-func Initialise(fs embed.FS, filePath string) error {
-	if err := getEmbeddedHistory(fs, filePath); err != nil {
-		return err
-	}
-
-	if err := cleanLinkerData(); err != nil {
-		return err
-	}
-
-	// set up the Short & Long responses from the components
-	inf.Short = inf.Version + inf.SuffixShort
-
-	//see https://semver.org/
-	inf.Long = fmt.Sprintf("%s%s (%s:%s:%s:%s:%s)",
-		inf.Version,
-		inf.SuffixLong,
-		inf.CodeName,
-		inf.Date,
-		inf.OS,
-		inf.ARCH,
-		inf.Note)
-	return nil
+var linkerData = &LinkerDataJSON{
+	Tag:      dummyTag,
+	Hash:     dummyHash,
+	Date:     dummyTime,
+	Suffix:   dummySuffix,
+	AppName:  "",
+	AppTitle: "",
 }
 
-func History() []ReleaseHistory {
-	return history
-}
+var parsedInfo VersionInfo
 
 func Info() VersionInfo {
-	return inf
+	return parsedInfo
+}
+
+// init reads the linker data and exports the values in the VersionInfo Struct
+// Maintained for backward compatibility - new code should use ParseLinkerJSON directly
+func init() {
+	if err := cleanLinkerData(); err != nil {
+		parsedInfo.Err = err
+	}
+	// Short and Long are now calculated in ParseLinkerJSON/cleanLinkerData
 }

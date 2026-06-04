@@ -1,5 +1,6 @@
-// Copyright ©2017-2025 Mr MXF   info@mrmxf.com
-// BSD-3-Clause License   https://opensource.org/license/bsd-3-clause/
+//  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+//  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+// This file is part of clog.
 
 package slogger_test
 
@@ -11,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	slog "github.com/mrmxf/clog/slogger"
+	slog "github.com/mrmxf/clog-mrmxf/slogger"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -36,14 +37,20 @@ func stripEscapes(s string) string {
 }
 
 func checkLogOutput(t *testing.T, buf bytes.Buffer, title string, expected string) {
-	ltt := len("2025-03-21 14:50:21")
+	ltt := len("2006-01-02 15:04:05")
 	raw := buf.String()
+	// remove any escape sequences from pretty printing
 	got := stripEscapes(raw)
 	msg := strings.TrimSpace(got)
 	ttt := strings.TrimSpace(got)
 	if len(got) > ltt {
 		msg = strings.TrimSpace(got[ltt:])
 		ttt = strings.TrimSpace(got[:ltt])
+	}
+	// all pretty print prefixes are 3 chars except "OK" which is " OK" in the main code
+	// to prevent a false failure, pad the message with " " if it's an OK message
+	if strings.HasPrefix(msg, "OK") {
+		msg = " " + msg
 	}
 	Convey(fmt.Sprintf("%s check", title), func() {
 
@@ -53,11 +60,12 @@ func checkLogOutput(t *testing.T, buf bytes.Buffer, title string, expected strin
 		Convey(fmt.Sprintf("output string == \"%s\"", expected), func() {
 			So(msg, ShouldEqual, expected)
 		})
-		Convey("time stamp", func() {
-			logTimestamp, err := time.Parse("2006-01-02 15:04:05", ttt)
+		logTimestamp, err := time.Parse("2006-01-02 15:04:05", ttt)
+		Convey(fmt.Sprintf("time stamp == \"%s\"", logTimestamp.Format("2006-01-02 15:04:05")), func() {
 			So(err, ShouldBeNil)
-			age := time.Until(logTimestamp)
-			So(age.Seconds(), ShouldBeLessThan, 0.500)
+			// the function call should be no more than 1 second in the past
+			callTimeLimit := time.Until(logTimestamp).Milliseconds()
+			So(callTimeLimit, ShouldBeGreaterThan, -1000)
 		})
 
 	})
@@ -73,7 +81,7 @@ func TestSpec_Levels(t *testing.T) {
 		buf.Reset()
 		slog.Trace("Trace")
 		out.Flush()
-		checkLogOutput(t, *buf, "Trace", "--- Trace")
+		checkLogOutput(t, *buf, "Trace", "TRC Trace")
 
 		buf.Reset()
 		slog.Debug("Debug")
@@ -88,7 +96,7 @@ func TestSpec_Levels(t *testing.T) {
 		buf.Reset()
 		slog.Success("Success")
 		out.Flush()
-		checkLogOutput(t, *buf, "Success", "OK Success")
+		checkLogOutput(t, *buf, "Success", " OK Success")
 
 		buf.Reset()
 		slog.Warn("Warn")
