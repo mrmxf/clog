@@ -120,10 +120,12 @@ jobs:
         id: scan
         if: always() && env.do_build == 'true'
         run: |
-          files='[]'
-          if ls _clog_build/scan/*.sarif >/dev/null 2>&1; then
-            files="$(cd _clog_build/scan && ls *.sarif | jq -R . | jq -sc .)"
-          fi
+          # find, not ls: parsing ls output breaks on any name shellcheck
+          # warns about, and -printf %f gives the bare filenames upload-sarif
+          # needs as categories.
+          files="$(find _clog_build/scan -maxdepth 1 -name '*.sarif' -printf '%f\n' 2>/dev/null \
+                   | jq -R . | jq -sc .)"
+          [ -z "$files" ] && files='[]'
           echo "files=$files" >> "$GITHUB_OUTPUT"
           clog Log -I "scan results: $files"
 
