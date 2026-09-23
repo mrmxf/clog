@@ -39,10 +39,18 @@ jobs:
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: go.mod
-      - name: go env (prove GOWORK really is off)
+      # `go env GOWORK` reports "" when it found no workspace and "off" when
+      # one is disabled. Both mean the pins in go.mod are what is being built.
+      # Anything else is a PATH to a go.work, and that is the masking this job
+      # exists to catch - so the test is "not a path", not "empty".
+      - name: go env (prove no workspace is masking go.mod)
         run: |
-          echo "GOWORK=[$(go env GOWORK)]"
-          [ -z "$(go env GOWORK)" ] || { echo "::error::a workspace is active - go.mod pins are not being tested"; exit 1; }
+          gw="$(go env GOWORK)"
+          echo "GOWORK=[$gw]"
+          case "$gw" in
+            ""|off) echo "ok: go.mod pins are what is being built" ;;
+            *) echo "::error::workspace $gw is active - go.mod pins are not being tested"; exit 1 ;;
+          esac
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./...
