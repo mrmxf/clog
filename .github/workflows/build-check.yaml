@@ -56,8 +56,8 @@ jobs:
       - name: prepare (checkout, go, clog, ci.policy)
         # ABSOLUTE on purpose: inside a reusable workflow, `uses: ./…` resolves
         # against the CALLER's checkout, not this repo, so a relative path here
-        # would break every external consumer. Only the composite-action → action
-        # hop inside clog-prepare may be relative.
+        # would break every external consumer. The same holds inside a composite
+        # action, so clog-prepare → setup-clog is absolute as well.
         uses: mrmxf/clog/.github/actions/clog-prepare@main
         with:
           self-build: ${{ inputs.self-build }}

@@ -97,7 +97,11 @@ runs:
 
     - name: install clog release
       if: inputs.self-build != 'true'
-      uses: ./.github/actions/setup-clog
+      # ABSOLUTE on purpose: inside a composite action, `uses: ./…` resolves
+      # against the WORKSPACE - the caller's checkout - not this action's repo.
+      # A relative path here passes every self-build run (the step is skipped)
+      # and fails every consumer that installs a release.
+      uses: mrmxf/clog/.github/actions/setup-clog@main
       with:
         clog-ref: ${{ inputs.clog-ref }}
         clog-repo: ${{ inputs.clog-repo }}

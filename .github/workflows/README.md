@@ -44,8 +44,8 @@ cannot match a `v*` glob.
 `build-check.yaml` and `deploy-probe.yaml`, `uses: ./…` resolves against the
 **caller's** checkout — so the reference to `clog-prepare` is absolute on
 purpose. A caller (`self-build.yaml`) may use `./…`, because it resolves against
-its own repo. The composite-action → action hop inside `clog-prepare` may also
-be relative.
+its own repo. The same is true inside a composite action, so `clog-prepare`'s
+reference to `setup-clog` is absolute too; `ci.yaml` enforces that.
 
 That rule is why `test-actions.yaml` exists: a PR editing `clog-prepare` would
 otherwise be tested against the pinned ref instead of against the change. It is

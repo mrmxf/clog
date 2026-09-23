@@ -9,7 +9,8 @@
 #  and plain actions only:
 #
 #    1. GOWORK=off go build/test   the pins in go.mod, not a local workspace
-#    2. actionlint                 the workflow YAML in this repo
+#    2. actionlint                 the workflow YAML in this repo, and no
+#                                  relative `uses:` inside a composite action
 #
 #  (1) exists because ~/gr/clogs/go.work puts util's working tree into the Go
 #  workspace on the author's machine, so a local build uses util's SOURCE and
@@ -73,3 +74,13 @@ jobs:
         run: |
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
           ./actionlint -color
+      # Inside a composite action `uses: ./…` resolves against the CALLER's
+      # workspace, so a relative reference works here (this repo is the
+      # workspace) and fails in every consumer. actionlint cannot know that.
+      - name: no relative uses in composite actions
+        run: |
+          if grep -nE '^[[:space:]]*(-[[:space:]]*)?uses:[[:space:]]*\./' .github/actions/*/action.y*ml; then
+            echo "::error::a composite action uses ./… - that resolves against the caller's checkout; use mrmxf/clog/.github/actions/<name>@<ref>"
+            exit 1
+          fi
+          echo "ok: every composite action refers to other actions absolutely"

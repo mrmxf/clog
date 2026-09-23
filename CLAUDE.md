@@ -72,16 +72,20 @@ cannot fire on a CI asset tag.
 
 ### `uses:` resolution — the trap that breaks consumers
 
-Inside a **reusable workflow**, `uses: ./…` resolves against the **caller's**
-checkout, not this repo. So:
+Inside a **reusable workflow** *and* inside a **composite action**, `uses: ./…`
+resolves against the **caller's** checkout (the workspace), not this repo. So:
 
 - `build-check.yaml` → `clog-prepare` must stay **absolute**
   (`mrmxf/clog/.github/actions/clog-prepare@<ref>`), or every external consumer
   breaks.
 - `self-build.yaml` → `build-check.yaml` may be **relative**: a caller resolves
   against its own repo, and this repo *is* the caller.
-- `clog-prepare` → `setup-clog` may be relative: the composite-action → action
-  hop is the one place it is allowed.
+- `clog-prepare` → `setup-clog` must stay **absolute** too. It was once relative
+  on the belief that the composite → action hop was exempt; it is not. Every
+  self-build run skips that step, so only a consumer installing a release hits
+  it — verified 2026-09-23 from a throwaway external repo, which failed with
+  "Can't find 'action.yml' under …/<caller>/.github/actions/setup-clog".
+  `ci.yaml` now refuses a relative `uses:` in any composite action.
 
 Because of the first rule, a PR editing `clog-prepare` would otherwise be tested
 against the *ref* rather than against the change. That is what
