@@ -32,7 +32,7 @@ on:
       self-build: { required: false, type: boolean, default: false }
       stack:      { required: false, type: string,  default: "" }   # '' = every stack
       clog-ref:   { required: false, type: string,  default: "" }
-      clog-repo:  { required: false, type: string,  default: mrmxf/clog-sample }  # Phase 5 collapses this to mrmxf/clog
+      clog-repo:  { required: false, type: string,  default: "" }   # '' = get-clog.sh decides
       production: { required: false, type: boolean, default: false }
     secrets:
       clog_download_token: { required: false }

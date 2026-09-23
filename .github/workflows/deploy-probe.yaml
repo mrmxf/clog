@@ -42,7 +42,7 @@ on:
     inputs:
       self-build: { required: false, type: boolean, default: false }
       clog-ref:   { required: false, type: string,  default: "" }
-      clog-repo:  { required: false, type: string,  default: mrmxf/clog-sample }
+      clog-repo:  { required: false, type: string,  default: "" }   # '' = get-clog.sh decides
       production: { required: false, type: boolean, default: false }  # build/deploy the newest release tag
     secrets:
       clog_download_token: { required: false }

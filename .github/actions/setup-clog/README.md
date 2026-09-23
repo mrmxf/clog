@@ -15,7 +15,7 @@ before it is ever executed.
 - uses: mrmxf/clog/.github/actions/setup-clog@workflows
   with:
     clog-ref: ""                         # default: read ./.clog-version
-    clog-repo: mrmxf/clog-sample         # public binary; use mrmxf/clog-app for private
+    clog-repo: ""                        # default mrmxf/clog; mrmxf/clog-app for private
     token: ${{ secrets.clog_download_token }}   # only for a private clog-repo
 - run: clog --version
 ```

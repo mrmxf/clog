@@ -14,7 +14,7 @@
 #    - uses: mrmxf/clog/.github/actions/setup-clog@workflows
 #      with:
 #        clog-ref: v0.10.11        # optional; default reads .clog-version
-#        clog-repo: mrmxf/clog-app # optional; default mrmxf/clog-sample
+#        clog-repo: mrmxf/clog-app # optional; default mrmxf/clog
 #        token: ${{ secrets.clog_download_token }}  # optional (private repos)
 
 name: setup-clog
@@ -26,9 +26,9 @@ inputs:
     required: false
     default: ""
   clog-repo:
-    description: GitHub owner/repo holding the clog release
+    description: "GitHub owner/repo holding the clog release ('' = get-clog.sh's default, mrmxf/clog)"
     required: false
-    default: mrmxf/clog-sample
+    default: ""
   version-file:
     description: path to the version pin file (used when clog-ref is empty)
     required: false

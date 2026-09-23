@@ -38,9 +38,9 @@ inputs:
     required: false
     default: ""
   clog-repo:
-    description: GitHub owner/repo holding the clog release; ignored for self-build
+    description: "GitHub owner/repo holding the clog release ('' = mrmxf/clog); ignored for self-build"
     required: false
-    default: mrmxf/clog-sample
+    default: ""
   token:
     description: token for a private clog release repo (optional)
     required: false

@@ -24,7 +24,7 @@
 #
 #  Jobs provided: clog-build (stage build), clog-deploy (stage deploy).
 #  Hidden job .clog-prepare can be extended for custom verbs:
-#    my-job: {extends: .clog-prepare, script: ["clog ci should build || exit 0", "clog ci run -- clog my-verb"]}
+#    my-job: {extends: .clog-prepare, script: ["clog CI should build || exit 0", "clog CI run -- clog my-verb"]}
 
 spec:
   inputs:
@@ -41,8 +41,13 @@ spec:
       default: ""
       description: clog release tag when not self-building ('' = .clog-version)
     clog-repo:
-      default: mrmxf/clog-sample     # Phase 5 collapses this to mrmxf/clog
-      description: GitHub owner/repo holding the clog release
+      default: ""
+      description: GitHub owner/repo holding the clog release ('' = mrmxf/clog)
+    get-clog-url:
+      default: ""
+      description: >-
+        where to fetch the installer ('' = the get-clog.sh asset of the release
+        being installed, so the installer and the binary come from one release)
     artifact-paths:
       type: array
       # The canonical layout: _clog_build holds artifacts, the check stash and
@@ -68,8 +73,15 @@ spec:
       if [ "$[[ inputs.self-build ]]" = "true" ]; then
         go build -o /usr/local/bin/clog .
       else
-        curl -fsSL "https://raw.githubusercontent.com/mrmxf/util/workflows-v1/.github/actions/setup-clog/get-clog.sh" -o /tmp/get-clog.sh
-        CLOG_DIR="$(CLOG_VERSION="$[[ inputs.clog-version ]]" CLOG_REPO="$[[ inputs.clog-repo ]]" CLOG_INSTALL_DIR=/usr/local/bin bash /tmp/get-clog.sh)"
+        # The installer is fetched from the release it installs, so the URL
+        # needs the repo and version first. That makes this the one place
+        # besides get-clog.sh that names the default repo: a URL cannot defer.
+        v="$[[ inputs.clog-version ]]"
+        [ -n "$v" ] || v="$(grep -vE '^\s*(#|$)' .clog-version | head -n1 | tr -d '[:space:]')"
+        repo="$[[ inputs.clog-repo ]]"; repo="${repo:-mrmxf/clog}"
+        url="$[[ inputs.get-clog-url ]]"; url="${url:-https://github.com/$repo/releases/download/$v/get-clog.sh}"
+        curl -fsSL "$url" -o /tmp/get-clog.sh
+        CLOG_DIR="$(CLOG_VERSION="$v" CLOG_REPO="$repo" CLOG_INSTALL_DIR=/usr/local/bin bash /tmp/get-clog.sh)"
         export PATH="$CLOG_DIR:$PATH"
       fi
     - clog --version

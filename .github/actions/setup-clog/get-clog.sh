@@ -19,7 +19,7 @@
 #                         from CLOG_VERSION_FILE.
 #     CLOG_VERSION_FILE   path to the pin file (default: ./.clog-version)
 #     CLOG_REPO           GitHub owner/repo holding the release
-#                         (default: mrmxf/clog-sample — the public binary)
+#                         (default: mrmxf/clog — THE one place this default lives)
 #     CLOG_INSTALL_DIR    where to install the `clog` binary
 #                         (default: $RUNNER_TEMP/clog/bin in CI, else
 #                          $HOME/.local/bin)
@@ -42,7 +42,7 @@ if [ -z "${CLOG_VERSION:-}" ]; then
   CLOG_VERSION="$(grep -vE '^\s*(#|$)' "$CLOG_VERSION_FILE" | head -n1 | tr -d '[:space:]')"
   [ -n "$CLOG_VERSION" ] || die "pin file '$CLOG_VERSION_FILE' is empty"
 fi
-CLOG_REPO="${CLOG_REPO:-mrmxf/clog-sample}"
+CLOG_REPO="${CLOG_REPO:-mrmxf/clog}"
 
 # --- detect platform → asset name (matches clog release convention) --------
 case "$(uname -s)" in
