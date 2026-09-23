@@ -35,6 +35,10 @@ jobs:
       contents: read
       id-token: write
     steps:
+      # A local action is loaded from disk, so the tree must be checked out
+      # before `uses: ./…` can find it. clog-prepare checks out again itself
+      # (full depth, tags) - that is its contract, not a duplicate to remove.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: run clog-prepare from this branch
         uses: ./.github/actions/clog-prepare
         with:
