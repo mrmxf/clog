@@ -15,18 +15,20 @@ that forking it gives you a working CLI and a working pipeline in one tree.
 ```yaml
 jobs:
   build:
-    uses: mrmxf/clog/.github/workflows/build-check.yaml@workflows-v1
+    uses: mrmxf/clog/.github/workflows/build-check.yaml@workflows
     permissions: {contents: read, id-token: write, security-events: write}
 
   deploy:
     needs: [build]
-    uses: mrmxf/clog/.github/workflows/deploy-probe.yaml@workflows-v1
+    uses: mrmxf/clog/.github/workflows/deploy-probe.yaml@workflows
     permissions: {contents: read, id-token: write}
 ```
 
-Pin to `workflows-v1` (moving) or to a `workflows-v1.N.M` (fixed). Those tags
-never collide with the `v*` release tags — different namespace, and `workflows-*`
-cannot match a `v*` glob.
+Pin to `workflows` (moving: the newest CI that passed `test-actions.yaml`) or
+to a release tag `vX.Y.Z` (fixed). A tag names a commit of the whole repo, not
+of a folder, so a release tag pins the workflows exactly as well as the binary;
+there is no separate CI version number to track. The moving tag is not called
+`v1` because `self-release.yaml` fires on `v*`.
 
 ## What only this repo uses
 
@@ -51,7 +53,7 @@ That rule is why `test-actions.yaml` exists: a PR editing `clog-prepare` would
 otherwise be tested against the pinned ref instead of against the change. It is
 a gate, not a convenience.
 
-**2. `workflows-v1` moves by hand, never alongside a Go change.** One repo, two
+**2. `workflows` moves by hand, never alongside a Go change.** One repo, two
 lifecycles. Move the tag only to a commit that passed `test-actions.yaml`.
 
 ## Scan uploads

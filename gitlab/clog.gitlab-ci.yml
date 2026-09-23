@@ -17,7 +17,7 @@
 #  Use from a project's .gitlab-ci.yml:
 #
 #    include:
-#      - remote: https://raw.githubusercontent.com/mrmxf/clog/workflows-v1/gitlab/clog.gitlab-ci.yml
+#      - remote: https://raw.githubusercontent.com/mrmxf/clog/workflows/gitlab/clog.gitlab-ci.yml
 #        inputs:
 #          audience: https://eu.infisical.com   # = ci.infisical.domain = identity Audiences
 #          self-build: true                     # clog repos only

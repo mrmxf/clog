@@ -12,7 +12,7 @@ before it is ever executed.
 
 ```yaml
 - uses: actions/checkout@<sha>          # needed so .clog-version is on disk
-- uses: mrmxf/util/.github/actions/setup-clog@workflows-v1
+- uses: mrmxf/clog/.github/actions/setup-clog@workflows
   with:
     clog-ref: ""                         # default: read ./.clog-version
     clog-repo: mrmxf/clog-sample         # public binary; use mrmxf/clog-app for private

@@ -25,7 +25,7 @@ The installer verifies the binary's sha256 against the release's
 In a GitHub workflow:
 
 ```yaml
-- uses: mrmxf/clog/.github/actions/setup-clog@workflows-v1
+- uses: mrmxf/clog/.github/actions/setup-clog@workflows
   with:
     clog-ref: v1.0.0        # optional; default reads .clog-version
 ```

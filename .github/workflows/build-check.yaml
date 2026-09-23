@@ -20,7 +20,7 @@
 #    permissions: {contents: read, id-token: write, security-events: write}
 #    jobs:
 #      build:
-#        uses: mrmxf/clog/.github/workflows/build-check.yaml@workflows-v1
+#        uses: mrmxf/clog/.github/workflows/build-check.yaml@workflows
 #        permissions: {contents: read, id-token: write, security-events: write}
 
 name: build-check
@@ -58,7 +58,7 @@ jobs:
         # against the CALLER's checkout, not this repo, so a relative path here
         # would break every external consumer. The same holds inside a composite
         # action, so clog-prepare → setup-clog is absolute as well.
-        uses: mrmxf/clog/.github/actions/clog-prepare@main
+        uses: mrmxf/clog/.github/actions/clog-prepare@workflows
         with:
           self-build: ${{ inputs.self-build }}
           production: ${{ inputs.production }}

@@ -65,7 +65,7 @@ jobs:
     steps:
       - name: prepare (checkout, go, clog, ci.policy)
         # ABSOLUTE on purpose - see build-check.yaml.
-        uses: mrmxf/clog/.github/actions/clog-prepare@main
+        uses: mrmxf/clog/.github/actions/clog-prepare@workflows
         with:
           self-build: true
           production: ${{ github.event_name == 'workflow_dispatch' && inputs.production }}

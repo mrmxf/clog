@@ -11,7 +11,7 @@
 #  used only by the download step — never executed.
 #
 #  Usage:
-#    - uses: mrmxf/util/.github/actions/setup-clog@workflows-v1
+#    - uses: mrmxf/clog/.github/actions/setup-clog@workflows
 #      with:
 #        clog-ref: v0.10.11        # optional; default reads .clog-version
 #        clog-repo: mrmxf/clog-app # optional; default mrmxf/clog-sample

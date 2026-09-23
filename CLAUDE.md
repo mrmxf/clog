@@ -56,19 +56,22 @@ hand afterwards. When this binary runs in *another* repo's CI, that repo's
 `.clog.yaml` must win. Let Konfigure do the merge and it fires first, and this
 repo's config silently overrides the config of the repo being built.
 
-### Two tag namespaces, never merged
+### Two tags, never merged
 
 | tag | names | moves? |
 |---|---|---|
-| `vX.Y.Z` | a binary release | never |
-| `workflows-v1` | the CI assets | deliberately, by hand |
-| `workflows-v1.N.M` | a pinnable CI asset version | never |
+| `vX.Y.Z` | a release — the binaries **and** the CI assets at that commit | never |
+| `workflows` | the newest CI assets that passed `test-actions.yaml` | deliberately, by hand |
 
-**Rule:** `workflows-v1` moves only by deliberate action, only to a commit that
+A tag names a commit of the whole repo, not a folder, so `vX.Y.Z` is already a
+fixed pin for the workflows; there is no separate CI version number. A consumer
+wanting stability pins `…/build-check.yaml@vX.Y.Z`, and the cost is accepted: a
+CI-only fix becomes pinnable only by cutting a release.
+
+**Rule:** `workflows` moves only by deliberate action, only to a commit that
 passed `test-actions.yaml`, and **never in the same commit as a Go change**. One
 repo now has two lifecycles sharing a commit graph; this is what keeps them
-apart. `workflows-*` also cannot match a `v*` glob, so the release trigger
-cannot fire on a CI asset tag.
+apart. It is not named `v1` because `self-release.yaml` fires on `v*`.
 
 ### `uses:` resolution — the trap that breaks consumers
 

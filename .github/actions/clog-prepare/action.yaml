@@ -101,7 +101,7 @@ runs:
       # against the WORKSPACE - the caller's checkout - not this action's repo.
       # A relative path here passes every self-build run (the step is skipped)
       # and fails every consumer that installs a release.
-      uses: mrmxf/clog/.github/actions/setup-clog@main
+      uses: mrmxf/clog/.github/actions/setup-clog@workflows
       with:
         clog-ref: ${{ inputs.clog-ref }}
         clog-repo: ${{ inputs.clog-repo }}

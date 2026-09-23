@@ -23,7 +23,7 @@ run-name: self-build(${{ github.event_name }}) 🥷${{ github.actor }}
 on:
   push:
     branches: ["**"]
-    tags-ignore: ["v*"]     # a release tag belongs to self-release.yaml
+    tags-ignore: ["v*", "workflows"]   # v*: self-release.yaml; workflows: moving it rebuilds nothing new
   pull_request:
   workflow_dispatch:
 
