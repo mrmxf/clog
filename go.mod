@@ -9,7 +9,7 @@ require (
 	github.com/mrmxf/util/ci v0.20.2
 	github.com/mrmxf/util/cmdlog v0.11.1
 	github.com/mrmxf/util/crayon v0.11.1
-	github.com/mrmxf/util/embedfs v0.15.0
+	github.com/mrmxf/util/embedfs v0.16.0
 	github.com/mrmxf/util/install v0.15.0
 	github.com/mrmxf/util/kfg v0.12.0
 	github.com/mrmxf/util/slogger v0.11.2

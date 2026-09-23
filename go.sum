@@ -90,8 +90,8 @@ github.com/mrmxf/util/cmdlog v0.11.1 h1:JN8cCKjoNPESRnxW9xPbY/wPop4QV3ERyehP8552
 github.com/mrmxf/util/cmdlog v0.11.1/go.mod h1:5ThmPhZ4svT3vje8VP5WY7ONMP0iKy0itp84mUTtS9k=
 github.com/mrmxf/util/crayon v0.11.1 h1:J3C2vuthpR0T+pufT/xMeTKzvJeaXXIQG8+RjRa7cf4=
 github.com/mrmxf/util/crayon v0.11.1/go.mod h1:RaQR6hbAuCXV+tjb25XK8WVpWGqScT84eTZ3pSq3tms=
-github.com/mrmxf/util/embedfs v0.15.0 h1:pOaZk9Qk7Y60uXci9XxD+EIyCe8nY/yPxafPurK7hjM=
-github.com/mrmxf/util/embedfs v0.15.0/go.mod h1:qP+0mIlRqZ3Ikk1u5GXrEw6d5bIzoiteAAcXInYxYyo=
+github.com/mrmxf/util/embedfs v0.16.0 h1:bP5RoNnykTwb7H/yz77hh2fY56mdNG5/GFMmtwPcNqM=
+github.com/mrmxf/util/embedfs v0.16.0/go.mod h1:qP+0mIlRqZ3Ikk1u5GXrEw6d5bIzoiteAAcXInYxYyo=
 github.com/mrmxf/util/install v0.15.0 h1:7Xy8pP77lL83hld8moEnQfb6SkQh3nporWLaIj+v/SQ=
 github.com/mrmxf/util/install v0.15.0/go.mod h1:l7IWmp8Vl7w0XeiRRW+NVe76eZd584iah7EI4ieYnoo=
 github.com/mrmxf/util/kfg v0.12.0 h1:wgPYaZ1UsvACfqPOqTeCgaVFT0UKScQc6/0PR/XT4ak=

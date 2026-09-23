@@ -4,6 +4,8 @@
 package main
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/mrmxf/util/check"
@@ -75,6 +77,37 @@ func TestEveryStackChkPhaseHasACheckGroup(t *testing.T) {
 			if !groups[phase] {
 				t.Errorf("stack %q names check phase %q, but no check.%s group is defined",
 					typ, phase, phase)
+			}
+		}
+	}
+}
+
+// Check phases run BEFORE make, so a phase that sweeps artifacts sweeps nothing
+// on a clean checkout - which is what every release is. That shipped once: the
+// sweep sat in check.scan, and v1.0.0's prod build died on a missing
+// _clog_build/artifacts while every dev build and every laptop build passed.
+// The sweep belongs in check.scan-artifacts, which `build` runs after make.
+func TestNoStackChkPhaseSweepsArtifacts(t *testing.T) {
+	groups := checkGroups(t)
+	if !groups["scan-artifacts"] {
+		t.Fatal("no check.scan-artifacts group: nothing sweeps what the targets ship")
+	}
+	for _, typ := range []string{
+		ci.StackHugo, ci.StackGolang, ci.StackGolangLib, ci.StackContainer, ci.StackTinygo,
+	} {
+		stacks, err := ci.Stacks(ci.Config{
+			Stack: ci.StackList{{Name: "probe", Type: typ}},
+		})
+		if err != nil {
+			t.Fatalf("stack type %q does not resolve: %v", typ, err)
+		}
+		for _, phase := range ci.StackChk(stacks) {
+			if phase == "scan-artifacts" {
+				t.Errorf("stack %q runs scan-artifacts as a chk phase, before anything is built", typ)
+			}
+			if raw := fmt.Sprint(kfg.Raw.Get("check." + phase)); strings.Contains(raw, "scan_artifact") {
+				t.Errorf("stack %q chk phase %q reads scan_artifact_*: it sweeps artifacts before make has written them",
+					typ, phase)
 			}
 		}
 	}
