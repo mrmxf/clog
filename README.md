@@ -15,9 +15,12 @@ with nothing to wire together. That is the point.
 ## Install
 
 ```bash
-CLOG_REPO=mrmxf/clog bash <(curl -fsSL \
+CLOG_VERSION=latest bash <(curl -fsSL \
   https://github.com/mrmxf/clog/releases/latest/download/get-clog.sh)
 ```
+
+Inside a repo, leave `CLOG_VERSION` unset: the installer reads the version
+pinned in `.clog-version`, which is what CI installs too.
 
 The installer verifies the binary's sha256 against the release's
 `checksums.txt` and refuses to install one it cannot verify.

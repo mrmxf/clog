@@ -15,8 +15,9 @@
 #     - a GitLab CI job             source ./get-clog.sh
 #
 #   Configuration (all via environment, with sensible defaults):
-#     CLOG_VERSION        clog tag to install (e.g. v0.10.11). If unset, read
-#                         from CLOG_VERSION_FILE.
+#     CLOG_VERSION        clog tag to install (e.g. v1.0.1). If unset, read
+#                         from CLOG_VERSION_FILE. `latest` resolves the newest
+#                         release - for a first install by hand, never for CI.
 #     CLOG_VERSION_FILE   path to the pin file (default: ./.clog-version)
 #     CLOG_REPO           GitHub owner/repo holding the release
 #                         (default: mrmxf/clog — THE one place this default lives)
@@ -43,6 +44,15 @@ if [ -z "${CLOG_VERSION:-}" ]; then
   [ -n "$CLOG_VERSION" ] || die "pin file '$CLOG_VERSION_FILE' is empty"
 fi
 CLOG_REPO="${CLOG_REPO:-mrmxf/clog}"
+
+# `latest` has to be spelled out. Falling back to it when no pin is found would
+# let a repo that lost its .clog-version float silently instead of failing.
+if [ "$CLOG_VERSION" = "latest" ]; then
+  url="$(curl --fail --silent --location --output /dev/null --write-out '%{url_effective}' \
+    "https://github.com/${CLOG_REPO}/releases/latest")" || die "cannot resolve the latest release of ${CLOG_REPO}"
+  CLOG_VERSION="${url##*/}"
+  case "$CLOG_VERSION" in v[0-9]*) ;; *) die "latest release of ${CLOG_REPO} is not a vX.Y.Z tag: ${url}" ;; esac
+fi
 
 # --- detect platform → asset name (matches clog release convention) --------
 case "$(uname -s)" in
