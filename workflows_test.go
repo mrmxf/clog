@@ -112,3 +112,34 @@ func TestArtifactPathsAreCanonical(t *testing.T) {
 		}
 	}
 }
+
+// topLevelPermissions matches a workflow-level `permissions:` key.
+var topLevelPermissions = regexp.MustCompile(`(?m)^permissions:`)
+
+// Both of these shipped, and together they meant no GitHub target could ever
+// publish through deploy-probe - found only when pihuw's v0.4.14 tag tried:
+//
+//  1. A reusable workflow's own permissions block can only NARROW what the
+//     caller grants. `contents: read` there cut pihuw's write back to read:
+//     the gh-pages push got 403.
+//  2. Actions does not put its token in the environment, and the GitHub
+//     deployers read GH_TOKEN from there: "could not read Username".
+func TestDeployProbeCanPublishToGitHub(t *testing.T) {
+	src := workflow(t, "deploy-probe.yaml")
+	if topLevelPermissions.MatchString(src) {
+		t.Error("deploy-probe.yaml: a top-level permissions block narrows the caller's grant; " +
+			"remove it and let the caller grant contents: write for GitHub targets")
+	}
+	// the run lines themselves, not the header comment that mentions them
+	for _, step := range []string{`clog CI deploy --target "$CLOG_TARGET"`, "clog CI probe || true"} {
+		i := strings.Index(src, step)
+		if i < 0 {
+			t.Fatalf("deploy-probe.yaml no longer runs %q - this test needs rethinking", step)
+		}
+		start := strings.LastIndex(src[:i], "- name:")
+		if !strings.Contains(src[start:i], "GH_TOKEN: ${{ github.token }}") {
+			t.Errorf("deploy-probe.yaml: the step running %q does not set GH_TOKEN; "+
+				"the GitHub deployers cannot authenticate without it", step)
+		}
+	}
+}
