@@ -1,0 +1,187 @@
+---
+#  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+#  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#
+#  build-check — callable workflow: one workflow for every stack.
+#
+#  It BUILDS and it GATES, and everything it produces lands in _clog_build/ -
+#  artifacts/, check/ and scan/. The name says both halves because a build that
+#  does not gate is not what any caller wants, and the pair is what the deploy
+#  job later downloads instead of rebuilding.
+#
+#  `ci.stack` supplies the toolchain, the check phases and the make phases, so
+#  a repo declares what it is instead of choosing a workflow by name. That
+#  removes the class of bug where the workflow and the config disagree about
+#  what kind of repo this is.
+#
+#  Config: clog CI --config-help.
+#
+#  Caller:
+#    permissions: {contents: read, id-token: write, security-events: write}
+#    jobs:
+#      build:
+#        uses: mrmxf/clog/.github/workflows/build-check.yaml@workflows-v1
+#        permissions: {contents: read, id-token: write, security-events: write}
+
+name: build-check
+run-name: ${{ github.workflow }}(${{ github.event_name }}) 🥷${{ github.actor }}
+
+on:
+  workflow_call:
+    inputs:
+      self-build: { required: false, type: boolean, default: false }
+      stack:      { required: false, type: string,  default: "" }   # '' = every stack
+      clog-ref:   { required: false, type: string,  default: "" }
+      clog-repo:  { required: false, type: string,  default: mrmxf/clog-sample }  # Phase 5 collapses this to mrmxf/clog
+      production: { required: false, type: boolean, default: false }
+    secrets:
+      clog_download_token: { required: false }
+
+permissions:
+  contents: read
+  id-token: write        # OIDC → Infisical
+  security-events: write # SARIF upload below
+
+concurrency:
+  group: build-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      scan_files: ${{ steps.scan.outputs.files }}
+    steps:
+      - name: prepare (checkout, go, clog, ci.policy)
+        # ABSOLUTE on purpose: inside a reusable workflow, `uses: ./…` resolves
+        # against the CALLER's checkout, not this repo, so a relative path here
+        # would break every external consumer. Only the composite-action → action
+        # hop inside clog-prepare may be relative.
+        uses: mrmxf/clog/.github/actions/clog-prepare@main
+        with:
+          self-build: ${{ inputs.self-build }}
+          production: ${{ inputs.production }}
+          clog-ref: ${{ inputs.clog-ref }}
+          clog-repo: ${{ inputs.clog-repo }}
+          token: ${{ secrets.clog_download_token }}
+
+
+      # Kept until Phase 10 moves the image push out of the build. `bc-ko`
+      # still pushes from inside `clog build` on a deploying run, because there
+      # is no container-registry deployer yet, so the login has to happen here
+      # or a container repo cannot publish at all. DELETE THIS STEP with the
+      # ko → podman work: after it, the build only writes an OCI archive and
+      # `clog CI deploy` logs in for itself.
+      - name: login to the container registry (DOCKER_PAT from Infisical)
+        if: env.do_deploy == 'true'
+        run: |
+          t="$(clog CI target list --kind container-registry | head -1)"
+          [ -z "$t" ] && { clog Log -I "no container-registry target - no docker login"; exit 0; }
+          CLOG_TARGET="$t" clog CI run -- bash -c '
+            u="$(clog CI target get user)"
+            [ -z "$u" ] && { clog Log -E "target $CLOG_TARGET has no user: - cannot log in"; exit 1; }
+            printf %s "$DOCKER_PAT" | docker login -u "$u" --password-stdin'
+
+      # The stack decides the toolchain. clog never installs these behind your
+      # back during a build: a verb that quietly pulls binaries onto a machine
+      # while claiming to check a branch is the wrong supply-chain posture, so
+      # `clog build` refuses on a missing tool and prints its install line.
+      # CI therefore installs explicitly, here, where it is visible in the log.
+      - name: install toolchain (clog CI stack list tools)
+        if: env.do_build == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          clog Install slsa-verifier --verbose
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          for t in $(clog CI stack list tools --stack "${{ inputs.stack }}"); do
+            clog Install "$t" --verbose
+          done
+
+      # No --fast here, and no way to pass one: --fast makes no claim about the
+      # branch, so it has no business in CI.
+      - name: build (clog build ${{ env.build_mode }})
+        if: env.do_build == 'true'
+        env:
+          BUILD_STACK: ${{ inputs.stack }}   # '' = every stack
+        run: |
+          clog CI run -- bash -c '
+            clog CI require build || exit 1
+            clog build "$build_mode" $BUILD_STACK'
+
+      # The sweeps run inside `clog build` as check phases and write SARIF to
+      # _clog_build/scan, so the workflow does not iterate targets - which a `uses:`
+      # step cannot do anyway. It cannot upload the directory either: since
+      # 2025-07 GitHub rejects several SARIF runs sharing one category, and
+      # upload-sarif takes a single category per call. So the files are listed
+      # here and published by the matrix job below, one category each.
+      - name: collect scan results
+        id: scan
+        if: always() && env.do_build == 'true'
+        run: |
+          files='[]'
+          if ls _clog_build/scan/*.sarif >/dev/null 2>&1; then
+            files="$(cd _clog_build/scan && ls *.sarif | jq -R . | jq -sc .)"
+          fi
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+          clog Log -I "scan results: $files"
+
+      - name: upload scan results
+        if: always() && steps.scan.outputs.files != '[]'
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: scan-sarif
+          retention-days: 2
+          path: _clog_build/scan
+
+      # kodata is here because a Hugo site's publishDir is set in hugo.yaml,
+      # not by clog, so those repos still publish from outside the canonical
+      # dirs. It stays until each one moves its publishDir; the deploy job
+      # downloads the artifact into the repo root, so a target's `dir:` has to
+      # be inside what this uploads or the deploy finds nothing.
+      - name: upload artifact ${{ env.ci_artifact }}
+        if: env.do_build == 'true' && env.ci_artifact != ''
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: ${{ env.ci_artifact }}
+          retention-days: 2
+          path: |
+            _clog_build
+            _clog_deploy
+            kodata
+
+      - name: notify-team (slack, HOOK_SLACK from Infisical)
+        if: always() && env.do_build == 'true'
+        env:
+          MD: "• build ${{ env.build_mode }} ${{ env.ref }} by ${{ env.actor }}\n• ${{ env.url }}\n• run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n"
+        run: |
+          clog CI run -- bash -c '
+            [ -z "${HOOK_SLACK:-}" ] && { clog Log -W "HOOK_SLACK not set - no Slack notify"; exit 0; }
+            clog SlackStash "${ci_title:-build} ($build_mode)" --md "$MD"'
+
+  # One SARIF, one category, one call - the only shape upload-sarif accepts.
+  # fail-fast is off so one malformed sweep does not hide the others.
+  publish-scan:
+    needs: [build]
+    if: always() && needs.build.outputs.scan_files != '[]' && needs.build.outputs.scan_files != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        file: ${{ fromJSON(needs.build.outputs.scan_files) }}
+    steps:
+      - name: download scan results
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: scan-sarif
+          path: _clog_build/scan
+
+      - name: publish ${{ matrix.file }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: _clog_build/scan/${{ matrix.file }}
+          category: ${{ matrix.file }}

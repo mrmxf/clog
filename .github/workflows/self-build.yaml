@@ -1,0 +1,41 @@
+---
+#  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+#  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#
+#  self-build — this repo's own CI, through its own reusable workflow.
+#
+#  The chicken-and-egg: clog's CI needs clog. `self-build: true` compiles it
+#  from this checkout instead of downloading a release, so this repo can go
+#  green before it has ever published anything - and so a change to clog is
+#  tested by the clog it just built, not by the last one released.
+#
+#  Never point this at setup-clog. That would make the repo that produces every
+#  release depend on a release existing.
+#
+#  A relative `uses:` is correct HERE because this is a caller, not a reusable
+#  workflow: it resolves against this repository. Inside build-check.yaml the
+#  same syntax would resolve against the consumer's checkout, which is why the
+#  reference to clog-prepare in there is absolute.
+
+name: self-build
+run-name: self-build(${{ github.event_name }}) 🥷${{ github.actor }}
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["v*"]     # a release tag belongs to self-release.yaml
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-check.yaml
+    permissions:
+      contents: read
+      id-token: write         # OIDC → Infisical, when ci.infisical is configured
+      security-events: write  # the scan phase's SARIF
+    with:
+      self-build: true        # this repo IS clog: build it from its own go.mod

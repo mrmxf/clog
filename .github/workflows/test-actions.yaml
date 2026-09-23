@@ -1,0 +1,53 @@
+---
+#  Copyright ©2017-2025  Mr MXF   info@mrmxf.com
+#  BSD-3-Clause License           https://opensource.org/license/bsd-3-clause/
+#
+#  test-actions — exercise ./.github/actions/* FROM THE WORKING TREE.
+#
+#  Why this file has to exist: inside a reusable workflow, `uses: ./…` resolves
+#  against the CALLER's checkout, so build-check.yaml must refer to
+#  clog-prepare absolutely (mrmxf/clog/...@ref). That means a pull request
+#  changing clog-prepare would be tested against the REF, not against the
+#  change - the PR could never fail on its own edit.
+#
+#  A plain workflow has no such restriction: a relative `uses:` here really does
+#  run the action as edited in this branch. This is the only place that is true,
+#  which is why it is a gate rather than a convenience.
+
+name: test-actions
+run-name: test-actions(${{ github.event_name }}) 🥷${{ github.actor }}
+
+on:
+  pull_request:
+    paths:
+      - ".github/actions/**"
+      - ".github/workflows/test-actions.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clog-prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: run clog-prepare from this branch
+        uses: ./.github/actions/clog-prepare
+        with:
+          self-build: true
+
+      - name: it produced a working clog and a policy decision
+        run: |
+          clog --version
+          clog CI show policy
+          # clog-prepare's contract is these env values; a silent change to
+          # any of them breaks every caller's `if:` conditions.
+          for v in do_build do_deploy build_mode ci_artifact; do
+            eval "set -- \"\${$v+set}\""
+            [ "$1" = set ] || { echo "::error::clog-prepare did not set $v"; exit 1; }
+            echo "  $v=$(eval echo "\$$v")"
+          done
