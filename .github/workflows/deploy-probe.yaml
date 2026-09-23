@@ -82,6 +82,11 @@ jobs:
       # instruction, so a repo adds a destination by adding data.
       - name: deploy ${{ env.deploy_targets }} (one per target)
         if: env.do_deploy == 'true'
+        # Actions does not put its token in the environment, and the GitHub
+        # deployers (github-pages pushes, github-release runs gh) read it from
+        # there. Without this, every GitHub target fails to authenticate.
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           for t in $deploy_targets; do
             echo "::group::deploy $t (${{ env.deploy_mode }})"
@@ -93,6 +98,8 @@ jobs:
 
       # Probe what was just published. Never gates - see the header.
       - name: probe the live targets
+        env:
+          GH_TOKEN: ${{ github.token }}   # a release probe reads the assets with gh
         if: always() && env.do_deploy == 'true'
         run: clog CI probe || true
 
