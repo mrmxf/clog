@@ -31,8 +31,14 @@
 #      deploy:
 #        needs: [build]
 #        uses: mrmxf/clog/.github/workflows/deploy-probe.yaml@workflows
-#        permissions: {contents: read, id-token: write}
+#        permissions: {contents: write, id-token: write}   # write: a GitHub target
 #        with: {self-build: true}        # clog repos only
+#
+#  There is no permissions block below, on purpose. A reusable workflow's own
+#  block can only NARROW what the caller grants, so the `contents: read` that
+#  used to sit here cut every caller's write back to read, and no github-pages
+#  or github-release target could publish (403). The caller grants what its
+#  targets need: `contents: write` for GitHub targets, read for the rest.
 
 name: deploy-probe
 run-name: ${{ github.workflow }}(${{ github.event_name }}) 🥷${{ github.actor }}
@@ -46,10 +52,6 @@ on:
       production: { required: false, type: boolean, default: false }  # build/deploy the newest release tag
     secrets:
       clog_download_token: { required: false }
-
-permissions:
-  contents: read
-  id-token: write   # OIDC → Infisical
 
 concurrency:
   group: deploy-probe-${{ github.workflow }}-${{ github.ref }}

@@ -21,7 +21,7 @@ jobs:
   deploy:
     needs: [build]
     uses: mrmxf/clog/.github/workflows/deploy-probe.yaml@workflows
-    permissions: {contents: read, id-token: write}
+    permissions: {contents: write, id-token: write}   # write for a GitHub target; read otherwise
 ```
 
 Pin to `workflows` (moving: the newest CI that passed `test-actions.yaml`) or
