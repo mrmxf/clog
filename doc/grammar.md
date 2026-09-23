@@ -57,7 +57,7 @@ as an implementation detail. Predicates read as questions.
 |---|---|
 | `ci resolve` | `CI show event` |
 | `ci policy` | `CI show policy` |
-| `ci scan` | `CI show scan` |
+| `ci scan` | `CI scan show` |
 | `ci mode` | `CI mode show` |
 | `ci targets` | `CI target list` |
 | `ci stack` (bare) | `CI stack list` |

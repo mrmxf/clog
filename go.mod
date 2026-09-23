@@ -3,10 +3,10 @@ module github.com/mrmxf/clog
 go 1.26.4
 
 require (
-	github.com/mrmxf/util/bc v0.14.1
+	github.com/mrmxf/util/bc v0.15.0
 	github.com/mrmxf/util/buildinfo v0.13.0
 	github.com/mrmxf/util/check v0.11.2
-	github.com/mrmxf/util/ci v0.20.2
+	github.com/mrmxf/util/ci v0.21.0
 	github.com/mrmxf/util/cmdlog v0.11.1
 	github.com/mrmxf/util/crayon v0.11.1
 	github.com/mrmxf/util/embedfs v0.16.0
@@ -46,7 +46,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/mrmxf/util/retire v0.1.0 // indirect
+	github.com/mrmxf/util/retire v0.2.0 // indirect
 	github.com/mrmxf/util/scripts v0.11.0 // indirect
 	github.com/mrmxf/util/shell v0.11.0 // indirect
 	github.com/nats-io/nats.go v1.52.0 // indirect
