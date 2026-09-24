@@ -162,3 +162,12 @@ func TestSlackStashIsGuarded(t *testing.T) {
 		}
 	}
 }
+
+// A private repo without Advanced Security cannot receive SARIF, and the
+// upload failed on every file there; publish-scan must be conditional on it.
+func TestPublishScanSkipsWhereCodeScanningIsOff(t *testing.T) {
+	src := workflow(t, "build-check.yaml")
+	if !strings.Contains(src, "needs.build.outputs.scan_publish == 'true'") {
+		t.Error("build-check.yaml: publish-scan must run only when scan_publish is true")
+	}
+}
