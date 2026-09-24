@@ -124,4 +124,13 @@ jobs:
         run: |
           clog CI run -- bash -c '
             [ -z "${HOOK_SLACK:-}" ] && { clog Log -W "HOOK_SLACK not set - no Slack notify"; exit 0; }
-            clog SlackStash "${ci_title:-deploy} ($deploy_mode)" --md "$MD"'
+            # SlackStash is a clog-mrmxf command; the public clog has none, and
+            # `clog SlackStash` there is an unknown command that failed the job.
+            # Without it, post the same text to the webhook directly.
+            if clog SlackStash --help >/dev/null 2>&1; then
+              clog SlackStash "${ci_title:-deploy} ($deploy_mode)" --md "$MD"
+            else
+              jq -n --arg t "${ci_title:-deploy} ($deploy_mode)" --arg m "$MD" "{text: (\$t + \"\\n\" + \$m)}" \
+                | curl -fsS -m 20 -X POST -H "Content-type: application/json" --data @- "$HOOK_SLACK" >/dev/null \
+                || clog Log -W "Slack notify failed - the deploy itself is unaffected"
+            fi'

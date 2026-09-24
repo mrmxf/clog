@@ -143,3 +143,22 @@ func TestDeployProbeCanPublishToGitHub(t *testing.T) {
 		}
 	}
 }
+
+// SlackStash is a clog-mrmxf command. The public clog has none, so an
+// unguarded call failed every build whose Infisical folder held HOOK_SLACK -
+// found by www-mrmxf-com, the first such consumer.
+func TestSlackStashIsGuarded(t *testing.T) {
+	for _, name := range []string{"build-check.yaml", "deploy-probe.yaml"} {
+		src := workflow(t, name)
+		for i := strings.Index(src, `clog SlackStash "`); i >= 0; {
+			if !strings.Contains(src[max(0, i-300):i], "clog SlackStash --help") {
+				t.Errorf("%s: `clog SlackStash` is called without checking this clog has it", name)
+			}
+			next := strings.Index(src[i+1:], `clog SlackStash "`)
+			if next < 0 {
+				break
+			}
+			i += next + 1
+		}
+	}
+}
