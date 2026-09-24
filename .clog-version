@@ -8,4 +8,4 @@
 # This repo does not read it: its own workflows set self-build: true and compile
 # clog from the checkout, which is what lets it go green before it has ever
 # published a release.
-v1.0.2
+v1.0.3

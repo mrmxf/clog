@@ -58,13 +58,13 @@ as an implementation detail. Predicates read as questions.
 | `ci resolve` | `CI show event` |
 | `ci policy` | `CI show policy` |
 | `ci scan` | `CI scan show` |
-| `ci mode` | `CI mode show` |
 | `ci targets` | `CI target list` |
 | `ci stack` (bare) | `CI stack list` |
 | `ci stack get tools\|chk\|make\|names` | `CI stack list <which>` |
 | `ci scan --list-targets` | `CI scan list targets` |
-| `ci env` | retired outright (already deprecated) |
+| `ci env` | `CI mode show` — retired; fails naming it (until v1.0.3 a stray alias kept it working) |
 | `ci get` · `mode get` · `target get` · `stack get watch\|type` | unchanged — scalars |
+| `ci mode` (bare) | unchanged — prints the run's mode, `dev` or `prod`. The one bare noun kept: the namespace *is* the value, and ~30 `$(clog CI mode)` call sites read it. The `ci.modes.<mode>` document is `CI mode show`. |
 | `ci should` · `require` · `run` · `deploy` | unchanged |
 
 ## Retired — `BC`
@@ -118,3 +118,10 @@ every consumer `.clog.yaml` — a safe operation rather than a hopeful one.
 A static test (`retired_config_test.go`) greps the shipped config for any
 retired name and fails the build, which turns the runtime error into a
 compile-time one for anything this repo ships.
+
+## A wrong word fails
+
+Since v1.0.3 every grouping command refuses a word that is not one of its
+subcommands: `clog BC git tre is clean` exits 1 with `unknown command "tre" for
+"clog BC git"`. Before, it printed help and exited 0, which a shell script reads
+as a pass.
