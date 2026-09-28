@@ -6,7 +6,7 @@ require (
 	github.com/mrmxf/util/bc v0.16.0
 	github.com/mrmxf/util/buildinfo v0.13.0
 	github.com/mrmxf/util/check v0.11.2
-	github.com/mrmxf/util/ci v0.24.0
+	github.com/mrmxf/util/ci v0.25.0
 	github.com/mrmxf/util/cmdlog v0.11.1
 	github.com/mrmxf/util/crayon v0.11.1
 	github.com/mrmxf/util/embedfs v0.18.0
