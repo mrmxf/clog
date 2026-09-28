@@ -72,22 +72,6 @@ jobs:
           clog-repo: ${{ inputs.clog-repo }}
           token: ${{ secrets.clog_download_token }}
 
-
-      # For ko repos only. `bc-ko` still pushes from inside `clog build` on a
-      # deploying run, so it needs this login. A podman stack never pushes
-      # from a build - the container-registry deployer pushes its OCI layout
-      # in the deploy job and logs in for itself - so for those repos this is
-      # a login nothing uses. DELETE THIS STEP when the last ko repo moves.
-      - name: login to the container registry (DOCKER_PAT from Infisical)
-        if: env.do_deploy == 'true'
-        run: |
-          t="$(clog CI target list --kind container-registry | head -1)"
-          [ -z "$t" ] && { clog Log -I "no container-registry target - no docker login"; exit 0; }
-          CLOG_TARGET="$t" clog CI run -- bash -c '
-            u="$(clog CI target get user)"
-            [ -z "$u" ] && { clog Log -E "target $CLOG_TARGET has no user: - cannot log in"; exit 1; }
-            printf %s "$DOCKER_PAT" | docker login -u "$u" --password-stdin'
-
       # The stack decides the toolchain. clog never installs these behind your
       # back during a build: a verb that quietly pulls binaries onto a machine
       # while claiming to check a branch is the wrong supply-chain posture, so
