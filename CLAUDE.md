@@ -118,3 +118,4 @@ working tree. Do not delete it as redundant.
 - `releases.yaml` is history, not policy. Versions come from git tags via
   `clog BC gen buildinfo`.
 - `_clog_build/` and `_clog_deploy/` are build output and are gitignored.
+- Known issues and long-range ideas: [claude-backlog.md](claude-backlog.md).
