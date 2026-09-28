@@ -7,3 +7,6 @@ _clog_deploy/
 
 # a local clog binary built for trying things out
 /clog
+# temp stuff
+tmp-*
+tmp/
