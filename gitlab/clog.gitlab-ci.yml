@@ -68,6 +68,12 @@ spec:
   variables:
     GIT_DEPTH: 0              # clog BC git needs tags and history
     GIT_STRATEGY: clone
+    # podman inside an unprivileged job container: no overlay mounts and no
+    # namespaces to spare, so vfs storage and chroot isolation. bc-podman's
+    # builds are COPY-only (Go cross-compiles on the host), which is what
+    # makes that enough. Harmless to a job that never runs podman.
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
   before_script:
     - |
       if [ "$[[ inputs.self-build ]]" = "true" ]; then
@@ -86,6 +92,14 @@ spec:
       fi
     - clog --version
     - clog CI show policy
+    # A scheduled run rebuilds the NEWEST RELEASE TAG, not the branch head it
+    # was scheduled on - that is how date-gated content goes live with no
+    # commit, and `clog build prod` refuses anything else. The GitHub twin is
+    # clog-prepare's "production checkout" step.
+    - |
+      if clog CI show event --format env | grep -qx 'is_production=true'; then
+        clog BC git checkout production
+      fi
 
 clog-build:
   extends: .clog-prepare
@@ -114,6 +128,15 @@ clog-deploy:
   needs: [clog-build]
   script:
     - clog CI should deploy || exit 0
+    # A deployer's own tool, per target kind: the job image is a Go image, and
+    # wrangler needs node, the registry deployer podman.
+    - |
+      for k in $(for t in $(clog CI target list); do CLOG_TARGET="$t" clog CI target get kind; done | sort -u); do
+        case "$k" in
+          container-registry) command -v podman >/dev/null || clog Install podman --verbose || exit 1 ;;
+          cloudflare-pages)   command -v npx >/dev/null || { apt-get update -qq && apt-get install -y -qq nodejs npm; } || exit 1 ;;
+        esac
+      done
     # one clog deploy per ci.targets entry for this mode (D-I.14)
     - |
       for t in $(clog CI target list); do

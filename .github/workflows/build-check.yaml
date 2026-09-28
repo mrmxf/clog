@@ -73,12 +73,11 @@ jobs:
           token: ${{ secrets.clog_download_token }}
 
 
-      # Kept until Phase 10 moves the image push out of the build. `bc-ko`
-      # still pushes from inside `clog build` on a deploying run, because there
-      # is no container-registry deployer yet, so the login has to happen here
-      # or a container repo cannot publish at all. DELETE THIS STEP with the
-      # ko → podman work: after it, the build only writes an OCI archive and
-      # `clog CI deploy` logs in for itself.
+      # For ko repos only. `bc-ko` still pushes from inside `clog build` on a
+      # deploying run, so it needs this login. A podman stack never pushes
+      # from a build - the container-registry deployer pushes its OCI layout
+      # in the deploy job and logs in for itself - so for those repos this is
+      # a login nothing uses. DELETE THIS STEP when the last ko repo moves.
       - name: login to the container registry (DOCKER_PAT from Infisical)
         if: env.do_deploy == 'true'
         run: |
