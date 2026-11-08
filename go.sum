@@ -84,8 +84,8 @@ github.com/mrmxf/util/buildinfo v0.13.0 h1:9biJ+FEDcE01l4XOUoR2xHPIIyHYYonpetsDP
 github.com/mrmxf/util/buildinfo v0.13.0/go.mod h1:V2hLEt0BJfn+ty4N4go+lJKaB7YLwR0BFXHJTS4yJL0=
 github.com/mrmxf/util/check v0.11.2 h1:TMVeNm1Qf1zbqck4FswiwzzDOvncv1KJ5jwbsUHI+FI=
 github.com/mrmxf/util/check v0.11.2/go.mod h1:eaLGJTgJl2zvp7zjdNUk/gM7ViqJCzXLfMGRLEwkFS8=
-github.com/mrmxf/util/ci v0.27.0 h1:BGGJBfoRcEaaPYS7NFm8Cc1yOKHBF6wHQXSAS3n7iTQ=
-github.com/mrmxf/util/ci v0.27.0/go.mod h1:7eiOCWBGWSmODo0opK+wmdLJjiAEn4xlFDYC2GXGbus=
+github.com/mrmxf/util/ci v0.27.1 h1:z0aIU8xJdICO16yuO9mJ1Sk6iqSIpLQYtGRMWyO+/Xk=
+github.com/mrmxf/util/ci v0.27.1/go.mod h1:7eiOCWBGWSmODo0opK+wmdLJjiAEn4xlFDYC2GXGbus=
 github.com/mrmxf/util/cmdlog v0.11.1 h1:JN8cCKjoNPESRnxW9xPbY/wPop4QV3ERyehP8552Lbk=
 github.com/mrmxf/util/cmdlog v0.11.1/go.mod h1:5ThmPhZ4svT3vje8VP5WY7ONMP0iKy0itp84mUTtS9k=
 github.com/mrmxf/util/crayon v0.11.1 h1:J3C2vuthpR0T+pufT/xMeTKzvJeaXXIQG8+RjRa7cf4=
