@@ -4,8 +4,9 @@
 #
 #  clog-prepare - the shared first step of every clog build/deploy job
 #
-#    checkout → Go (from go.mod) → clog (built from this repo, or a pinned
-#    release) → clog CI show event + show policy + ci.* values into $GITHUB_ENV
+#    checkout → Go (from go.mod) → Node (.nvmrc, else 26) → clog (built from
+#    this repo, or a pinned release) → clog CI show event + show policy +
+#    ci.* values into $GITHUB_ENV
 #
 #  After it, a job's steps gate on env.do_build / env.do_deploy and run their
 #  work through `clog CI run -- …`, which fetches Infisical secrets via OIDC.
@@ -45,6 +46,10 @@ inputs:
     description: token for a private clog release repo (optional)
     required: false
     default: ""
+  node-version:
+    description: Node.js for wrangler/npx when the repo has no .nvmrc (a major, or an exact X.Y.Z)
+    required: false
+    default: "26"
   production:
     description: >-
       "true" = check out the newest release tag and force prod mode, whatever
@@ -67,7 +72,7 @@ runs:
   using: composite
   steps:
     - name: checkout
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0            # clog BC git needs tags and history
         lfs: true
@@ -82,9 +87,26 @@ runs:
 
     - name: setup go (from go.mod)
       if: steps.gomod.outputs.file != ''
-      uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: ${{ steps.gomod.outputs.file }}
+
+    # The Node that wrangler, npx and a node stack run on - NOT the runtime of
+    # the JavaScript actions above (GitHub picks that, node24 at most). The
+    # runner's own Node lags the LTS line, so pin it: the repo's .nvmrc, as
+    # `clog Install node` reads it, else the node-version input.
+    - name: node version
+      id: node
+      shell: bash
+      run: |
+        if [ -f .nvmrc ]; then echo "file=.nvmrc"; echo "version="
+        else echo "file="; echo "version=${{ inputs.node-version }}"; fi >> "$GITHUB_OUTPUT"
+
+    - name: setup node (from .nvmrc, else ${{ inputs.node-version }})
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version-file: ${{ steps.node.outputs.file }}
+        node-version: ${{ steps.node.outputs.version }}
 
     - name: build clog from this repository
       if: inputs.self-build == 'true'
