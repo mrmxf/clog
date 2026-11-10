@@ -53,8 +53,14 @@ That rule is why `test-actions.yaml` exists: a PR editing `clog-prepare` would
 otherwise be tested against the pinned ref instead of against the change. It is
 a gate, not a convenience.
 
-**2. `workflows` moves by hand, never alongside a Go change.** One repo, two
-lifecycles. Move the tag only to a commit that passed `test-actions.yaml`.
+**2. `workflows` moves by hand, never to an unreleased Go change.** One repo,
+two lifecycles. Move the tag only to a commit that passed `test-actions.yaml`.
+
+The default, unless the maintainer says otherwise: when a CI change and a Go
+change share a commit, release that commit as `vX.Y.Z`, run `test-actions.yaml`
+on it, then move `workflows` to it. No padding commit is needed, because
+`workflows` never decides which clog binary runs: each consumer's
+`.clog-version` does.
 
 ## Scan uploads
 

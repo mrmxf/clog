@@ -69,9 +69,20 @@ wanting stability pins `…/build-check.yaml@vX.Y.Z`, and the cost is accepted: 
 CI-only fix becomes pinnable only by cutting a release.
 
 **Rule:** `workflows` moves only by deliberate action, only to a commit that
-passed `test-actions.yaml`, and **never in the same commit as a Go change**. One
-repo now has two lifecycles sharing a commit graph; this is what keeps them
-apart. It is not named `v1` because `self-release.yaml` fires on `v*`.
+passed `test-actions.yaml`, and **never to an unreleased Go change**. One repo
+now has two lifecycles sharing a commit graph; this is what keeps them apart.
+It is not named `v1` because `self-release.yaml` fires on `v*`.
+
+**Default fix — follow it unless the user says otherwise:** when a CI-asset
+change (a workflow, an action, `gitlab/clog.gitlab-ci.yml`) lands in the same
+commit as a Go change, cut the release (`vX.Y.Z` on that commit), run
+`test-actions.yaml` on it (`gh workflow run test-actions.yaml --ref main`), and
+move `workflows` to the release commit:
+`git tag -f workflows <sha> && git push -f origin workflows`.
+Do not add a padding commit to keep the two apart: `workflows` never chooses the
+binary (each consumer's `.clog-version` does), so a released commit is safe. First
+used for v1.3.3 (2026-11-10), whose GitLab template switched apt Node 18 for
+`clog Install node`.
 
 ### `uses:` resolution — the trap that breaks consumers
 
