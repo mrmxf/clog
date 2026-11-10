@@ -6,11 +6,11 @@ require (
 	github.com/mrmxf/util/bc v0.16.0
 	github.com/mrmxf/util/buildinfo v0.13.0
 	github.com/mrmxf/util/check v0.11.2
-	github.com/mrmxf/util/ci v0.27.1
+	github.com/mrmxf/util/ci v0.28.0
 	github.com/mrmxf/util/cmdlog v0.11.1
 	github.com/mrmxf/util/crayon v0.11.1
 	github.com/mrmxf/util/embedfs v0.20.0
-	github.com/mrmxf/util/install v0.20.0
+	github.com/mrmxf/util/install v0.21.0
 	github.com/mrmxf/util/kfg v0.12.0
 	github.com/mrmxf/util/slogger v0.11.2
 	github.com/mrmxf/util/snippets v0.11.2
