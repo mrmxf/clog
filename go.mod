@@ -3,7 +3,7 @@ module github.com/mrmxf/clog
 go 1.26.4
 
 require (
-	github.com/mrmxf/util/bc v0.16.0
+	github.com/mrmxf/util/bc v0.16.1
 	github.com/mrmxf/util/buildinfo v0.13.0
 	github.com/mrmxf/util/check v0.11.2
 	github.com/mrmxf/util/ci v0.28.0
