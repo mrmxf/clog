@@ -84,8 +84,13 @@ func main() {
 	if err := kfg.Konfigure(&bootOpts); err != nil {
 		slog.Warn("base config load failed", "err", err)
 	}
+	// A config file that exists but does not parse must stop the run. Ignoring
+	// it used to fall back to the built-in config, so one YAML typo quietly
+	// dropped a repo's stacks, targets and checks, and every later error
+	// blamed something else ("ci.stack is not set").
 	if err := kfg.AutoMerge(); err != nil {
-		slog.Debug("working-directory config merge failed", "err", err)
+		slog.Error("fix the YAML, then re-run; clog will not run on a config it could not read", "err", err)
+		os.Exit(1)
 	}
 
 	// set SemVer so commands that format version strings have data

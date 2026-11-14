@@ -51,10 +51,9 @@ spec:
     artifact-paths:
       type: array
       # The canonical layout: _clog_build holds artifacts, the check stash and
-      # SARIF; _clog_deploy holds receipts and probe findings. kodata is here
-      # because a Hugo site's publishDir is set in hugo.yaml rather than by
-      # clog, so those repos still publish from outside the tree.
-      default: ["_clog_build/", "_clog_deploy/", "kodata/"]
+      # SARIF; _clog_deploy holds receipts and probe findings. A Hugo site
+      # sets publishDir: _clog_build/public (kodata was dropped in 2026-11).
+      default: ["_clog_build/", "_clog_deploy/"]
       description: build outputs handed from clog-build to clog-deploy
     stack:
       default: ""

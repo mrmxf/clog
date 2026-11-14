@@ -143,11 +143,11 @@ jobs:
           retention-days: 2
           path: _clog_build/scan
 
-      # kodata is here because a Hugo site's publishDir is set in hugo.yaml,
-      # not by clog, so those repos still publish from outside the canonical
-      # dirs. It stays until each one moves its publishDir; the deploy job
+      # Only the canonical dirs travel from build to deploy. The deploy job
       # downloads the artifact into the repo root, so a target's `dir:` has to
-      # be inside what this uploads or the deploy finds nothing.
+      # be inside what this uploads or the deploy finds nothing: a Hugo site
+      # sets publishDir: _clog_build/public (the legacy kodata dir was dropped
+      # in 2026-11, once no consumer published there; backlog M-01).
       - name: upload artifact ${{ env.ci_artifact }}
         if: env.do_build == 'true' && env.ci_artifact != ''
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -157,7 +157,6 @@ jobs:
           path: |
             _clog_build
             _clog_deploy
-            kodata
 
       - name: notify-team (slack, HOOK_SLACK from Infisical)
         if: always() && env.do_build == 'true'
