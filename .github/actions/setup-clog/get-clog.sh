@@ -26,6 +26,13 @@
 #                          $HOME/.local/bin)
 #     CLOG_TOKEN          token for private-repo downloads (optional)
 #     CLOG_SKIP_VERIFY    set to 1 to skip checksum verification (NOT advised)
+#     CLOG_PLAN           set to 1 to print the resolved plan (version= repo=
+#                         asset= url= dir=) on stdout and exit before anything
+#                         is downloaded or created
+#
+#   `clog Install clog` (alias `clog upgrade`, util/install/self.go) is this
+#   script in Go. getclog_parity_test.go runs both with CLOG_PLAN=1 /
+#   --dry-run and fails on any difference: change them together.
 #
 #   On success it prints the install dir on stdout (for $GITHUB_PATH) and a log
 #   line to stderr.
@@ -75,12 +82,19 @@ if [ -z "${CLOG_INSTALL_DIR:-}" ]; then
     CLOG_INSTALL_DIR="$HOME/.local/bin"
   fi
 fi
+base="https://github.com/${CLOG_REPO}/releases/download/${CLOG_VERSION}"
+
+if [ "${CLOG_PLAN:-0}" = "1" ]; then
+  printf 'version=%s\nrepo=%s\nasset=%s\nurl=%s\ndir=%s\n' \
+    "$CLOG_VERSION" "$CLOG_REPO" "$asset" "${base}/${asset}" "$CLOG_INSTALL_DIR"
+  exit 0
+fi
+
 mkdir -p "$CLOG_INSTALL_DIR"
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-base="https://github.com/${CLOG_REPO}/releases/download/${CLOG_VERSION}"
 log "installing clog ${CLOG_VERSION} (${asset}) from ${CLOG_REPO} → ${CLOG_INSTALL_DIR}"
 
 # curl with optional auth for private repos. --fail makes HTTP errors fatal.

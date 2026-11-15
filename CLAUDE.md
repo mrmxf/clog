@@ -25,6 +25,8 @@ pipeline, not just this one.
 - `clog build` — checks, lints, scans, then writes `_clog_build/artifacts/`
 - `clog build --fast` — skips every gate; makes no claim about the branch
 - `clog build prod` — **refuses a HEAD that is not a clean release tag**
+- `clog upgrade` (= `clog Install clog`) — installs the `.clog-version` pin in
+  place; `--use <v|latest|lts>` picks another, `--pin` writes it back
 - `clog CI deploy --target release` — checksums the assets and publishes
 - Use `go run . <verb>` when iterating on this repo's own code
 
@@ -126,6 +128,26 @@ working tree. Do not delete it as redundant.
 - `golangci-lint` and `trivy` must be on `PATH` for `clog build` to pass. clog
   refuses to install them behind your back — it names the tool and prints the
   install line (`clog Install <tool>`).
+- **`clog upgrade` / `clog Install clog` is `get-clog.sh` in Go**
+  (`util/install/self.go`). Both read `--use` → `CLOG_VERSION` →
+  `.clog-version`, and neither ever falls back to `latest`.
+  `getclog_parity_test.go` runs both and fails on any difference, so change them
+  together. The default repo is the one the running binary was released from
+  (`buildinfo` `Repo`, stamped by `clog BC gen buildinfo` from
+  `GITHUB_REPOSITORY` or the origin remote).
+- **Renaming or moving this repo needs development work, not just a GitHub
+  rename.** GitHub redirects old URLs, but the name is baked in elsewhere:
+  - `get-clog.sh` and `util/install/self.go` (`defaultClogRepo`): the default
+    `CLOG_REPO`. Change both together; the parity test checks they agree.
+  - `.clog.yaml`: `ci.targets.release.prod.repo` and `bc-main-repo`.
+  - every absolute `uses: mrmxf/clog/.github/actions/…` (see the `uses:`
+    resolution section), `gitlab/clog.gitlab-ci.yml`, and `go.mod`'s module
+    path.
+  - binaries that are already released keep the **old** repo stamped in their
+    buildinfo. `clog upgrade` goes on asking the old repo (via the redirect)
+    until a user upgrades once to a release built under the new name, and it
+    refuses a `.clog.yaml` `install.clog.install.repo` that names the new repo
+    unless `CLOG_REPO` is set. Say so in that release's notes.
 - `releases.yaml` is history, not policy. Versions come from git tags via
   `clog BC gen buildinfo`.
 - `_clog_build/` and `_clog_deploy/` are build output and are gitignored.

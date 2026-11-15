@@ -133,8 +133,10 @@ func bootStrap(root *cobra.Command) error {
 	// check: try/ok/catch/finally blocks from config
 	root.AddCommand(check.Command)
 
-	// declarative tool installer
+	// declarative tool installer, and `clog Upgrade` - which is
+	// `clog Install clog`: get-clog.sh's rules, replacing this binary
 	root.AddCommand(install.Command)
+	root.AddCommand(install.UpgradeCommand)
 
 	// ── build tasks ──────────────────────────────────────────────────────────
 	// The embedded bc-* workers call all of these, so a binary without them can

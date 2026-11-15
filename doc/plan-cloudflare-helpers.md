@@ -97,6 +97,22 @@ detaches it there first, after the same confirmation.
 
 ## Part 2 — `clog Install clog [vX.Y.Z|latest|pinned]`
 
+> **Superseded — shipped differently in v1.3.6** (util `install/v0.22.0`) as
+> `clog Install clog`, alias `clog upgrade`. To stop toolchain drift between a
+> laptop and CI, it follows `get-clog.sh` exactly, not the design below:
+> - the default is the `.clog-version` pin, not `latest`, and no pin is an error;
+> - the version comes from `--use`/`--at` (a version, `latest` or `lts`), not an
+>   argument;
+> - `CLOG_SKIP_VERIFY=1` is honoured, as in the script;
+> - the edition guard uses the release repo stamped in buildinfo (`CLOG_REPO`
+>   overrides it), and there is no `--force`;
+> - `--pin` writes the chosen version back to `.clog-version`.
+>
+> `getclog_parity_test.go` keeps the script and the Go code in agreement. A
+> `go run` binary is not refused (open question 3 here is answered: allowed,
+> with a warning when the version differs from the pin). The text below is kept
+> as history.
+
 Make the running clog a specific version by reinstalling it in place.
 
 ```console
