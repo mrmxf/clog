@@ -78,8 +78,8 @@ github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa1
 github.com/mitchellh/copystructure v1.2.0/go.mod h1:qLl+cE2AmVv+CoeAwDPye/v+N2HKCj9FbZEVFJRxO9s=
 github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zxSIeXaQ=
 github.com/mitchellh/reflectwalk v1.0.2/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
-github.com/mrmxf/util/bc v0.17.0 h1:7u8A8xwr+S/SL/4ruO1QJLwQ1MCniuNCoxZTATF19y8=
-github.com/mrmxf/util/bc v0.17.0/go.mod h1:DXqK7kvYN3rHaVeuMcRMrP1en/fE1qfKNrzsGag2Vus=
+github.com/mrmxf/util/bc v0.18.0 h1:kgBIwURaLxPkAtZuPSE8mOBmIhZmLvTUfKiZ8FY4Xr0=
+github.com/mrmxf/util/bc v0.18.0/go.mod h1:DXqK7kvYN3rHaVeuMcRMrP1en/fE1qfKNrzsGag2Vus=
 github.com/mrmxf/util/buildinfo v0.14.0 h1:ssi68V4OklrjCCBb/76USubmuSh/xSLcolmp90Z26So=
 github.com/mrmxf/util/buildinfo v0.14.0/go.mod h1:V2hLEt0BJfn+ty4N4go+lJKaB7YLwR0BFXHJTS4yJL0=
 github.com/mrmxf/util/check v0.11.2 h1:TMVeNm1Qf1zbqck4FswiwzzDOvncv1KJ5jwbsUHI+FI=
@@ -90,8 +90,8 @@ github.com/mrmxf/util/cmdlog v0.11.1 h1:JN8cCKjoNPESRnxW9xPbY/wPop4QV3ERyehP8552
 github.com/mrmxf/util/cmdlog v0.11.1/go.mod h1:5ThmPhZ4svT3vje8VP5WY7ONMP0iKy0itp84mUTtS9k=
 github.com/mrmxf/util/crayon v0.11.1 h1:J3C2vuthpR0T+pufT/xMeTKzvJeaXXIQG8+RjRa7cf4=
 github.com/mrmxf/util/crayon v0.11.1/go.mod h1:RaQR6hbAuCXV+tjb25XK8WVpWGqScT84eTZ3pSq3tms=
-github.com/mrmxf/util/embedfs v0.21.0 h1:3ONPBZDiGedpFCU1YpA2i5ITJqy3pHUvKiQfW4fUyxU=
-github.com/mrmxf/util/embedfs v0.21.0/go.mod h1:qP+0mIlRqZ3Ikk1u5GXrEw6d5bIzoiteAAcXInYxYyo=
+github.com/mrmxf/util/embedfs v0.22.0 h1:ZmvS8A6ULXPOPhnBfzuk+OvuQTsqaftQn0mAEa+yy6M=
+github.com/mrmxf/util/embedfs v0.22.0/go.mod h1:qP+0mIlRqZ3Ikk1u5GXrEw6d5bIzoiteAAcXInYxYyo=
 github.com/mrmxf/util/install v0.22.0 h1:lrFdp+OCqARePePOudx2AFLmMIlxOpG0nWCY6sZ5bNw=
 github.com/mrmxf/util/install v0.22.0/go.mod h1:ACNemj7fPtM5UT5QjDCeAj8o3svpf93FPpjGjYOz2sg=
 github.com/mrmxf/util/kfg v0.13.0 h1:vIgzJX659u0aQTRiBTLGROFwDImBOHQe5MDkrWD2Kk0=
