@@ -95,9 +95,23 @@ spec:
     # was scheduled on - that is how date-gated content goes live with no
     # commit, and `clog build prod` refuses anything else. The GitHub twin is
     # clog-prepare's "production checkout" step.
+    #
+    # An LFS repo needs git-lfs BEFORE that checkout, not in clog-build's tool
+    # loop: the runner's helper clone leaves LFS hooks (post-checkout) behind
+    # that the job image cannot run, so the checkout fails - and without
+    # git-lfs the tag's binaries would be pointer stubs anyway. The deploy job
+    # runs this too and installs no stack tools, so it has to live here.
     - |
       if clog CI show event --format env | grep -qx 'is_production=true'; then
-        clog BC git checkout production
+        lfs=false
+        if grep -qs 'filter=lfs' .gitattributes; then lfs=true; fi
+        if grep -qs 'git-lfs' "$(git rev-parse --git-path hooks)/post-checkout"; then lfs=true; fi
+        if [ "$lfs" = "true" ]; then
+          command -v git-lfs >/dev/null || clog Install git-lfs --verbose || exit 1
+          git lfs install --local
+        fi
+        clog BC git checkout production || exit 1
+        if [ "$lfs" = "true" ]; then git lfs pull || exit 1; fi
       fi
 
 clog-build:
