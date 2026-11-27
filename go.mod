@@ -10,7 +10,7 @@ require (
 	github.com/mrmxf/util/cmdlog v0.11.1
 	github.com/mrmxf/util/crayon v0.11.1
 	github.com/mrmxf/util/embedfs v0.22.0
-	github.com/mrmxf/util/install v0.22.0
+	github.com/mrmxf/util/install v0.23.0
 	github.com/mrmxf/util/kfg v0.13.0
 	github.com/mrmxf/util/slogger v0.12.0
 	github.com/mrmxf/util/snippets v0.11.2
